@@ -102,7 +102,7 @@ export default function Nav({ page, setPage, user }) {
 
         <hr className="hud-divider mt-4" />
         <p className="text-[9px] text-[rgba(0,212,255,0.2)] tracking-widest uppercase text-center mt-3">
-          JARVIS v2.0
+          JARVIS v2.1
         </p>
       </aside>
     </>
