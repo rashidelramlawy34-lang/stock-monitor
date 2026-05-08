@@ -3,7 +3,13 @@ import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
+const ADMIN_ID = 'rashidelramlawy';
+
 router.use(requireAuth);
+router.use((req, res, next) => {
+  if (req.user.id !== ADMIN_ID) return res.status(403).json({ error: 'Access denied' });
+  next();
+});
 
 router.get('/stats', (req, res) => {
   const db = getDb();

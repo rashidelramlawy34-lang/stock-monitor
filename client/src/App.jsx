@@ -39,7 +39,7 @@ export default function App() {
 
   return (
     <div className="flex flex-col sm:flex-row min-h-screen bg-[#020810]">
-      <Nav page={page} setPage={setPage} />
+      <Nav page={page} setPage={setPage} user={user} />
       <main className="flex-1 overflow-auto flex flex-col">
         <MarketBar />
         <AlertBanner />
@@ -50,7 +50,7 @@ export default function App() {
           {page === 'alerts'    && <AlertsPage />}
           {page === 'discover'  && <DiscoverPage />}
           {page === 'settings'  && <SettingsPage />}
-          {page === 'developer' && <DeveloperPage />}
+          {page === 'developer' && user?.id === 'rashidelramlawy' && <DeveloperPage />}
         </div>
       </main>
     </div>

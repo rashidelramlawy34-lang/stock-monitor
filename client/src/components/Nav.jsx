@@ -14,8 +14,11 @@ const LINKS = [
   { id: 'developer',  label: 'Developer',  Icon: DeveloperIcon },
 ];
 
-export default function Nav({ page, setPage }) {
+const ADMIN_ID = 'rashidelramlawy';
+
+export default function Nav({ page, setPage, user }) {
   const [open, setOpen] = useState(false);
+  const links = LINKS.filter(l => l.id !== 'developer' || user?.id === ADMIN_ID);
 
   const linkCls = (active) =>
     `flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all duration-150 relative tracking-wide
@@ -40,7 +43,7 @@ export default function Nav({ page, setPage }) {
       {/* Mobile dropdown */}
       {open && (
         <div className="sm:hidden bg-[#020810] border-b border-[rgba(0,212,255,0.15)] px-2 pb-2">
-          {LINKS.map(({ id, label, Icon, badge }) => (
+          {links.map(({ id, label, Icon, badge }) => (
             <button
               key={id}
               onClick={() => { setPage(id); setOpen(false); }}
@@ -76,7 +79,7 @@ export default function Nav({ page, setPage }) {
         <hr className="hud-divider mb-4" />
 
         <nav className="flex flex-col gap-0.5 flex-1">
-          {LINKS.map(({ id, label, Icon, badge }) => (
+          {links.map(({ id, label, Icon, badge }) => (
             <button
               key={id}
               onClick={() => setPage(id)}
