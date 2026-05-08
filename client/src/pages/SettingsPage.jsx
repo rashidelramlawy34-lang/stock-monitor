@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { usePushNotifications } from '../hooks/usePushNotifications.js';
 
 function KeyField({ label, keyName, description, current, onChange }) {
   const [show, setShow] = useState(false);
@@ -37,6 +38,7 @@ function KeyField({ label, keyName, description, current, onChange }) {
 }
 
 export default function SettingsPage() {
+  const push = usePushNotifications();
   const [saved, setSaved] = useState({});
   const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
@@ -143,8 +145,56 @@ export default function SettingsPage() {
         </div>
       </form>
 
+      {/* Push Notifications */}
+      <div className="card p-5 flex flex-col gap-4 mt-0">
+        <div>
+          <h2 className="hud-label mb-0.5">Push Notifications</h2>
+          <p className="text-xs text-muted mt-1">Get browser notifications when your price alerts fire.</p>
+        </div>
+        {!push.supported && (
+          <p className="text-xs text-muted">Push notifications are not supported in this browser.</p>
+        )}
+        {push.supported && (
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <p className="text-xs text-muted">
+                Status:{' '}
+                <span className={`font-bold ${
+                  push.permission === 'granted' ? 'text-bull' :
+                  push.permission === 'denied' ? 'text-bear' : 'text-muted'
+                }`}>
+                  {push.permission === 'granted' ? 'Allowed' : push.permission === 'denied' ? 'Blocked' : 'Not set'}
+                </span>
+                {push.subscribed && <span className="text-bull ml-2">· Subscribed</span>}
+              </p>
+              {push.error && <p className="text-bear text-xs mt-1">{push.error}</p>}
+            </div>
+            {push.subscribed ? (
+              <button
+                onClick={push.unsubscribe}
+                disabled={push.loading}
+                className="btn-outline text-xs"
+              >
+                {push.loading ? 'Disabling…' : 'Disable Notifications'}
+              </button>
+            ) : (
+              <button
+                onClick={push.subscribe}
+                disabled={push.loading || push.permission === 'denied'}
+                className="btn-primary text-xs"
+              >
+                {push.loading ? 'Enabling…' : 'Enable Notifications'}
+              </button>
+            )}
+          </div>
+        )}
+        {push.permission === 'denied' && (
+          <p className="text-xs text-warn">Notifications are blocked. Allow them in your browser settings, then try again.</p>
+        )}
+      </div>
+
       {/* Info */}
-      <div className="mt-8 card p-4 bg-[rgba(0,212,255,0.03)]">
+      <div className="mt-0 card p-4 bg-[rgba(0,212,255,0.03)]">
         <p className="hud-label mb-3">How Keys Are Used</p>
         <ul className="text-xs text-[rgba(0,212,255,0.5)] space-y-1.5 list-disc list-inside">
           <li><span className="text-[#a8d8ea] font-medium">Anthropic</span> — AI Advisor analysis, Portfolio Digest, and Discover deep analysis</li>

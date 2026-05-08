@@ -22,6 +22,11 @@ import hrhrRouter from './routes/hrhr.js';
 import settingsRouter from './routes/settings.js';
 import authRouter from './routes/auth.js';
 import developerRouter from './routes/developer.js';
+import watchlistRouter from './routes/watchlist.js';
+import tradesRouter from './routes/trades.js';
+import pushRouter from './routes/pushNotifications.js';
+import coachRouter from './routes/coach.js';
+import benchmarkRouter from './routes/benchmark.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -65,6 +70,11 @@ app.use('/api/candles', candlesRouter);
 app.use('/api/hrhr', hrhrRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/developer', developerRouter);
+app.use('/api/watchlist', watchlistRouter);
+app.use('/api/trades', tradesRouter);
+app.use('/api/push', pushRouter);
+app.use('/api/coach', coachRouter);
+app.use('/api/benchmark', benchmarkRouter);
 
 // Serve built frontend in production
 if (isProd) {

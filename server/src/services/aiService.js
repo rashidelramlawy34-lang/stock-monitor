@@ -118,6 +118,41 @@ export async function getAdvice(ticker, priceData, newsItems, fundamentals = {})
   return { ...row, generated_at: Math.floor(Date.now() / 1000) };
 }
 
+export async function getPortfolioCoach(holdings, allAdvice, allFundamentals, allPrices) {
+  const holdingsData = holdings.map(h => {
+    const price = allPrices[h.ticker]?.price ?? 0;
+    const pnlPct = price && h.cost_basis ? ((price - h.cost_basis) / h.cost_basis * 100).toFixed(2) : 'N/A';
+    const advice = allAdvice[h.ticker] ?? {};
+    const fund = allFundamentals[h.ticker] ?? {};
+    return {
+      ticker: h.ticker,
+      shares: h.shares,
+      cost_basis: h.cost_basis,
+      current_price: price,
+      pnl_pct: pnlPct,
+      recommendation: advice.recommendation ?? 'N/A',
+      bull_case: advice.bull_case ?? null,
+      bear_case: advice.bear_case ?? null,
+      beta: fund.beta ?? null,
+      pe_ratio: fund.pe_ratio ?? null,
+      sector: fund.sector ?? 'Unknown',
+    };
+  });
+
+  const template = loadPrompt('coach');
+  const prompt = template.replace('{{HOLDINGS_JSON}}', JSON.stringify(holdingsData, null, 2));
+
+  const message = await getClient().messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 2048,
+    system: 'You are a senior portfolio manager. Respond only with valid JSON.',
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  const raw = message.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
+  try { return JSON.parse(raw); } catch { return { summary: raw, score: 50, overall_health: 'Balanced' }; }
+}
+
 export async function discoverStocks(holdings) {
   const template = loadPrompt('discover');
   const holdingsList = holdings.map(h => h.ticker).join(', ');

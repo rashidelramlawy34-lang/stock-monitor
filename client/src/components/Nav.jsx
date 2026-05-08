@@ -2,14 +2,18 @@ import { useState } from 'react';
 import {
   PortfolioIcon, NewsIcon, AdvisorIcon,
   AlertsIcon, DiscoverIcon, SettingsIcon, DeveloperIcon,
+  WatchlistIcon, CoachIcon, TradesIcon,
 } from './icons/NavIcons';
 
 const LINKS = [
   { id: 'portfolio',  label: 'Portfolio',  Icon: PortfolioIcon },
+  { id: 'watchlist',  label: 'Watchlist',  Icon: WatchlistIcon },
   { id: 'news',       label: 'Intel Feed', Icon: NewsIcon },
   { id: 'advisor',    label: 'AI Advisor', Icon: AdvisorIcon },
+  { id: 'coach',      label: 'AI Coach',   Icon: CoachIcon },
   { id: 'alerts',     label: 'Alerts',     Icon: AlertsIcon },
   { id: 'discover',   label: 'Discover',   Icon: DiscoverIcon, badge: 'HRHR' },
+  { id: 'trades',     label: 'Trade Log',  Icon: TradesIcon },
   { id: 'settings',   label: 'Settings',   Icon: SettingsIcon },
   { id: 'developer',  label: 'Developer',  Icon: DeveloperIcon },
 ];

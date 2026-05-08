@@ -4,7 +4,7 @@ const SENTIMENT = {
   neutral: { label: 'Neutral', cls: 'badge-neutral' },
 };
 
-export default function NewsCard({ article }) {
+export default function NewsCard({ article, showTicker }) {
   const s = SENTIMENT[article.sentiment] ?? SENTIMENT.neutral;
   const date = article.published_at
     ? new Date(article.published_at * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -24,6 +24,10 @@ export default function NewsCard({ article }) {
         <span className={`shrink-0 ${s.cls}`}>{s.label}</span>
       </div>
       <div className="mt-2 flex items-center gap-2 text-xs text-muted">
+        {showTicker && article._sourceTicker && (
+          <span className="font-mono font-bold text-arc tracking-widest">{article._sourceTicker}</span>
+        )}
+        {showTicker && article._sourceTicker && (article.source || date) && <span>·</span>}
         {article.source && <span>{article.source}</span>}
         {article.source && date && <span>·</span>}
         {date && <span>{date}</span>}

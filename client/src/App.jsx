@@ -11,11 +11,14 @@ import SettingsPage from './pages/SettingsPage.jsx';
 import DeveloperPage from './pages/DeveloperPage.jsx';
 import AlertBanner from './components/AlertBanner.jsx';
 import LoginPage from './pages/LoginPage.jsx';
+import WatchlistPage from './pages/WatchlistPage.jsx';
+import CoachPage from './pages/CoachPage.jsx';
+import TradeLogPage from './pages/TradeLogPage.jsx';
 
 export default function App() {
   const [page, setPage] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    return ['portfolio','news','advisor','alerts','discover','settings','developer'].includes(hash) ? hash : 'portfolio';
+    return ['portfolio','watchlist','news','advisor','coach','alerts','discover','trades','settings','developer'].includes(hash) ? hash : 'portfolio';
   });
   const { user, loading, setUser } = useAuth();
 
@@ -44,13 +47,16 @@ export default function App() {
         <MarketBar />
         <AlertBanner />
         <div className="flex-1">
-          {page === 'portfolio' && <Dashboard />}
-          {page === 'news'      && <NewsPage />}
-          {page === 'advisor'   && <AdvisorPage />}
-          {page === 'alerts'    && <AlertsPage />}
-          {page === 'discover'  && <DiscoverPage />}
-          {page === 'settings'  && <SettingsPage />}
-          {page === 'developer' && user?.id === 'rashidelramlawy' && <DeveloperPage />}
+          {page === 'portfolio'  && <Dashboard />}
+          {page === 'watchlist'  && <WatchlistPage />}
+          {page === 'news'       && <NewsPage />}
+          {page === 'advisor'    && <AdvisorPage />}
+          {page === 'coach'      && <CoachPage />}
+          {page === 'alerts'     && <AlertsPage />}
+          {page === 'discover'   && <DiscoverPage />}
+          {page === 'trades'     && <TradeLogPage />}
+          {page === 'settings'   && <SettingsPage />}
+          {page === 'developer'  && user?.id === 'rashidelramlawy' && <DeveloperPage />}
         </div>
       </main>
     </div>

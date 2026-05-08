@@ -1,32 +1,54 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { useNews } from '../hooks/useNews.js';
 import NewsCard from '../components/NewsCard.jsx';
 
 const SENTIMENT_FILTERS = ['All', 'Bullish', 'Bearish', 'Neutral'];
+const ALL_TAB = '__ALL__';
 
 export default function NewsPage() {
   const { holdings } = usePortfolio();
   const { news, loading, errors, fetchNews } = useNews();
-  const [activeTicker, setActiveTicker] = useState(null);
+  const [activeTicker, setActiveTicker] = useState(ALL_TAB);
   const [sentimentFilter, setSentimentFilter] = useState('All');
 
+  // Auto-fetch news for all holdings when on "All" tab
   useEffect(() => {
-    if (holdings.length > 0 && !activeTicker) {
-      setActiveTicker(holdings[0].ticker);
+    if (activeTicker === ALL_TAB) {
+      for (const h of holdings) {
+        if (!news[h.ticker]) fetchNews(h.ticker);
+      }
     }
-  }, [holdings, activeTicker]);
+  }, [activeTicker, holdings, news, fetchNews]);
 
   useEffect(() => {
-    if (activeTicker && !news[activeTicker]) fetchNews(activeTicker);
+    if (activeTicker !== ALL_TAB && !news[activeTicker]) fetchNews(activeTicker);
   }, [activeTicker, news, fetchNews]);
 
-  const allArticles = activeTicker ? (news[activeTicker] ?? []) : [];
+  // Unified feed: merge + sort + deduplicate by url
+  const unifiedArticles = useMemo(() => {
+    if (activeTicker !== ALL_TAB) return news[activeTicker] ?? [];
+    const seen = new Set();
+    const all = [];
+    for (const h of holdings) {
+      for (const a of news[h.ticker] ?? []) {
+        const key = a.url || `${a.headline}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          all.push({ ...a, _sourceTicker: h.ticker });
+        }
+      }
+    }
+    return all.sort((a, b) => (b.published_at ?? 0) - (a.published_at ?? 0));
+  }, [activeTicker, holdings, news]);
+
+  const allArticles = unifiedArticles;
   const articles = sentimentFilter === 'All'
     ? allArticles
     : allArticles.filter(a => a.sentiment?.toLowerCase() === sentimentFilter.toLowerCase());
-  const isLoading = activeTicker ? loading[activeTicker] : false;
-  const error = activeTicker ? errors[activeTicker] : null;
+  const isLoadingAll = activeTicker === ALL_TAB && holdings.some(h => loading[h.ticker]);
+  const isLoading = activeTicker === ALL_TAB ? isLoadingAll : (loading[activeTicker] ?? false);
+  const error = activeTicker === ALL_TAB ? null : (errors[activeTicker] ?? null);
 
   const counts = {
     Bullish: allArticles.filter(a => a.sentiment === 'bullish').length,
@@ -68,6 +90,16 @@ export default function NewsPage() {
       {/* Ticker tabs */}
       {holdings.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => { setActiveTicker(ALL_TAB); setSentimentFilter('All'); }}
+            className={`px-3 py-1.5 rounded-sm text-sm font-mono font-bold transition-all border tracking-widest ${
+              activeTicker === ALL_TAB
+                ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
+                : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
+            }`}
+          >
+            ALL
+          </button>
           {holdings.map(h => (
             <button
               key={h.ticker}
@@ -127,7 +159,7 @@ export default function NewsPage() {
 
       {!isLoading && articles.length > 0 && (
         <div className="flex flex-col gap-3">
-          {articles.map(a => <NewsCard key={a.id} article={a} />)}
+          {articles.map((a, i) => <NewsCard key={a.id ?? i} article={a} showTicker={activeTicker === ALL_TAB} />)}
         </div>
       )}
     </div>

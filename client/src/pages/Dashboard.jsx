@@ -7,6 +7,8 @@ import HoldingRow from '../components/HoldingRow.jsx';
 import SectorChart from '../components/SectorChart.jsx';
 import EarningsCalendar from '../components/EarningsCalendar.jsx';
 import PortfolioChart from '../components/PortfolioChart.jsx';
+import BenchmarkChart from '../components/BenchmarkChart.jsx';
+import CorrelationMatrix from '../components/CorrelationMatrix.jsx';
 
 function totalValue(holdings, prices) {
   return holdings.reduce((sum, h) => {
@@ -140,6 +142,12 @@ export default function Dashboard() {
 
       {/* Portfolio chart */}
       {holdings.length > 0 && <PortfolioChart />}
+
+      {/* Benchmark comparison */}
+      {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
+
+      {/* Correlation matrix */}
+      {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
 
       {/* Side panels */}
       {holdings.length > 0 && (

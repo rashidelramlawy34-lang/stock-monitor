@@ -1,6 +1,33 @@
+import webpush from 'web-push';
 import { getDb } from '../db/schema.js';
 
 const CHECK_INTERVAL = 30_000;
+
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    `mailto:${process.env.VAPID_EMAIL || 'admin@stockmonitor.app'}`,
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY,
+  );
+}
+
+async function sendPushToUser(userId, payload) {
+  if (!process.env.VAPID_PUBLIC_KEY) return;
+  const db = getDb();
+  const subs = db.prepare('SELECT * FROM push_subscriptions WHERE user_id = ?').all(userId);
+  for (const sub of subs) {
+    try {
+      await webpush.sendNotification(
+        { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
+        JSON.stringify(payload),
+      );
+    } catch (e) {
+      if (e.statusCode === 410 || e.statusCode === 404) {
+        db.prepare('DELETE FROM push_subscriptions WHERE id = ?').run(sub.id);
+      }
+    }
+  }
+}
 
 function checkAlerts() {
   const db = getDb();
@@ -22,6 +49,12 @@ function checkAlerts() {
     if (hit) {
       trigger.run(alert.id);
       console.log(`Alert triggered: ${alert.ticker} ${alert.type} $${alert.target_price} (current: $${price.price.toFixed(2)})`);
+
+      const direction = alert.type === 'above' ? '↑ above' : '↓ below';
+      sendPushToUser(alert.user_id, {
+        title: `Alert: ${alert.ticker} ${direction} $${alert.target_price}`,
+        body: `Current price: $${price.price.toFixed(2)}`,
+      }).catch(() => {});
     }
   }
 }

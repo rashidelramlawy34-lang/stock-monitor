@@ -148,6 +148,44 @@ function applySchema(db) {
       key   TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS watchlist (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id  TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ticker   TEXT    NOT NULL,
+      note     TEXT,
+      added_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      UNIQUE(user_id, ticker)
+    );
+
+    CREATE TABLE IF NOT EXISTS trades (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      ticker     TEXT    NOT NULL,
+      action     TEXT    NOT NULL CHECK(action IN ('buy','sell')),
+      shares     REAL    NOT NULL,
+      price      REAL    NOT NULL,
+      fees       REAL    NOT NULL DEFAULT 0,
+      traded_at  INTEGER NOT NULL DEFAULT (unixepoch()),
+      note       TEXT
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_trades_user ON trades(user_id, ticker);
+
+    CREATE TABLE IF NOT EXISTS push_subscriptions (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      endpoint   TEXT    NOT NULL UNIQUE,
+      p256dh     TEXT    NOT NULL,
+      auth       TEXT    NOT NULL,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS coach_cache (
+      user_id      TEXT    PRIMARY KEY,
+      analysis     TEXT    NOT NULL,
+      generated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
   `);
 
   // Add new columns if they don't exist yet
