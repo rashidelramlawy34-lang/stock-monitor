@@ -29,9 +29,9 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { value, label } = payload[0].payload;
   return (
-    <div className="bg-white dark:bg-[#1e2537] border border-slate-200 dark:border-[#1e2d45] rounded-lg px-3 py-2 shadow-card text-xs">
-      <p className="text-slate-500 dark:text-slate-400 mb-0.5">{label}</p>
-      <p className="font-semibold text-slate-800 dark:text-slate-200">
+    <div className="bg-[#071220] border border-[rgba(0,212,255,0.3)] rounded-sm px-3 py-2 text-xs">
+      <p className="text-muted mb-0.5">{label}</p>
+      <p className="font-mono font-semibold text-[#a8d8ea]">
         ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
     </div>
@@ -44,8 +44,8 @@ export default function PortfolioChart() {
   if (loading) {
     return (
       <div className="card p-5 mb-6 animate-pulse">
-        <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-4" />
-        <div className="h-24 bg-slate-100 dark:bg-slate-800 rounded" />
+        <div className="h-4 bg-[rgba(0,212,255,0.08)] rounded w-1/4 mb-4" />
+        <div className="h-24 bg-[rgba(0,212,255,0.04)] rounded" />
       </div>
     );
   }
@@ -53,8 +53,8 @@ export default function PortfolioChart() {
   if (data.length < 3) {
     return (
       <div className="card p-5 mb-6">
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Portfolio Value (7 days)</p>
-        <p className="text-xs text-slate-400 dark:text-slate-500">Chart will appear once price history accumulates (prices are sampled every 30 seconds).</p>
+        <p className="hud-label mb-2">Portfolio Value (7 days)</p>
+        <p className="text-xs text-muted">Chart will appear once price history accumulates.</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ export default function PortfolioChart() {
   const change = last - first;
   const changePct = first > 0 ? (change / first) * 100 : 0;
   const positive = change >= 0;
-  const strokeColor = positive ? '#22c55e' : '#ef4444';
+  const strokeColor = positive ? '#00e676' : '#ff3355';
   const gradientId = 'pcg';
 
   const minVal = Math.min(...data.map(d => d.value));
@@ -74,10 +74,8 @@ export default function PortfolioChart() {
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Portfolio Value (7 days)</h2>
-        </div>
-        <span className={`text-sm font-semibold ${positive ? 'text-bull' : 'text-bear'}`}>
+        <p className="hud-label">Portfolio Value (7 days)</p>
+        <span className={`text-sm font-bold font-mono ${positive ? 'text-bull' : 'text-bear'}`}>
           {positive ? '+' : ''}${Math.abs(change).toFixed(2)} ({positive ? '+' : ''}{changePct.toFixed(2)}%)
         </span>
       </div>
@@ -85,7 +83,7 @@ export default function PortfolioChart() {
         <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.15} />
+              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2} />
               <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
           </defs>

@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 
 const INDICES = [
   { key: 'SPY', label: 'S&P 500' },
-  { key: 'QQQ', label: 'Nasdaq' },
-  { key: 'DIA', label: 'Dow' },
+  { key: 'QQQ', label: 'NASDAQ' },
+  { key: 'DIA', label: 'DOW' },
 ];
 
 function isMarketOpen() {
@@ -14,7 +14,7 @@ function isMarketOpen() {
   const h = et.getHours();
   const m = et.getMinutes();
   const mins = h * 60 + m;
-  return day >= 1 && day <= 5 && mins >= 570 && mins < 960; // 9:30–16:00
+  return day >= 1 && day <= 5 && mins >= 570 && mins < 960;
 }
 
 export default function MarketBar() {
@@ -32,39 +32,40 @@ export default function MarketBar() {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    hour12: false,
   });
 
   return (
-    <div className="border-b border-slate-200 dark:border-[#1e2d45] bg-white dark:bg-[#0a0e1a] px-4 py-1.5 flex items-center gap-6 text-xs overflow-x-auto">
+    <div className="border-b border-[rgba(0,212,255,0.12)] bg-[#020810] px-4 py-1.5 flex items-center gap-6 text-xs overflow-x-auto">
       {INDICES.map(({ key, label }) => {
         const d = indices[key];
         if (!d) return (
-          <span key={key} className="text-slate-400 dark:text-slate-600 shrink-0">{label} —</span>
+          <span key={key} className="text-muted shrink-0 font-hud text-[10px] tracking-widest">{label} —</span>
         );
         const pos = d.change_pct >= 0;
         return (
           <span key={key} className="flex items-center gap-1.5 shrink-0">
-            <span className="text-slate-500 dark:text-slate-400 font-medium">{label}</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200">
+            <span className="hud-label text-[9px]">{label}</span>
+            <span className="font-mono font-semibold text-[#a8d8ea]">
               ${d.price?.toFixed(2)}
             </span>
-            <span className={pos ? 'text-bull font-medium' : 'text-bear font-medium'}>
+            <span className={pos ? 'text-bull font-bold' : 'text-bear font-bold'}>
               {pos ? '+' : ''}{d.change_pct?.toFixed(2)}%
             </span>
           </span>
         );
       })}
 
-      <span className="ml-auto flex items-center gap-2 shrink-0">
-        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full font-medium ${
+      <span className="ml-auto flex items-center gap-3 shrink-0">
+        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-bold text-[10px] tracking-widest uppercase border ${
           open
-            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+            ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30'
+            : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
         }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
-          {open ? 'Market Open' : 'Market Closed'}
+          <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-[#00e676] animate-pulse' : 'bg-[rgba(0,212,255,0.3)]'}`} />
+          {open ? 'MARKET OPEN' : 'MARKET CLOSED'}
         </span>
-        <span className="text-slate-400 dark:text-slate-500 font-mono">{etTime} ET</span>
+        <span className="font-mono text-[rgba(0,212,255,0.5)] text-[11px]">{etTime} ET</span>
       </span>
     </div>
   );

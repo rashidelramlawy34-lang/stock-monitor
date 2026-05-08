@@ -1,9 +1,9 @@
 import { useState } from 'react';
 
 const REC = {
-  buy:  { label: 'BUY',  border: 'border-l-bull', badge: 'badge-bull' },
-  hold: { label: 'HOLD', border: 'border-l-warn', badge: 'badge-neutral' },
-  sell: { label: 'SELL', border: 'border-l-bear', badge: 'badge-bear' },
+  buy:  { label: 'BUY',  borderColor: '#00e676', badge: 'badge-bull' },
+  hold: { label: 'HOLD', borderColor: '#ffaa00', badge: 'badge-neutral' },
+  sell: { label: 'SELL', borderColor: '#ff3355', badge: 'badge-bear' },
 };
 
 export default function AdviceCard({ ticker, advice, loading, error, onRefresh, fundamentals }) {
@@ -14,8 +14,8 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
     ? Math.round((Date.now() / 1000 - advice.generated_at) / 60)
     : null;
 
-  const barColor = advice?.recommendation === 'buy' ? 'bg-bull'
-    : advice?.recommendation === 'sell' ? 'bg-bear' : 'bg-warn';
+  const barColor = advice?.recommendation === 'buy' ? '#00e676'
+    : advice?.recommendation === 'sell' ? '#ff3355' : '#ffaa00';
 
   const risks = (() => { try { return JSON.parse(advice?.key_risks ?? '[]'); } catch { return []; } })();
   const catalysts = (() => { try { return JSON.parse(advice?.key_catalysts ?? '[]'); } catch { return []; } })();
@@ -26,13 +26,16 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
   const beta = fundamentals?.beta;
 
   return (
-    <div className={`card p-5 flex flex-col gap-4 border-l-4 ${rec?.border ?? 'border-l-slate-300 dark:border-l-slate-700'}`}>
+    <div
+      className="card p-5 flex flex-col gap-4 border-l-4"
+      style={{ borderLeftColor: rec?.borderColor ?? 'rgba(0,212,255,0.2)' }}
+    >
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="font-mono font-bold text-slate-800 dark:text-slate-200 text-lg">{ticker}</span>
+          <span className="font-mono font-bold text-[#00d4ff] text-lg tracking-widest">{ticker}</span>
           {(companyName || sector) && (
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5 truncate">
+            <p className="text-xs text-muted mt-0.5 truncate">
               {companyName}{companyName && sector ? ' · ' : ''}{sector}
             </p>
           )}
@@ -48,20 +51,20 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
         </div>
       </div>
 
-      {/* Fundamentals context strip */}
+      {/* Fundamentals strip */}
       {(pe != null || beta != null) && (
-        <div className="flex gap-3 text-xs text-slate-500 dark:text-slate-500">
-          {pe != null && <span>P/E <span className="font-mono text-slate-700 dark:text-slate-300">{pe.toFixed(1)}</span></span>}
-          {beta != null && <span>β <span className="font-mono text-slate-700 dark:text-slate-300">{beta.toFixed(2)}</span></span>}
+        <div className="flex gap-4 text-xs text-muted">
+          {pe != null && <span>P/E <span className="font-mono text-[#a8d8ea]">{pe.toFixed(1)}</span></span>}
+          {beta != null && <span>β <span className="font-mono text-[#a8d8ea]">{beta.toFixed(2)}</span></span>}
         </div>
       )}
 
       {/* Skeleton */}
       {loading && (
         <div className="space-y-2 animate-pulse">
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-1/2" />
-          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-2/3" />
+          <div className="h-3 bg-[rgba(0,212,255,0.08)] rounded w-3/4" />
+          <div className="h-3 bg-[rgba(0,212,255,0.08)] rounded w-1/2" />
+          <div className="h-3 bg-[rgba(0,212,255,0.08)] rounded w-2/3" />
         </div>
       )}
 
@@ -70,7 +73,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
       {!loading && !error && !advice && (
         <button
           onClick={() => onRefresh(ticker)}
-          className="text-xs text-accent hover:underline text-left"
+          className="text-xs text-arc hover:underline text-left"
         >
           Generate AI analysis →
         </button>
@@ -80,12 +83,15 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
         <>
           {/* Confidence bar */}
           <div>
-            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400 mb-1.5">
-              <span>Confidence</span>
-              <span className="font-mono">{confidence}%</span>
+            <div className="flex justify-between text-xs text-muted mb-1.5">
+              <span className="hud-label text-[9px]">Confidence</span>
+              <span className="font-mono text-[#a8d8ea]">{confidence}%</span>
             </div>
-            <div className="h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-              <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${confidence}%` }} />
+            <div className="h-1.5 bg-[rgba(0,212,255,0.08)] rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${confidence}%`, backgroundColor: barColor, boxShadow: `0 0 8px ${barColor}80` }}
+              />
             </div>
           </div>
 
@@ -94,14 +100,14 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
             <div className="flex gap-4 text-xs">
               {advice.price_target && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">12m Target</span>
-                  <span className="font-semibold text-bull">${advice.price_target.toFixed(2)} ↑</span>
+                  <span className="text-muted">12m Target</span>
+                  <span className="font-semibold text-bull font-mono">${advice.price_target.toFixed(2)} ↑</span>
                 </div>
               )}
               {advice.stop_loss && (
                 <div className="flex items-center gap-1.5">
-                  <span className="text-slate-500 dark:text-slate-400">Stop Loss</span>
-                  <span className="font-semibold text-bear">${advice.stop_loss.toFixed(2)} ↓</span>
+                  <span className="text-muted">Stop Loss</span>
+                  <span className="font-semibold text-bear font-mono">${advice.stop_loss.toFixed(2)} ↓</span>
                 </div>
               )}
             </div>
@@ -109,17 +115,17 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
 
           {/* Tabs */}
           {(advice.bull_case || advice.bear_case) && (
-            <div className="flex gap-0 border border-slate-200 dark:border-[#1e2d45] rounded-lg overflow-hidden text-xs font-medium w-fit">
+            <div className="flex gap-0 border border-[rgba(0,212,255,0.2)] rounded-sm overflow-hidden text-xs font-medium w-fit">
               {['reasoning', 'bull', 'bear'].map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
-                  className={`px-3 py-1.5 transition-colors capitalize ${
+                  className={`px-3 py-1.5 transition-colors capitalize tracking-wide ${
                     tab === t
-                      ? t === 'bull' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : t === 'bear' ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400'
-                        : 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200'
-                      : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'
+                      ? t === 'bull' ? 'bg-[#00e676]/15 text-[#00e676] border-[#00e676]/30'
+                        : t === 'bear' ? 'bg-[#ff3355]/15 text-[#ff3355]'
+                        : 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff]'
+                      : 'text-muted hover:text-[#a8d8ea] hover:bg-[rgba(0,212,255,0.04)]'
                   }`}
                 >
                   {t === 'bull' ? '↑ Bull' : t === 'bear' ? '↓ Bear' : 'Analysis'}
@@ -128,13 +134,13 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
             </div>
           )}
 
-          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">
+          <p className="text-sm text-[#a8d8ea] leading-relaxed">
             {tab === 'bull' ? (advice.bull_case || advice.reasoning)
               : tab === 'bear' ? (advice.bear_case || advice.reasoning)
               : advice.reasoning}
           </p>
 
-          {/* Key catalysts */}
+          {/* Catalysts */}
           {catalysts.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {catalysts.map((c, i) => (
@@ -143,7 +149,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
             </div>
           )}
 
-          {/* Key risks */}
+          {/* Risks */}
           {risks.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {risks.map((r, i) => (
@@ -153,7 +159,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           )}
 
           {age !== null && (
-            <span className="text-xs text-slate-400 dark:text-slate-600">
+            <span className="text-xs text-muted">
               {age < 1 ? 'Generated just now' : `Generated ${age}m ago`}
             </span>
           )}

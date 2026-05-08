@@ -27,6 +27,14 @@ export function getDb() {
 
 function applySchema(db) {
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id         TEXT    PRIMARY KEY,
+      email      TEXT,
+      name       TEXT,
+      avatar     TEXT,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
     CREATE TABLE IF NOT EXISTS holdings (
       ticker        TEXT PRIMARY KEY,
       name          TEXT,
@@ -150,6 +158,10 @@ function applySchema(db) {
     'ALTER TABLE ai_advice ADD COLUMN stop_loss REAL',
     'ALTER TABLE ai_advice ADD COLUMN key_risks TEXT',
     'ALTER TABLE ai_advice ADD COLUMN key_catalysts TEXT',
+    // User-scoping columns
+    "ALTER TABLE holdings ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
+    "ALTER TABLE alerts ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
+    "ALTER TABLE ai_advice ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
   ];
   for (const sql of newCols) { try { db.exec(sql); } catch {} }
 }

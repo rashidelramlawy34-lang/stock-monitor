@@ -1,10 +1,16 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.get('/', (req, res) => {
-  const alerts = getDb().prepare('SELECT * FROM alerts ORDER BY created_at DESC').all();
+  const userId = req.user.id;
+  const alerts = getDb()
+    .prepare('SELECT * FROM alerts WHERE user_id = ? ORDER BY created_at DESC')
+    .all(userId);
   res.json(alerts);
 });
 
@@ -16,16 +22,20 @@ router.post('/', (req, res) => {
   }
 
   const db = getDb();
+  const userId = req.user.id;
   const result = db.prepare(`
-    INSERT INTO alerts (ticker, type, target_price)
-    VALUES (@ticker, @type, @target_price)
-  `).run({ ticker: ticker.toUpperCase(), type, target_price: target_price ?? null });
+    INSERT INTO alerts (ticker, type, target_price, user_id)
+    VALUES (@ticker, @type, @target_price, @user_id)
+  `).run({ ticker: ticker.toUpperCase(), type, target_price: target_price ?? null, user_id: userId });
 
   res.status(201).json(db.prepare('SELECT * FROM alerts WHERE id = ?').get(result.lastInsertRowid));
 });
 
 router.delete('/:id', (req, res) => {
-  const result = getDb().prepare('DELETE FROM alerts WHERE id = ?').run(req.params.id);
+  const userId = req.user.id;
+  const result = getDb()
+    .prepare('DELETE FROM alerts WHERE id = ? AND user_id = ?')
+    .run(req.params.id, userId);
   if (result.changes === 0) return res.status(404).json({ error: 'Alert not found' });
   res.json({ deleted: Number(req.params.id) });
 });

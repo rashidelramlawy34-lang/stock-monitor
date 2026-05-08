@@ -20,28 +20,26 @@ export default function EarningsCalendar({ holdings, fundamentals }) {
 
   return (
     <div className="card p-4">
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-        Upcoming Earnings
-      </p>
+      <p className="hud-label mb-3">Earnings Calendar</p>
       <div className="flex flex-col gap-2">
         {upcoming.map(({ ticker, date, days, company }) => {
           const soon = days <= 14;
           return (
             <div key={ticker} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="font-semibold text-slate-800 dark:text-slate-200 shrink-0">{ticker}</span>
-                <span className="text-slate-500 dark:text-slate-500 truncate">{company}</span>
+                <span className="font-mono font-semibold text-[#00d4ff] shrink-0">{ticker}</span>
+                <span className="text-muted truncate">{company}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
-                <span className="text-slate-500 dark:text-slate-400 font-mono">
+                <span className="text-[rgba(0,212,255,0.5)] font-mono">
                   {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
-                <span className={`px-1.5 py-0.5 rounded-full font-medium ${
+                <span className={`px-1.5 py-0.5 rounded-sm font-bold text-[10px] tracking-wide border ${
                   soon
-                    ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                    : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'
+                    ? 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/30'
+                    : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
                 }`}>
-                  {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `In ${days}d`}
+                  {days === 0 ? 'TODAY' : days === 1 ? 'TMRW' : `${days}D`}
                 </span>
               </div>
             </div>

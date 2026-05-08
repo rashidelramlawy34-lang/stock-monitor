@@ -23,14 +23,12 @@ export default function AddHoldingForm({ onAdd }) {
     }
   };
 
-  const labelCls = 'text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider';
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-wrap gap-3 items-end">
       <div className="flex flex-col gap-1">
-        <label className={labelCls}>Ticker</label>
+        <label className="hud-label">Ticker</label>
         <input
-          className="input w-24 uppercase"
+          className="input w-24 uppercase font-mono"
           placeholder="AAPL"
           value={form.ticker}
           onChange={e => setForm(f => ({ ...f, ticker: e.target.value.toUpperCase() }))}
@@ -38,35 +36,35 @@ export default function AddHoldingForm({ onAdd }) {
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className={labelCls}>Shares</label>
+        <label className="hud-label">Shares</label>
         <input
           type="number" min="0" step="any"
-          className="input w-24"
+          className="input w-24 font-mono"
           placeholder="10"
           value={form.shares}
           onChange={e => setForm(f => ({ ...f, shares: e.target.value }))}
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className={labelCls}>Cost/Share ($)</label>
+        <label className="hud-label">Cost/Share ($)</label>
         <input
           type="number" min="0" step="any"
-          className="input w-28"
+          className="input w-28 font-mono"
           placeholder="150.00"
           value={form.cost_basis}
           onChange={e => setForm(f => ({ ...f, cost_basis: e.target.value }))}
         />
       </div>
       <div className="flex flex-col gap-1">
-        <label className={labelCls}>&nbsp;</label>
+        <label className="hud-label">&nbsp;</label>
         <button type="submit" disabled={busy} className="btn-primary">
-          {busy ? 'Adding…' : 'Add Stock'}
+          {busy ? 'Adding…' : '+ Add Stock'}
         </button>
       </div>
       {error && <p className="w-full text-bear text-xs mt-0.5">{error}</p>}
       {!error && Number(form.shares) > 0 && Number(form.cost_basis) > 0 && (
-        <p className="w-full text-xs text-slate-500 dark:text-slate-400">
-          Total cost: <span className="font-semibold text-slate-700 dark:text-slate-300">
+        <p className="w-full text-xs text-muted">
+          Total cost: <span className="font-semibold text-[#a8d8ea] font-mono">
             ${(Number(form.shares) * Number(form.cost_basis)).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
         </p>

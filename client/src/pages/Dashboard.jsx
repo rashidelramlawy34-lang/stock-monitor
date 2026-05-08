@@ -41,7 +41,7 @@ function portfolioBeta(holdings, prices, fundamentals) {
   return totalVal > 0 ? weightedBeta / totalVal : null;
 }
 
-function exportCSV(holdings, prices, fundamentals, candles) {
+function exportCSV(holdings, prices, fundamentals) {
   const headers = ['Ticker', 'Shares', 'Cost/Share', 'Current Price', 'Market Value', 'P&L', 'P&L %', 'Beta', 'Analyst Target', 'Upside %'];
   const rows = holdings.map(h => {
     const p = prices[h.ticker]?.price;
@@ -60,12 +60,12 @@ function exportCSV(holdings, prices, fundamentals, candles) {
   a.click();
 }
 
-function StatCard({ label, value, sub, color = '' }) {
+function StatCard({ label, value, sub, color }) {
   return (
     <div className="card p-4">
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-      <p className={`text-2xl font-bold tracking-tight ${color || 'text-slate-800 dark:text-slate-200'}`}>{value}</p>
-      {sub && <p className="text-xs text-slate-400 dark:text-slate-600 mt-0.5">{sub}</p>}
+      <p className="hud-label mb-2">{label}</p>
+      <p className={`text-2xl font-bold font-mono tracking-tight ${color || 'text-[#a8d8ea]'}`}>{value}</p>
+      {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
     </div>
   );
 }
@@ -89,8 +89,8 @@ export default function Dashboard() {
     <div className="p-6 max-w-6xl mx-auto">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Portfolio</h1>
-          <p className="text-slate-500 dark:text-slate-500 text-sm mt-0.5">
+          <h1 className="hud-title text-xl">Portfolio</h1>
+          <p className="text-muted text-xs mt-1 tracking-wide">
             {lastUpdated
               ? <>Prices updated {lastUpdated.toLocaleTimeString()}</>
               : 'Fetching prices…'}
@@ -99,13 +99,13 @@ export default function Dashboard() {
         {holdings.length > 0 && (
           <div className="flex items-center gap-2">
             <button
-              onClick={() => exportCSV(holdings, prices, fundamentals, candles)}
-              className="btn-outline text-xs flex items-center gap-1"
+              onClick={() => exportCSV(holdings, prices, fundamentals)}
+              className="btn-outline flex items-center gap-1"
             >
               ↓ CSV
             </button>
-            <button onClick={refreshPrices} className="btn-outline text-xs flex items-center gap-1">
-              ↻ Prices
+            <button onClick={refreshPrices} className="btn-outline flex items-center gap-1">
+              ↻ Refresh
             </button>
           </div>
         )}
@@ -138,10 +138,10 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Portfolio value chart */}
+      {/* Portfolio chart */}
       {holdings.length > 0 && <PortfolioChart />}
 
-      {/* Side panels: sector chart + earnings */}
+      {/* Side panels */}
       {holdings.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
           <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
@@ -149,32 +149,32 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Portfolio table */}
+      {/* Holdings table */}
       <section className="card mb-6">
-        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-[#1e2d45]">
-          <h2 className="font-semibold text-slate-800 dark:text-slate-200">Holdings</h2>
+        <div className="flex items-center justify-between p-4 border-b border-[rgba(0,212,255,0.1)]">
+          <h2 className="hud-label">Holdings</h2>
         </div>
 
-        {loading && <p className="p-6 text-slate-500 dark:text-slate-400 text-sm">Loading…</p>}
+        {loading && <p className="p-6 text-muted text-sm">Loading…</p>}
         {error && <p className="p-6 text-bear text-sm">Error: {error}</p>}
 
         {!loading && holdings.length === 0 && (
-          <p className="p-6 text-slate-500 dark:text-slate-500 text-sm">No holdings yet. Add your first stock below.</p>
+          <p className="p-6 text-muted text-sm">No holdings yet. Add your first stock below.</p>
         )}
 
         {!loading && holdings.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  <th className="text-left py-2.5 px-4">Ticker</th>
-                  <th className="text-right py-2.5 px-4">Price</th>
-                  <th className="text-right py-2.5 px-4">Today</th>
-                  <th className="py-2.5 px-4">7D</th>
-                  <th className="text-right py-2.5 px-4">Shares</th>
-                  <th className="text-right py-2.5 px-4">Cost</th>
-                  <th className="text-right py-2.5 px-4">P&L</th>
-                  <th className="text-right py-2.5 px-4">Upside</th>
+                <tr>
+                  <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Today</th>
+                  <th className="hud-label py-2.5 px-4 font-normal">7D</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Cost</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">P&L</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Upside</th>
                   <th className="py-2.5 px-4"></th>
                 </tr>
               </thead>
@@ -194,7 +194,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="p-4 border-t border-slate-200 dark:border-[#1e2d45]">
+        <div className="p-4 border-t border-[rgba(0,212,255,0.1)]">
           <AddHoldingForm onAdd={addHolding} />
         </div>
       </section>

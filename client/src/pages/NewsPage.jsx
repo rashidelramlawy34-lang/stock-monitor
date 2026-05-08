@@ -5,13 +5,6 @@ import NewsCard from '../components/NewsCard.jsx';
 
 const SENTIMENT_FILTERS = ['All', 'Bullish', 'Bearish', 'Neutral'];
 
-const SENTIMENT_CHIP = {
-  'All':     'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
-  'Bullish': 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800',
-  'Bearish': 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-200 dark:border-red-800',
-  'Neutral': 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-800',
-};
-
 export default function NewsPage() {
   const { holdings } = usePortfolio();
   const { news, loading, errors, fetchNews } = useNews();
@@ -41,13 +34,20 @@ export default function NewsPage() {
     Neutral: allArticles.filter(a => a.sentiment === 'neutral').length,
   };
 
+  const SENTIMENT_STYLE = {
+    All:     { active: 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]' },
+    Bullish: { active: 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/40' },
+    Bearish: { active: 'bg-[#ff3355]/10 text-[#ff3355] border-[#ff3355]/40' },
+    Neutral: { active: 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/40' },
+  };
+
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">News Feed</h1>
+          <h1 className="hud-title text-xl">Intel Feed</h1>
           {allArticles.length > 0 && (
-            <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">
+            <p className="text-xs text-muted mt-1 tracking-wide">
               {allArticles.length} articles
               {counts.Bullish > 0 && <span className="text-bull ml-2">↑ {counts.Bullish} bullish</span>}
               {counts.Bearish > 0 && <span className="text-bear ml-2">↓ {counts.Bearish} bearish</span>}
@@ -58,23 +58,24 @@ export default function NewsPage() {
           <button
             onClick={() => fetchNews(activeTicker)}
             disabled={isLoading}
-            className="btn-ghost text-xs disabled:opacity-50"
+            className="btn-ghost text-xs disabled:opacity-40"
           >
-            {isLoading ? 'Loading…' : 'Refresh'}
+            {isLoading ? 'Loading…' : '↻ Refresh'}
           </button>
         )}
       </div>
 
+      {/* Ticker tabs */}
       {holdings.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-4">
           {holdings.map(h => (
             <button
               key={h.ticker}
               onClick={() => { setActiveTicker(h.ticker); setSentimentFilter('All'); }}
-              className={`px-3 py-1.5 rounded-lg text-sm font-mono font-medium transition-colors border ${
+              className={`px-3 py-1.5 rounded-sm text-sm font-mono font-bold transition-all border tracking-widest ${
                 activeTicker === h.ticker
-                  ? 'bg-accent text-white border-accent'
-                  : 'border-slate-200 dark:border-[#1e2d45] text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-white/5'
+                  ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
+                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
               }`}
             >
               {h.ticker}
@@ -90,10 +91,10 @@ export default function NewsPage() {
             <button
               key={s}
               onClick={() => setSentimentFilter(s)}
-              className={`text-xs font-medium px-2.5 py-1 rounded-full border transition-colors ${
+              className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider uppercase ${
                 sentimentFilter === s
-                  ? SENTIMENT_CHIP[s] + ' ring-1 ring-offset-1 ring-current'
-                  : 'bg-transparent border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-600'
+                  ? SENTIMENT_STYLE[s].active
+                  : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
               }`}
             >
               {s}{s !== 'All' && counts[s] > 0 ? ` (${counts[s]})` : ''}
@@ -103,7 +104,7 @@ export default function NewsPage() {
       )}
 
       {holdings.length === 0 && (
-        <p className="text-slate-500 dark:text-slate-500 text-sm">Add stocks to your portfolio to see news.</p>
+        <p className="text-muted text-sm">Add stocks to your portfolio to see news.</p>
       )}
 
       {isLoading && (
@@ -117,7 +118,7 @@ export default function NewsPage() {
       {error && <p className="text-bear text-sm">Error: {error}</p>}
 
       {!isLoading && !error && articles.length === 0 && activeTicker && (
-        <p className="text-slate-500 dark:text-slate-500 text-sm">
+        <p className="text-muted text-sm">
           {sentimentFilter !== 'All'
             ? `No ${sentimentFilter.toLowerCase()} articles for ${activeTicker}.`
             : `No recent news found for ${activeTicker}.`}

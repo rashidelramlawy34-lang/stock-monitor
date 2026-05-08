@@ -5,33 +5,31 @@ function KeyField({ label, keyName, description, current, onChange }) {
   const isSet = current === '***set***';
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-        {label}
-      </label>
-      <p className="text-xs text-slate-400 dark:text-slate-500">{description}</p>
+    <div className="flex flex-col gap-2">
+      <label className="hud-label">{label}</label>
+      <p className="text-xs text-muted">{description}</p>
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
           <input
             type={show ? 'text' : 'password'}
             placeholder={isSet ? '••••••••••••••••••••••••' : 'Paste your key here…'}
             onChange={e => onChange(keyName, e.target.value)}
-            className="input w-full pr-10 font-mono text-xs"
+            className="input w-full pr-14 font-mono text-xs"
           />
           <button
             type="button"
             onClick={() => setShow(s => !s)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 text-xs"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-[#00d4ff] text-xs transition-colors"
           >
             {show ? 'Hide' : 'Show'}
           </button>
         </div>
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+        <span className={`text-xs font-bold px-2 py-1 rounded-sm border tracking-wider uppercase ${
           isSet
-            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800'
-            : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700'
+            ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30'
+            : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
         }`}>
-          {isSet ? 'Set' : 'Not set'}
+          {isSet ? '✓ Set' : 'Not Set'}
         </span>
       </div>
     </div>
@@ -39,8 +37,8 @@ function KeyField({ label, keyName, description, current, onChange }) {
 }
 
 export default function SettingsPage() {
-  const [saved, setSaved] = useState({});   // what the server has
-  const [draft, setDraft] = useState({});   // pending user edits
+  const [saved, setSaved] = useState({});
+  const [draft, setDraft] = useState({});
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
@@ -69,7 +67,6 @@ export default function SettingsPage() {
         body: JSON.stringify(draft),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      // Refresh saved state
       const updated = await fetch('/api/settings').then(r => r.json());
       setSaved(updated);
       setDraft({});
@@ -86,9 +83,9 @@ export default function SettingsPage() {
   return (
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Settings</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-500 mt-0.5">
-          API keys are stored securely in your local database and never leave your machine.
+        <h1 className="hud-title text-xl">Settings</h1>
+        <p className="text-xs text-muted mt-1 tracking-wide">
+          API keys are stored in your local database and never leave your machine.
         </p>
       </div>
 
@@ -96,8 +93,8 @@ export default function SettingsPage() {
         {/* AI Keys */}
         <div className="card p-5 flex flex-col gap-5">
           <div>
-            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">AI Analysis</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500">Powers the AI Advisor, Weekly Digest, and Discover scan.</p>
+            <h2 className="hud-label mb-0.5">AI Analysis</h2>
+            <p className="text-xs text-muted mt-1">Powers the AI Advisor, Portfolio Digest, and Discover scan.</p>
           </div>
 
           <KeyField
@@ -112,8 +109,8 @@ export default function SettingsPage() {
         {/* Market Data Keys */}
         <div className="card p-5 flex flex-col gap-5">
           <div>
-            <h2 className="font-semibold text-slate-800 dark:text-slate-200 mb-0.5">Market Data</h2>
-            <p className="text-xs text-slate-400 dark:text-slate-500">Required for live prices, fundamentals, and news. Free tier at finnhub.io.</p>
+            <h2 className="hud-label mb-0.5">Market Data</h2>
+            <p className="text-xs text-muted mt-1">Required for live prices, fundamentals, and news. Free tier at finnhub.io.</p>
           </div>
 
           <KeyField
@@ -125,19 +122,19 @@ export default function SettingsPage() {
           />
         </div>
 
-        {/* Actions */}
+        {/* Save */}
         <div className="flex items-center gap-3">
           <button
             type="submit"
             disabled={saving || !hasDraft}
-            className="btn-primary disabled:opacity-50"
+            className="btn-primary"
           >
             {saving ? 'Saving…' : 'Save Keys'}
           </button>
 
           {success && (
-            <span className="text-sm text-bull font-medium">
-              ✓ Keys saved successfully
+            <span className="text-sm text-bull font-bold">
+              ✓ Keys saved
             </span>
           )}
           {error && (
@@ -146,14 +143,14 @@ export default function SettingsPage() {
         </div>
       </form>
 
-      {/* Info box */}
-      <div className="mt-8 card p-4 bg-slate-50 dark:bg-[#0f1623]">
-        <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">How keys are used</p>
-        <ul className="text-xs text-slate-500 dark:text-slate-500 space-y-1.5 list-disc list-inside">
-          <li><span className="font-medium text-slate-700 dark:text-slate-300">Anthropic</span> — AI Advisor analysis, Weekly Digest, and Discover deep analysis</li>
-          <li><span className="font-medium text-slate-700 dark:text-slate-300">Finnhub</span> — Real-time prices, fundamentals, analyst ratings, earnings calendar, and news</li>
-          <li>Keys set via environment variables (in <code className="bg-slate-200 dark:bg-slate-700 px-1 rounded">.env</code>) take precedence over keys saved here</li>
-          <li>Keys are only used server-side — they are never sent to the browser</li>
+      {/* Info */}
+      <div className="mt-8 card p-4 bg-[rgba(0,212,255,0.03)]">
+        <p className="hud-label mb-3">How Keys Are Used</p>
+        <ul className="text-xs text-[rgba(0,212,255,0.5)] space-y-1.5 list-disc list-inside">
+          <li><span className="text-[#a8d8ea] font-medium">Anthropic</span> — AI Advisor analysis, Portfolio Digest, and Discover deep analysis</li>
+          <li><span className="text-[#a8d8ea] font-medium">Finnhub</span> — Real-time prices, fundamentals, analyst ratings, earnings calendar, and news</li>
+          <li>Keys set via environment variables take precedence over keys saved here</li>
+          <li>Keys are only used server-side — never sent to the browser</li>
         </ul>
       </div>
     </div>

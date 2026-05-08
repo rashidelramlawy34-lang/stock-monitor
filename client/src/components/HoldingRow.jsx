@@ -22,7 +22,7 @@ export default function HoldingRow({ holding, price, candles, fundamentals, onRe
   const initials = holding.ticker.slice(0, 2).toUpperCase();
 
   return (
-    <tr className="table-row-hover border-t border-slate-200 dark:border-[#1e2d45] transition-colors">
+    <tr className="table-row-hover">
       {/* Ticker + logo */}
       <td className="py-3 px-4">
         <div className="flex items-center gap-2">
@@ -30,33 +30,33 @@ export default function HoldingRow({ holding, price, candles, fundamentals, onRe
             ? <img
                 src={logoUrl}
                 alt=""
-                className="w-5 h-5 rounded object-contain bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
+                className="w-5 h-5 rounded object-contain bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.15)]"
                 onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
               />
             : null}
           <span
-            className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 shrink-0 ${logoUrl ? 'hidden' : 'flex'}`}
+            className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center bg-[rgba(0,212,255,0.08)] text-[rgba(0,212,255,0.6)] shrink-0 border border-[rgba(0,212,255,0.15)] ${logoUrl ? 'hidden' : 'flex'}`}
           >
             {initials}
           </span>
-          <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">{holding.ticker}</span>
+          <span className="font-mono font-semibold text-[#a8d8ea] tracking-wide">{holding.ticker}</span>
         </div>
       </td>
 
       {/* Price */}
       <td className="py-3 px-4 text-right">
         {price?.price != null
-          ? <span className="font-medium text-slate-800 dark:text-slate-200">${price.price.toFixed(2)}</span>
-          : <span className="text-slate-400">—</span>}
+          ? <span className="font-mono font-medium text-[#a8d8ea]">${price.price.toFixed(2)}</span>
+          : <span className="text-muted">—</span>}
       </td>
 
       {/* Today % */}
       <td className="py-3 px-4 text-right">
         {changePct != null
-          ? <span className={changePct >= 0 ? 'text-bull font-medium' : 'text-bear font-medium'}>
+          ? <span className={changePct >= 0 ? 'text-bull font-bold' : 'text-bear font-bold'}>
               {changePct >= 0 ? '+' : ''}{changePct.toFixed(2)}%
             </span>
-          : <span className="text-slate-400">—</span>}
+          : <span className="text-muted">—</span>}
       </td>
 
       {/* Sparkline */}
@@ -65,43 +65,43 @@ export default function HoldingRow({ holding, price, candles, fundamentals, onRe
       </td>
 
       {/* Shares */}
-      <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">{holding.shares}</td>
+      <td className="py-3 px-4 text-right text-[rgba(0,212,255,0.5)] font-mono">{holding.shares}</td>
 
       {/* Avg cost */}
-      <td className="py-3 px-4 text-right text-slate-600 dark:text-slate-400">
+      <td className="py-3 px-4 text-right text-[rgba(0,212,255,0.5)] font-mono">
         ${Number(holding.cost_basis).toFixed(2)}
       </td>
 
       {/* P&L */}
       <td className="py-3 px-4 text-right">
         {gain != null
-          ? <span className={gain.value >= 0 ? 'text-bull font-medium' : 'text-bear font-medium'}>
+          ? <span className={gain.value >= 0 ? 'text-bull font-bold' : 'text-bear font-bold'}>
               {gain.value >= 0 ? '+' : ''}${gain.value.toFixed(2)}
               <span className="text-xs ml-1 opacity-70">({gain.pct.toFixed(1)}%)</span>
             </span>
-          : <span className="text-slate-400">—</span>}
+          : <span className="text-muted">—</span>}
       </td>
 
       {/* Analyst upside */}
       <td className="py-3 px-4 text-right">
         {upside != null
-          ? <span className={upside >= 0 ? 'text-bull text-xs font-medium' : 'text-bear text-xs font-medium'}>
+          ? <span className={upside >= 0 ? 'text-bull text-xs font-bold' : 'text-bear text-xs font-bold'}>
               {upside >= 0 ? '+' : ''}{upside.toFixed(1)}%
-              <span className="ml-0.5 opacity-60">{upside >= 0 ? '↑' : '↓'}</span>
+              <span className="ml-0.5 opacity-70">{upside >= 0 ? '↑' : '↓'}</span>
             </span>
-          : <span className="text-slate-400 text-xs">—</span>}
+          : <span className="text-muted text-xs">—</span>}
       </td>
 
       {/* Remove */}
       <td className="py-3 px-4 text-right">
         {confirming
           ? <span className="flex gap-2 justify-end">
-              <button onClick={() => onRemove(holding.ticker)} className="text-xs text-bear hover:text-red-300 underline">Confirm</button>
-              <button onClick={() => setConfirming(false)} className="text-xs text-slate-500 hover:text-slate-300">Cancel</button>
+              <button onClick={() => onRemove(holding.ticker)} className="text-xs text-bear hover:text-[#ff3355] underline">Confirm</button>
+              <button onClick={() => setConfirming(false)} className="text-xs text-muted hover:text-[#a8d8ea]">Cancel</button>
             </span>
           : <button
               onClick={() => setConfirming(true)}
-              className="text-slate-400 hover:text-bear transition-colors text-sm"
+              className="text-muted hover:text-bear transition-colors text-sm"
               title="Remove holding"
             >✕</button>}
       </td>

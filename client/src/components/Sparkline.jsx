@@ -3,10 +3,10 @@ import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 
 const Sparkline = React.memo(function Sparkline({ closes, positive, ticker }) {
   if (!closes || closes.length < 2) {
-    return <span className="text-slate-300 dark:text-slate-600 text-xs">—</span>;
+    return <span className="text-muted text-xs">—</span>;
   }
   const data = closes.map(v => ({ v }));
-  const color = positive ? '#22c55e' : '#ef4444';
+  const color = positive ? '#00e676' : '#ff3355';
   const gradId = `sg-${ticker ?? (positive ? 'pos' : 'neg')}`;
 
   return (

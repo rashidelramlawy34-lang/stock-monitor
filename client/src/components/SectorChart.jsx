@@ -1,8 +1,8 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 
 const COLORS = [
-  '#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6',
-  '#06b6d4', '#f97316', '#ec4899', '#14b8a6', '#a3e635',
+  '#00d4ff', '#00e676', '#ffaa00', '#ff3355', '#0066ff',
+  '#ff6b35', '#ffa800', '#00b8e6', '#8b5cf6', '#06b6d4',
 ];
 
 const LABEL = {
@@ -41,9 +41,7 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
 
   return (
     <div className="card p-4">
-      <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-        Sector Allocation
-      </p>
+      <p className="hud-label mb-3">Sector Allocation</p>
       <div className="flex items-center gap-4">
         <div style={{ width: 120, height: 120, flexShrink: 0 }}>
           <ResponsiveContainer width="100%" height="100%">
@@ -53,7 +51,8 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
                 cx="50%" cy="50%"
                 innerRadius={34} outerRadius={54}
                 dataKey="value"
-                strokeWidth={0}
+                strokeWidth={1}
+                stroke="rgba(0,212,255,0.1)"
               >
                 {data.map((_, i) => (
                   <Cell key={i} fill={COLORS[i % COLORS.length]} />
@@ -62,22 +61,22 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
               <Tooltip
                 formatter={(v) => [`$${v.toLocaleString()}`, '']}
                 contentStyle={{
-                  background: 'var(--tooltip-bg, #1e2537)',
-                  border: '1px solid #1e2d45',
-                  borderRadius: 8,
-                  fontSize: 12,
-                  color: '#e2e8f0',
+                  background: '#071220',
+                  border: '1px solid rgba(0,212,255,0.3)',
+                  borderRadius: 4,
+                  fontSize: 11,
+                  color: '#a8d8ea',
                 }}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div className="flex flex-col gap-1 min-w-0">
+        <div className="flex flex-col gap-1.5 min-w-0">
           {data.map((d, i) => (
             <div key={d.name} className="flex items-center gap-2 text-xs">
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
-              <span className="text-slate-600 dark:text-slate-400 truncate">{d.short}</span>
-              <span className="ml-auto text-slate-500 dark:text-slate-500 font-mono pl-2">
+              <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+              <span className="text-[rgba(0,212,255,0.5)] truncate">{d.short}</span>
+              <span className="ml-auto font-mono text-[#a8d8ea] pl-2">
                 {((d.value / total) * 100).toFixed(0)}%
               </span>
             </div>

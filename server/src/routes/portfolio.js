@@ -1,17 +1,26 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
+router.use(requireAuth);
+
 router.get('/', (req, res) => {
-  const holdings = getDb().prepare('SELECT * FROM holdings ORDER BY added_at DESC').all();
+  const userId = req.user.id;
+  const holdings = getDb()
+    .prepare('SELECT * FROM holdings WHERE user_id = ? ORDER BY added_at DESC')
+    .all(userId);
   res.json(holdings);
 });
 
-// Returns hourly portfolio value snapshots from price_history
+// Returns hourly portfolio value snapshots from price_history (scoped to user's holdings)
 router.get('/history', (req, res) => {
   const db = getDb();
-  const holdings = db.prepare('SELECT ticker, shares FROM holdings').all();
+  const userId = req.user.id;
+  const holdings = db
+    .prepare('SELECT ticker, shares FROM holdings WHERE user_id = ?')
+    .all(userId);
   if (holdings.length === 0) return res.json([]);
 
   const tickers = holdings.map(h => h.ticker);
@@ -57,20 +66,28 @@ router.post('/', (req, res) => {
   }
 
   const db = getDb();
-  db.prepare(`
-    INSERT OR REPLACE INTO holdings (ticker, name, shares, cost_basis)
-    VALUES (@ticker, @name, @shares, @cost_basis)
-  `).run({ ticker: ticker.toUpperCase(), name: name ?? null, shares, cost_basis });
+  const userId = req.user.id;
+  const upperTicker = ticker.toUpperCase();
 
-  res.status(201).json(db.prepare('SELECT * FROM holdings WHERE ticker = ?').get(ticker.toUpperCase()));
+  db.prepare(`
+    INSERT OR REPLACE INTO holdings (ticker, name, shares, cost_basis, user_id)
+    VALUES (@ticker, @name, @shares, @cost_basis, @user_id)
+  `).run({ ticker: upperTicker, name: name ?? null, shares, cost_basis, user_id: userId });
+
+  res.status(201).json(
+    db.prepare('SELECT * FROM holdings WHERE ticker = ? AND user_id = ?').get(upperTicker, userId)
+  );
 });
 
 router.patch('/:ticker', (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
   const { shares, cost_basis, name } = req.body;
+  const userId = req.user.id;
 
   const db = getDb();
-  const existing = db.prepare('SELECT * FROM holdings WHERE ticker = ?').get(ticker);
+  const existing = db
+    .prepare('SELECT * FROM holdings WHERE ticker = ? AND user_id = ?')
+    .get(ticker, userId);
   if (!existing) return res.status(404).json({ error: 'Holding not found' });
 
   db.prepare(`
@@ -78,15 +95,20 @@ router.patch('/:ticker', (req, res) => {
       shares     = COALESCE(@shares, shares),
       cost_basis = COALESCE(@cost_basis, cost_basis),
       name       = COALESCE(@name, name)
-    WHERE ticker = @ticker
-  `).run({ ticker, shares: shares ?? null, cost_basis: cost_basis ?? null, name: name ?? null });
+    WHERE ticker = @ticker AND user_id = @user_id
+  `).run({ ticker, shares: shares ?? null, cost_basis: cost_basis ?? null, name: name ?? null, user_id: userId });
 
-  res.json(db.prepare('SELECT * FROM holdings WHERE ticker = ?').get(ticker));
+  res.json(
+    db.prepare('SELECT * FROM holdings WHERE ticker = ? AND user_id = ?').get(ticker, userId)
+  );
 });
 
 router.delete('/:ticker', (req, res) => {
   const ticker = req.params.ticker.toUpperCase();
-  const result = getDb().prepare('DELETE FROM holdings WHERE ticker = ?').run(ticker);
+  const userId = req.user.id;
+  const result = getDb()
+    .prepare('DELETE FROM holdings WHERE ticker = ? AND user_id = ?')
+    .run(ticker, userId);
   if (result.changes === 0) return res.status(404).json({ error: 'Holding not found' });
   res.json({ deleted: ticker });
 });

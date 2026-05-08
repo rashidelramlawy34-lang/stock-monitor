@@ -30,12 +30,11 @@ export default function AdvisorPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">AI Advisor</h1>
+          <h1 className="hud-title text-xl">AI Advisor</h1>
           {holdings.length > 0 && (
-            <p className="text-sm text-slate-500 dark:text-slate-500 mt-0.5">
+            <p className="text-xs text-muted mt-1 tracking-wide">
               {loadingCount > 0
                 ? `Analyzing ${loadingCount} stock${loadingCount > 1 ? 's' : ''}…`
                 : `${doneCount} of ${holdings.length} analyzed`}
@@ -46,10 +45,10 @@ export default function AdvisorPage() {
           <button
             onClick={refreshAll}
             disabled={refreshingAll || loadingCount > 0}
-            className="btn-outline text-xs flex items-center gap-1.5 disabled:opacity-50"
+            className="btn-outline flex items-center gap-1.5 disabled:opacity-40"
           >
             {refreshingAll ? (
-              <><span className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />Refreshing…</>
+              <><span className="w-3 h-3 border-2 border-[rgba(0,212,255,0.3)] border-t-[#00d4ff] rounded-full animate-spin" />Refreshing…</>
             ) : '↻ Refresh All'}
           </button>
         )}
@@ -61,34 +60,31 @@ export default function AdvisorPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="card p-5 animate-pulse h-40">
-              <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-1/4 mb-3" />
-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-full mb-2" />
-              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded w-3/4" />
+              <div className="h-4 bg-[rgba(0,212,255,0.08)] rounded w-1/4 mb-3" />
+              <div className="h-2 bg-[rgba(0,212,255,0.08)] rounded w-full mb-2" />
+              <div className="h-2 bg-[rgba(0,212,255,0.08)] rounded w-3/4" />
             </div>
           ))}
         </div>
       )}
 
       {!holdingsLoading && holdings.length === 0 && (
-        <p className="text-slate-500 dark:text-slate-500 text-sm">Add stocks to your portfolio to get AI advice.</p>
+        <p className="text-muted text-sm">Add stocks to your portfolio to get AI advice.</p>
       )}
 
       {holdings.length > 0 && (
         <>
-          <h2 className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">
-            Buy / Hold / Sell Analysis
-          </h2>
+          <h2 className="hud-label mb-3">Buy / Hold / Sell Analysis</h2>
 
-          {/* Summary bar */}
           {doneCount > 0 && (() => {
             const buys = holdings.filter(h => advice[h.ticker]?.recommendation === 'buy').length;
             const sells = holdings.filter(h => advice[h.ticker]?.recommendation === 'sell').length;
             const holds = holdings.filter(h => advice[h.ticker]?.recommendation === 'hold').length;
             return (
-              <div className="flex items-center gap-3 mb-4 text-xs">
-                {buys > 0 && <span className="flex items-center gap-1 text-bull font-medium"><span className="w-2 h-2 rounded-full bg-bull" />{buys} Buy</span>}
-                {holds > 0 && <span className="flex items-center gap-1 text-warn font-medium"><span className="w-2 h-2 rounded-full bg-warn" />{holds} Hold</span>}
-                {sells > 0 && <span className="flex items-center gap-1 text-bear font-medium"><span className="w-2 h-2 rounded-full bg-bear" />{sells} Sell</span>}
+              <div className="flex items-center gap-4 mb-4 text-xs">
+                {buys > 0 && <span className="flex items-center gap-1.5 text-bull font-bold"><span className="w-2 h-2 rounded-full bg-bull shadow-[0_0_6px_#00e676]" />{buys} Buy</span>}
+                {holds > 0 && <span className="flex items-center gap-1.5 text-warn font-bold"><span className="w-2 h-2 rounded-full bg-warn shadow-[0_0_6px_#ffaa00]" />{holds} Hold</span>}
+                {sells > 0 && <span className="flex items-center gap-1.5 text-bear font-bold"><span className="w-2 h-2 rounded-full bg-bear shadow-[0_0_6px_#ff3355]" />{sells} Sell</span>}
               </div>
             );
           })()}

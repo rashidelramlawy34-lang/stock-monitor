@@ -15,15 +15,15 @@ export default function NewsCard({ article }) {
       href={article.url ?? '#'}
       target="_blank"
       rel="noopener noreferrer"
-      className="block card p-4 hover:border-accent/40 dark:hover:border-accent/40 transition-colors group"
+      className="block card p-4 transition-colors group"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-slate-100 leading-snug flex-1">
+        <p className="text-sm text-[#a8d8ea] group-hover:text-[#00d4ff] leading-snug flex-1 transition-colors">
           {article.headline}
         </p>
         <span className={`shrink-0 ${s.cls}`}>{s.label}</span>
       </div>
-      <div className="mt-2 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
+      <div className="mt-2 flex items-center gap-2 text-xs text-muted">
         {article.source && <span>{article.source}</span>}
         {article.source && date && <span>·</span>}
         {date && <span>{date}</span>}
