@@ -118,7 +118,7 @@ export default function BenchmarkChart({ holdings, candles }) {
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={220}>
+      <ResponsiveContainer width="100%" height={300}>
         <LineChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <CartesianGrid
             strokeDasharray="0"

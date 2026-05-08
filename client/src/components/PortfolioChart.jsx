@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  AreaChart, Area, XAxis, YAxis, Tooltip,
+  ResponsiveContainer, CartesianGrid, ReferenceLine,
+} from 'recharts';
 
 function usePortfolioHistory() {
   const [data, setData] = useState([]);
@@ -16,6 +19,7 @@ function usePortfolioHistory() {
             month: 'short', day: 'numeric',
             hour: '2-digit', minute: '2-digit',
           }),
+          dateOnly: new Date(p.ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         })));
       })
       .catch(() => {})
@@ -29,9 +33,10 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { value, label } = payload[0].payload;
   return (
-    <div className="bg-[#071220] border border-[rgba(0,212,255,0.3)] rounded-full px-3 py-2 text-xs">
-      <p className="text-muted mb-0.5">{label}</p>
-      <p className="font-mono font-semibold text-[#a8d8ea]">
+    <div style={{ background: '#070d18', border: '1px solid rgba(0,212,255,0.25)', borderRadius: 8 }}
+      className="px-3 py-2.5 text-xs shadow-xl">
+      <p className="text-muted mb-1">{label}</p>
+      <p className="font-mono font-bold text-[#00d4ff] text-base">
         ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
     </div>
@@ -43,17 +48,17 @@ export default function PortfolioChart() {
 
   if (loading) {
     return (
-      <div className="card p-5 mb-6 animate-pulse">
-        <div className="h-4 bg-[rgba(0,212,255,0.08)] rounded w-1/4 mb-4" />
-        <div className="h-24 bg-[rgba(0,212,255,0.04)] rounded" />
+      <div className="card p-5 animate-pulse">
+        <div className="h-4 bg-[rgba(0,212,255,0.06)] rounded-full w-1/4 mb-4" />
+        <div className="h-[320px] bg-[rgba(0,212,255,0.03)] rounded-lg" />
       </div>
     );
   }
 
   if (data.length < 3) {
     return (
-      <div className="card p-5 mb-6">
-        <p className="hud-label mb-2">Portfolio Value (7 days)</p>
+      <div className="card p-5">
+        <p className="hud-label mb-2">Portfolio Value</p>
         <p className="text-xs text-muted">Chart will appear once price history accumulates.</p>
       </div>
     );
@@ -69,35 +74,79 @@ export default function PortfolioChart() {
 
   const minVal = Math.min(...data.map(d => d.value));
   const maxVal = Math.max(...data.map(d => d.value));
-  const padding = (maxVal - minVal) * 0.1 || 10;
+  const padding = (maxVal - minVal) * 0.12 || 100;
+
+  const openValue = first;
 
   return (
-    <div className="card p-5 mb-6">
-      <div className="flex items-center justify-between mb-4">
-        <p className="hud-label">Portfolio Value (7 days)</p>
-        <span className={`text-sm font-bold font-mono ${positive ? 'text-bull' : 'text-bear'}`}>
-          {positive ? '+' : ''}${Math.abs(change).toFixed(2)} ({positive ? '+' : ''}{changePct.toFixed(2)}%)
-        </span>
+    <div className="card p-5">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <p className="hud-label mb-1">Portfolio Value</p>
+          <p className="text-3xl font-bold font-mono text-[#a8d8ea] tracking-tight">
+            ${last.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+        </div>
+        <div className={`text-right ${positive ? 'text-bull' : 'text-bear'}`}>
+          <p className="text-xl font-bold font-mono">
+            {positive ? '+' : ''}${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+          <p className="text-sm font-semibold font-mono">
+            {positive ? '+' : ''}{changePct.toFixed(2)}%
+          </p>
+        </div>
       </div>
-      <ResponsiveContainer width="100%" height={100}>
-        <AreaChart data={data} margin={{ top: 4, right: 0, bottom: 0, left: 0 }}>
+
+      <ResponsiveContainer width="100%" height={320}>
+        <AreaChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={strokeColor} stopOpacity={0.2} />
-              <stop offset="95%" stopColor={strokeColor} stopOpacity={0} />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
+              <stop offset="60%" stopColor={strokeColor} stopOpacity={0.06} />
+              <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey="label" hide />
-          <YAxis domain={[minVal - padding, maxVal + padding]} hide />
-          <Tooltip content={<CustomTooltip />} />
+          <CartesianGrid
+            strokeDasharray="0"
+            horizontal={true} vertical={false}
+            stroke="rgba(0,212,255,0.04)"
+          />
+          <XAxis
+            dataKey="dateOnly"
+            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            axisLine={false}
+            tickLine={false}
+            interval="preserveStartEnd"
+          />
+          <YAxis
+            domain={[minVal - padding, maxVal + padding]}
+            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
+            width={44}
+          />
+          <ReferenceLine
+            y={openValue}
+            stroke="rgba(0,212,255,0.15)"
+            strokeDasharray="4 4"
+          />
+          <Tooltip
+            content={<CustomTooltip />}
+            cursor={{ stroke: 'rgba(0,212,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+          />
           <Area
             type="monotone"
             dataKey="value"
             stroke={strokeColor}
-            strokeWidth={1.5}
+            strokeWidth={2}
             fill={`url(#${gradientId})`}
             dot={false}
-            activeDot={{ r: 3, fill: strokeColor, strokeWidth: 0 }}
+            activeDot={{ r: 5, fill: strokeColor, stroke: '#010409', strokeWidth: 2 }}
+            isAnimationActive={true}
+            animationDuration={800}
+            animationEasing="ease-out"
           />
         </AreaChart>
       </ResponsiveContainer>
