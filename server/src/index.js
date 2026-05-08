@@ -21,6 +21,7 @@ import candlesRouter from './routes/candles.js';
 import hrhrRouter from './routes/hrhr.js';
 import settingsRouter from './routes/settings.js';
 import authRouter from './routes/auth.js';
+import developerRouter from './routes/developer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -63,6 +64,7 @@ app.use('/api/fundamentals', fundamentalsRouter);
 app.use('/api/candles', candlesRouter);
 app.use('/api/hrhr', hrhrRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/developer', developerRouter);
 
 // Serve built frontend in production
 if (isProd) {

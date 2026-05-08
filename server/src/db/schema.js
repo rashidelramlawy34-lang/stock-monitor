@@ -150,8 +150,9 @@ function applySchema(db) {
     );
   `);
 
-  // Add new columns to ai_advice if they don't exist yet
+  // Add new columns if they don't exist yet
   const newCols = [
+    'ALTER TABLE users ADD COLUMN password_hash TEXT',
     'ALTER TABLE ai_advice ADD COLUMN bull_case TEXT',
     'ALTER TABLE ai_advice ADD COLUMN bear_case TEXT',
     'ALTER TABLE ai_advice ADD COLUMN price_target REAL',

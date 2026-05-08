@@ -8,13 +8,14 @@ import AdvisorPage from './pages/AdvisorPage.jsx';
 import AlertsPage from './pages/AlertsPage.jsx';
 import DiscoverPage from './pages/DiscoverPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
+import DeveloperPage from './pages/DeveloperPage.jsx';
 import AlertBanner from './components/AlertBanner.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 
 export default function App() {
   const [page, setPage] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    return ['portfolio','news','advisor','alerts','discover','settings'].includes(hash) ? hash : 'portfolio';
+    return ['portfolio','news','advisor','alerts','discover','settings','developer'].includes(hash) ? hash : 'portfolio';
   });
   const { user, loading, setUser } = useAuth();
 
@@ -49,6 +50,7 @@ export default function App() {
           {page === 'alerts'    && <AlertsPage />}
           {page === 'discover'  && <DiscoverPage />}
           {page === 'settings'  && <SettingsPage />}
+          {page === 'developer' && <DeveloperPage />}
         </div>
       </main>
     </div>

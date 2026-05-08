@@ -1,16 +1,17 @@
 import { useState } from 'react';
 import {
   PortfolioIcon, NewsIcon, AdvisorIcon,
-  AlertsIcon, DiscoverIcon, SettingsIcon,
+  AlertsIcon, DiscoverIcon, SettingsIcon, DeveloperIcon,
 } from './icons/NavIcons';
 
 const LINKS = [
-  { id: 'portfolio', label: 'Portfolio',  Icon: PortfolioIcon },
-  { id: 'news',      label: 'Intel Feed', Icon: NewsIcon },
-  { id: 'advisor',   label: 'AI Advisor', Icon: AdvisorIcon },
-  { id: 'alerts',    label: 'Alerts',     Icon: AlertsIcon },
-  { id: 'discover',  label: 'Discover',   Icon: DiscoverIcon, badge: 'HRHR' },
-  { id: 'settings',  label: 'Settings',   Icon: SettingsIcon },
+  { id: 'portfolio',  label: 'Portfolio',  Icon: PortfolioIcon },
+  { id: 'news',       label: 'Intel Feed', Icon: NewsIcon },
+  { id: 'advisor',    label: 'AI Advisor', Icon: AdvisorIcon },
+  { id: 'alerts',     label: 'Alerts',     Icon: AlertsIcon },
+  { id: 'discover',   label: 'Discover',   Icon: DiscoverIcon, badge: 'HRHR' },
+  { id: 'settings',   label: 'Settings',   Icon: SettingsIcon },
+  { id: 'developer',  label: 'Developer',  Icon: DeveloperIcon },
 ];
 
 export default function Nav({ page, setPage }) {
