@@ -27,6 +27,8 @@ import tradesRouter from './routes/trades.js';
 import pushRouter from './routes/pushNotifications.js';
 import coachRouter from './routes/coach.js';
 import benchmarkRouter from './routes/benchmark.js';
+import portfoliosRouter from './routes/portfolios.js';
+import marketDataRouter from './routes/marketData.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -75,6 +77,8 @@ app.use('/api/trades', tradesRouter);
 app.use('/api/push', pushRouter);
 app.use('/api/coach', coachRouter);
 app.use('/api/benchmark', benchmarkRouter);
+app.use('/api/portfolios', portfoliosRouter);
+app.use('/api/market-data', marketDataRouter);
 
 // Serve built frontend in production
 if (isProd) {

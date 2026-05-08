@@ -3,25 +3,32 @@ import {
   PortfolioIcon, NewsIcon, AdvisorIcon,
   AlertsIcon, DiscoverIcon, SettingsIcon, DeveloperIcon,
   WatchlistIcon, CoachIcon, TradesIcon,
+  InsidersIcon, InstitutionalIcon, CalendarIcon,
+  SunIcon, MoonIcon,
 } from './icons/NavIcons';
+import { useDarkMode } from '../hooks/useDarkMode';
 
 const LINKS = [
-  { id: 'portfolio',  label: 'Portfolio',  Icon: PortfolioIcon },
-  { id: 'watchlist',  label: 'Watchlist',  Icon: WatchlistIcon },
-  { id: 'news',       label: 'Intel Feed', Icon: NewsIcon },
-  { id: 'advisor',    label: 'AI Advisor', Icon: AdvisorIcon },
-  { id: 'coach',      label: 'AI Coach',   Icon: CoachIcon },
-  { id: 'alerts',     label: 'Alerts',     Icon: AlertsIcon },
-  { id: 'discover',   label: 'Discover',   Icon: DiscoverIcon, badge: 'HRHR' },
-  { id: 'trades',     label: 'Trade Log',  Icon: TradesIcon },
-  { id: 'settings',   label: 'Settings',   Icon: SettingsIcon },
-  { id: 'developer',  label: 'Developer',  Icon: DeveloperIcon },
+  { id: 'portfolio',     label: 'Portfolio',    Icon: PortfolioIcon },
+  { id: 'watchlist',     label: 'Watchlist',    Icon: WatchlistIcon },
+  { id: 'news',          label: 'Intel Feed',   Icon: NewsIcon },
+  { id: 'advisor',       label: 'AI Advisor',   Icon: AdvisorIcon },
+  { id: 'coach',         label: 'AI Coach',     Icon: CoachIcon },
+  { id: 'alerts',        label: 'Alerts',       Icon: AlertsIcon },
+  { id: 'discover',      label: 'Discover',     Icon: DiscoverIcon, badge: 'HRHR' },
+  { id: 'insiders',      label: 'Insiders',     Icon: InsidersIcon },
+  { id: 'institutional', label: 'Institutional',Icon: InstitutionalIcon },
+  { id: 'calendar',      label: 'Calendar',     Icon: CalendarIcon },
+  { id: 'trades',        label: 'Trade Log',    Icon: TradesIcon },
+  { id: 'settings',      label: 'Settings',     Icon: SettingsIcon },
+  { id: 'developer',     label: 'Developer',    Icon: DeveloperIcon },
 ];
 
 const ADMIN_ID = 'rashidelramlawy';
 
 export default function Nav({ page, setPage, user }) {
   const [open, setOpen] = useState(false);
+  const { dark, toggle } = useDarkMode();
   const links = LINKS.filter(l => l.id !== 'developer' || user?.id === ADMIN_ID);
 
   const linkCls = (active) =>
@@ -101,9 +108,18 @@ export default function Nav({ page, setPage, user }) {
         </nav>
 
         <hr className="hud-divider mt-4" />
-        <p className="text-[9px] text-[rgba(0,212,255,0.2)] tracking-widest uppercase text-center mt-3">
-          JARVIS v2.1
-        </p>
+        <div className="flex items-center justify-between mt-3 px-3">
+          <p className="text-[9px] text-[rgba(0,212,255,0.2)] tracking-widest uppercase">
+            JARVIS v2.1
+          </p>
+          <button
+            onClick={toggle}
+            title={dark ? 'Switch to light mode' : 'Switch to dark mode'}
+            className="text-[rgba(0,212,255,0.4)] hover:text-[#00d4ff] transition-colors"
+          >
+            {dark ? <SunIcon className="w-4 h-4" /> : <MoonIcon className="w-4 h-4" />}
+          </button>
+        </div>
       </aside>
     </>
   );

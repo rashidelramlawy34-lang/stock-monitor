@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.26.0",
+    "@sendgrid/mail": "^8.1.6",
     "better-sqlite3": "^12.9.0",
     "connect-sqlite3": "^0.9.16",
     "cors": "^2.8.5",

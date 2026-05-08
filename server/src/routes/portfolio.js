@@ -8,9 +8,11 @@ router.use(requireAuth);
 
 router.get('/', (req, res) => {
   const userId = req.user.id;
-  const holdings = getDb()
-    .prepare('SELECT * FROM holdings WHERE user_id = ? ORDER BY added_at DESC')
-    .all(userId);
+  const { portfolio_id } = req.query;
+  const db = getDb();
+  const holdings = portfolio_id
+    ? db.prepare('SELECT * FROM holdings WHERE user_id = ? AND portfolio_id = ? ORDER BY added_at DESC').all(userId, portfolio_id)
+    : db.prepare('SELECT * FROM holdings WHERE user_id = ? ORDER BY added_at DESC').all(userId);
   res.json(holdings);
 });
 
@@ -69,10 +71,11 @@ router.post('/', (req, res) => {
   const userId = req.user.id;
   const upperTicker = ticker.toUpperCase();
 
+  const { portfolio_id } = req.body;
   db.prepare(`
-    INSERT OR REPLACE INTO holdings (ticker, name, shares, cost_basis, user_id)
-    VALUES (@ticker, @name, @shares, @cost_basis, @user_id)
-  `).run({ ticker: upperTicker, name: name ?? null, shares, cost_basis, user_id: userId });
+    INSERT OR REPLACE INTO holdings (ticker, name, shares, cost_basis, user_id, portfolio_id)
+    VALUES (@ticker, @name, @shares, @cost_basis, @user_id, @portfolio_id)
+  `).run({ ticker: upperTicker, name: name ?? null, shares, cost_basis, user_id: userId, portfolio_id: portfolio_id ?? null });
 
   res.status(201).json(
     db.prepare('SELECT * FROM holdings WHERE ticker = ? AND user_id = ?').get(upperTicker, userId)

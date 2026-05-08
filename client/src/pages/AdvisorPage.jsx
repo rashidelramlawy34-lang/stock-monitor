@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { useAdvice } from '../hooks/useAdvice.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
+import { useMarketData } from '../hooks/useMarketData.js';
 import AdviceCard from '../components/AdviceCard.jsx';
 import DigestPanel from '../components/DigestPanel.jsx';
 
@@ -9,6 +10,7 @@ export default function AdvisorPage() {
   const { holdings, loading: holdingsLoading } = usePortfolio();
   const { advice, loading, errors, fetchAdvice } = useAdvice();
   const { fundamentals } = useFundamentals(holdings.map(h => h.ticker));
+  const { upgrades } = useMarketData(holdings.map(h => h.ticker));
   const [refreshingAll, setRefreshingAll] = useState(false);
 
   useEffect(() => {
@@ -102,6 +104,57 @@ export default function AdvisorPage() {
               />
             ))}
           </div>
+
+          {/* Analyst upgrades/downgrades feed */}
+          {(() => {
+            const allUpgrades = holdings.flatMap(h =>
+              (upgrades[h.ticker] ?? []).map(u => ({ ...u, ticker: h.ticker }))
+            ).sort((a, b) => new Date(b.gradeTime ?? b.date ?? 0) - new Date(a.gradeTime ?? a.date ?? 0));
+
+            if (allUpgrades.length === 0) return null;
+
+            return (
+              <div className="card mb-6 overflow-hidden">
+                <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+                  <h2 className="hud-label">Recent Analyst Actions</h2>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead>
+                      <tr className="text-muted border-b border-[rgba(0,212,255,0.08)]">
+                        <th className="text-left px-4 py-2 font-medium">Ticker</th>
+                        <th className="text-left px-4 py-2 font-medium">Firm</th>
+                        <th className="text-left px-4 py-2 font-medium">Action</th>
+                        <th className="text-left px-4 py-2 font-medium">From → To</th>
+                        <th className="text-right px-4 py-2 font-medium">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allUpgrades.slice(0, 30).map((u, i) => {
+                        const isUpgrade = u.action?.toLowerCase().includes('upgrade') || u.action?.toLowerCase().includes('initiat');
+                        const isDowngrade = u.action?.toLowerCase().includes('downgrade');
+                        return (
+                          <tr key={i} className="table-row-hover">
+                            <td className="px-4 py-2 font-bold text-arc">{u.ticker}</td>
+                            <td className="px-4 py-2 text-white truncate max-w-[120px]">{u.company ?? '—'}</td>
+                            <td className={`px-4 py-2 font-semibold ${isUpgrade ? 'text-[#00e676]' : isDowngrade ? 'text-bear' : 'text-warn'}`}>
+                              {u.action ?? '—'}
+                            </td>
+                            <td className="px-4 py-2 text-muted">
+                              {u.fromGrade ?? '—'} → {u.toGrade ?? '—'}
+                            </td>
+                            <td className="px-4 py-2 text-right text-muted">
+                              {(u.gradeTime ?? u.date ?? '').slice(0, 10)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            );
+          })()}
         </>
       )}
     </div>

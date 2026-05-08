@@ -1,5 +1,6 @@
 import Database from 'better-sqlite3';
 import { mkdirSync } from 'fs';
+import { randomUUID } from 'crypto';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
@@ -186,7 +187,40 @@ function applySchema(db) {
       analysis     TEXT    NOT NULL,
       generated_at INTEGER NOT NULL DEFAULT (unixepoch())
     );
+
+    CREATE TABLE IF NOT EXISTS portfolios (
+      id         TEXT    PRIMARY KEY,
+      user_id    TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      name       TEXT    NOT NULL,
+      is_default INTEGER NOT NULL DEFAULT 0,
+      created_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+
+    CREATE TABLE IF NOT EXISTS market_data_cache (
+      type       TEXT    NOT NULL,
+      ticker     TEXT    NOT NULL DEFAULT '',
+      data       TEXT    NOT NULL,
+      fetched_at INTEGER NOT NULL DEFAULT (unixepoch()),
+      PRIMARY KEY (type, ticker)
+    );
   `);
+
+  // Portfolio migration: create Default portfolio for existing users
+  try {
+    const usersWithHoldings = db.prepare(
+      `SELECT DISTINCT user_id FROM holdings WHERE portfolio_id IS NULL`
+    ).all();
+    for (const { user_id } of usersWithHoldings) {
+      const existing = db.prepare(`SELECT id FROM portfolios WHERE user_id = ?`).get(user_id);
+      if (!existing) {
+        const id = randomUUID();
+        db.prepare(`INSERT OR IGNORE INTO portfolios (id, user_id, name, is_default) VALUES (?, ?, 'Default', 1)`).run(id, user_id);
+        db.prepare(`UPDATE holdings SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
+        db.prepare(`UPDATE alerts   SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
+        db.prepare(`UPDATE trades   SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
+      }
+    }
+  } catch {}
 
   // Add new columns if they don't exist yet
   const newCols = [
@@ -201,6 +235,13 @@ function applySchema(db) {
     "ALTER TABLE holdings ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
     "ALTER TABLE alerts ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
     "ALTER TABLE ai_advice ADD COLUMN user_id TEXT NOT NULL DEFAULT 'default'",
+    // Portfolio columns
+    'ALTER TABLE holdings ADD COLUMN portfolio_id TEXT',
+    'ALTER TABLE alerts   ADD COLUMN portfolio_id TEXT',
+    'ALTER TABLE trades   ADD COLUMN portfolio_id TEXT',
+    // Email alert columns
+    'ALTER TABLE users ADD COLUMN email_alerts_enabled INTEGER NOT NULL DEFAULT 0',
+    'ALTER TABLE users ADD COLUMN alert_email TEXT',
   ];
   for (const sql of newCols) { try { db.exec(sql); } catch {} }
 }

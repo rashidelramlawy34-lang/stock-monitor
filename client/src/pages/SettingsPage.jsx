@@ -1,6 +1,84 @@
 import { useState, useEffect } from 'react';
 import { usePushNotifications } from '../hooks/usePushNotifications.js';
 
+function EmailAlertsSection() {
+  const [settings, setSettings] = useState({ alert_email: '', email_alerts_enabled: 0 });
+  const [draft, setDraft] = useState({});
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  useEffect(() => {
+    fetch('/auth/me/settings', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : {})
+      .then(d => setSettings(d))
+      .catch(() => {});
+  }, []);
+
+  async function save(e) {
+    e.preventDefault();
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await fetch('/auth/me', {
+        method: 'PATCH',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(draft),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const { user } = await res.json();
+      setSettings(user);
+      setDraft({});
+      setMsg('Saved');
+    } catch (err) {
+      setMsg(`Error: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const current = { ...settings, ...draft };
+
+  return (
+    <form onSubmit={save} className="card p-5 flex flex-col gap-5 mt-0">
+      <div>
+        <h2 className="hud-label mb-0.5">Email Alerts</h2>
+        <p className="text-xs text-muted mt-1">Receive an email when a price alert fires. Requires a SendGrid API key above.</p>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="hud-label">Alert Email Address</label>
+        <input
+          type="email"
+          placeholder="you@example.com"
+          value={current.alert_email ?? ''}
+          onChange={e => setDraft(d => ({ ...d, alert_email: e.target.value }))}
+          className="input w-full"
+        />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={!!current.email_alerts_enabled}
+            onChange={e => setDraft(d => ({ ...d, email_alerts_enabled: e.target.checked ? 1 : 0 }))}
+            className="w-3.5 h-3.5 accent-[#00d4ff]"
+          />
+          <span className="text-sm text-[rgba(0,212,255,0.7)]">Enable email alerts</span>
+        </label>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button type="submit" disabled={saving || !Object.keys(draft).length} className="btn-primary text-xs">
+          {saving ? 'Saving…' : 'Save Email Settings'}
+        </button>
+        {msg && <span className={`text-xs ${msg.startsWith('Error') ? 'text-bear' : 'text-bull'}`}>{msg}</span>}
+      </div>
+    </form>
+  );
+}
+
 function KeyField({ label, keyName, description, current, onChange }) {
   const [show, setShow] = useState(false);
   const isSet = current === '***set***';
@@ -122,6 +200,22 @@ export default function SettingsPage() {
             current={saved['FINNHUB_API_KEY'] ?? ''}
             onChange={handleChange}
           />
+
+          <KeyField
+            label="SendGrid API Key"
+            keyName="SENDGRID_API_KEY"
+            description="For email price alerts. Get a free key at sendgrid.com → API Keys."
+            current={saved['SENDGRID_API_KEY'] ?? ''}
+            onChange={handleChange}
+          />
+
+          <KeyField
+            label="Alert From Email"
+            keyName="ALERT_FROM_EMAIL"
+            description="The sender address for alert emails (must be verified in SendGrid)."
+            current={saved['ALERT_FROM_EMAIL'] ?? ''}
+            onChange={handleChange}
+          />
         </div>
 
         {/* Save */}
@@ -144,6 +238,8 @@ export default function SettingsPage() {
           )}
         </div>
       </form>
+
+      <EmailAlertsSection />
 
       {/* Push Notifications */}
       <div className="card p-5 flex flex-col gap-4 mt-0">

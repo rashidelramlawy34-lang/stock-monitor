@@ -6,14 +6,16 @@ const router = Router();
 router.use(requireAuth);
 
 router.get('/', (req, res) => {
-  const trades = getDb()
-    .prepare('SELECT * FROM trades WHERE user_id = ? ORDER BY traded_at DESC')
-    .all(req.user.id);
+  const { portfolio_id } = req.query;
+  const db = getDb();
+  const trades = portfolio_id
+    ? db.prepare('SELECT * FROM trades WHERE user_id = ? AND portfolio_id = ? ORDER BY traded_at DESC').all(req.user.id, portfolio_id)
+    : db.prepare('SELECT * FROM trades WHERE user_id = ? ORDER BY traded_at DESC').all(req.user.id);
   res.json(trades);
 });
 
 router.post('/', (req, res) => {
-  const { ticker, action, shares, price, fees, traded_at, note } = req.body;
+  const { ticker, action, shares, price, fees, traded_at, note, portfolio_id } = req.body;
   if (!ticker || !action || !shares || !price) {
     return res.status(400).json({ error: 'ticker, action, shares, price required' });
   }
@@ -23,9 +25,9 @@ router.post('/', (req, res) => {
   const db = getDb();
   const ts = traded_at ? Math.floor(new Date(traded_at).getTime() / 1000) : Math.floor(Date.now() / 1000);
   const result = db.prepare(`
-    INSERT INTO trades (user_id, ticker, action, shares, price, fees, traded_at, note)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(req.user.id, ticker.toUpperCase(), action, Number(shares), Number(price), Number(fees ?? 0), ts, note ?? null);
+    INSERT INTO trades (user_id, ticker, action, shares, price, fees, traded_at, note, portfolio_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(req.user.id, ticker.toUpperCase(), action, Number(shares), Number(price), Number(fees ?? 0), ts, note ?? null, portfolio_id ?? null);
   res.status(201).json(db.prepare('SELECT * FROM trades WHERE id = ?').get(result.lastInsertRowid));
 });
 

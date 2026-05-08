@@ -1,12 +1,141 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTrades } from '../hooks/useTrades.js';
 
 function fmt(n, d = 2) {
   return n != null ? Number(n).toFixed(d) : '—';
 }
 
+function TaxOptimizer({ trades }) {
+  const [prices, setPrices] = useState({});
+
+  const tickers = [...new Set(trades.map(t => t.ticker))];
+
+  useEffect(() => {
+    if (tickers.length === 0) return;
+    fetch(`/api/prices?tickers=${tickers.join(',')}`, { credentials: 'include' })
+      .then(r => r.ok ? r.json() : {})
+      .then(d => setPrices(d))
+      .catch(() => {});
+  }, [tickers.join(',')]);
+
+  const now = Date.now() / 1000;
+  const ONE_YEAR = 365 * 86400;
+
+  const lots = {};
+  for (const t of trades) {
+    if (!lots[t.ticker]) lots[t.ticker] = { buys: [], sells: [] };
+    if (t.action === 'buy') lots[t.ticker].buys.push({ ...t });
+    else lots[t.ticker].sells.push({ ...t });
+  }
+
+  const rows = [];
+  for (const [ticker, { buys, sells }] of Object.entries(lots)) {
+    const queue = buys.map(b => ({ ...b, remainingShares: b.shares }));
+
+    for (const sell of sells) {
+      let remaining = sell.shares;
+      while (remaining > 0 && queue.length > 0) {
+        const lot = queue[0];
+        const used = Math.min(lot.remainingShares, remaining);
+        lot.remainingShares -= used;
+        remaining -= used;
+        if (lot.remainingShares <= 0) queue.shift();
+      }
+    }
+
+    const currentPrice = prices[ticker]?.price ?? null;
+    for (const lot of queue) {
+      if (lot.remainingShares <= 0) continue;
+      const costBasis = lot.price * lot.remainingShares;
+      const currentValue = currentPrice ? currentPrice * lot.remainingShares : null;
+      const unrealized = currentValue !== null ? currentValue - costBasis : null;
+      const holdingDays = Math.floor((now - lot.traded_at) / 86400);
+      const isLongTerm = holdingDays >= 365;
+      rows.push({ ticker, shares: lot.remainingShares, costPerShare: lot.price, costBasis, currentPrice, currentValue, unrealized, holdingDays, isLongTerm, tradeId: lot.id });
+    }
+  }
+
+  const gainRows = rows.filter(r => r.unrealized !== null && r.unrealized > 0);
+  const lossRows = rows.filter(r => r.unrealized !== null && r.unrealized < 0);
+  const ltLoss = lossRows.filter(r => r.isLongTerm);
+  const stLoss = lossRows.filter(r => !r.isLongTerm);
+  const ltGain = gainRows.filter(r => r.isLongTerm);
+  const stGain = gainRows.filter(r => !r.isLongTerm);
+
+  if (rows.length === 0) return <p className="p-6 text-muted text-sm">No open lots found. Log some buy trades first.</p>;
+
+  return (
+    <div>
+      {/* Summary chips */}
+      <div className="flex flex-wrap gap-3 p-4 border-b border-[rgba(0,212,255,0.1)]">
+        <div className="text-xs">
+          <span className="text-muted">LT Losses: </span>
+          <span className="text-bear font-bold">${Math.abs(ltLoss.reduce((s, r) => s + (r.unrealized ?? 0), 0)).toFixed(0)}</span>
+        </div>
+        <div className="text-xs">
+          <span className="text-muted">ST Losses: </span>
+          <span className="text-bear font-bold">${Math.abs(stLoss.reduce((s, r) => s + (r.unrealized ?? 0), 0)).toFixed(0)}</span>
+        </div>
+        <div className="text-xs">
+          <span className="text-muted">LT Gains: </span>
+          <span className="text-bull font-bold">${ltGain.reduce((s, r) => s + (r.unrealized ?? 0), 0).toFixed(0)}</span>
+        </div>
+        <div className="text-xs">
+          <span className="text-muted">ST Gains: </span>
+          <span className="text-bull font-bold">${stGain.reduce((s, r) => s + (r.unrealized ?? 0), 0).toFixed(0)}</span>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-[rgba(0,212,255,0.08)] text-muted">
+              <th className="text-left px-4 py-2 font-medium">Ticker</th>
+              <th className="text-right px-4 py-2 font-medium">Shares</th>
+              <th className="text-right px-4 py-2 font-medium">Cost/sh</th>
+              <th className="text-right px-4 py-2 font-medium">Current</th>
+              <th className="text-right px-4 py-2 font-medium">Unrealized</th>
+              <th className="text-right px-4 py-2 font-medium">Days</th>
+              <th className="text-right px-4 py-2 font-medium">Term</th>
+              <th className="text-right px-4 py-2 font-medium">Harvest?</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.sort((a, b) => (a.unrealized ?? 0) - (b.unrealized ?? 0)).map((r, i) => (
+              <tr key={i} className="table-row-hover">
+                <td className="px-4 py-2 font-bold text-arc">{r.ticker}</td>
+                <td className="px-4 py-2 text-right text-white">{fmt(r.shares, 4)}</td>
+                <td className="px-4 py-2 text-right text-muted">${fmt(r.costPerShare)}</td>
+                <td className="px-4 py-2 text-right text-muted">{r.currentPrice ? `$${fmt(r.currentPrice)}` : '—'}</td>
+                <td className={`px-4 py-2 text-right font-bold ${r.unrealized === null ? 'text-muted' : r.unrealized >= 0 ? 'text-bull' : 'text-bear'}`}>
+                  {r.unrealized !== null ? `${r.unrealized >= 0 ? '+' : ''}$${fmt(Math.abs(r.unrealized))}` : '—'}
+                </td>
+                <td className="px-4 py-2 text-right text-muted">{r.holdingDays}d</td>
+                <td className="px-4 py-2 text-right">
+                  <span className={`px-1.5 py-0.5 rounded-sm text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
+                    {r.isLongTerm ? 'LT' : 'ST'}
+                  </span>
+                </td>
+                <td className="px-4 py-2 text-right">
+                  {r.unrealized !== null && r.unrealized < 0
+                    ? <span className="text-arc text-[10px] font-bold">HARVEST</span>
+                    : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-[10px] text-muted p-3 border-t border-[rgba(0,212,255,0.06)]">
+        HARVEST = unrealized loss you can sell to offset gains. Consult a tax advisor before acting.
+      </p>
+    </div>
+  );
+}
+
 export default function TradeLogPage() {
   const { trades, summary, loading, error, addTrade, deleteTrade } = useTrades();
+  const [activeTab, setActiveTab] = useState('history');
 
   const [form, setForm] = useState({
     ticker: '', action: 'buy', shares: '', price: '', fees: '', traded_at: '', note: '',
@@ -88,6 +217,31 @@ export default function TradeLogPage() {
         {formError && <p className="text-bear text-xs">{formError}</p>}
       </form>
 
+      {/* Tabs */}
+      <div className="flex gap-1 mb-4">
+        {['history', 'tax'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`text-xs px-3 py-1.5 rounded-sm border transition-all ${activeTab === tab ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
+          >
+            {tab === 'history' ? 'Trade History' : 'Tax Optimizer'}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'tax' && (
+        <div className="card overflow-hidden mb-6">
+          <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+            <h2 className="hud-label">Tax Lot Optimizer</h2>
+            <p className="text-xs text-muted mt-1">Open lots from buy trades, sorted by unrealized P&L</p>
+          </div>
+          <TaxOptimizer trades={trades} />
+        </div>
+      )}
+
+      {activeTab === 'history' && (
+      <>
       {/* Realized P&L summary */}
       {summary.length > 0 && (
         <div className="card mb-6 overflow-hidden">
@@ -192,6 +346,8 @@ export default function TradeLogPage() {
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

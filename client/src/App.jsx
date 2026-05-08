@@ -14,11 +14,16 @@ import LoginPage from './pages/LoginPage.jsx';
 import WatchlistPage from './pages/WatchlistPage.jsx';
 import CoachPage from './pages/CoachPage.jsx';
 import TradeLogPage from './pages/TradeLogPage.jsx';
+import InsidersPage from './pages/InsidersPage.jsx';
+import InstitutionalPage from './pages/InstitutionalPage.jsx';
+import CalendarPage from './pages/CalendarPage.jsx';
+
+const ALL_PAGES = ['portfolio','watchlist','news','advisor','coach','alerts','discover','insiders','institutional','calendar','trades','settings','developer'];
 
 export default function App() {
   const [page, setPage] = useState(() => {
     const hash = window.location.hash.replace('#', '');
-    return ['portfolio','watchlist','news','advisor','coach','alerts','discover','trades','settings','developer'].includes(hash) ? hash : 'portfolio';
+    return ALL_PAGES.includes(hash) ? hash : 'portfolio';
   });
   const { user, loading, setUser } = useAuth();
 
@@ -54,6 +59,9 @@ export default function App() {
           {page === 'coach'      && <CoachPage />}
           {page === 'alerts'     && <AlertsPage />}
           {page === 'discover'   && <DiscoverPage />}
+          {page === 'insiders'      && <InsidersPage />}
+          {page === 'institutional' && <InstitutionalPage />}
+          {page === 'calendar'      && <CalendarPage />}
           {page === 'trades'     && <TradeLogPage />}
           {page === 'settings'   && <SettingsPage />}
           {page === 'developer'  && user?.id === 'rashidelramlawy' && <DeveloperPage />}

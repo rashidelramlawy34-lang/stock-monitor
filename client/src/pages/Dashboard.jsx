@@ -2,6 +2,8 @@ import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
 import { useCandles } from '../hooks/useCandles.js';
+import { useMarketData } from '../hooks/useMarketData.js';
+import { usePortfolios } from '../hooks/usePortfolios.js';
 import AddHoldingForm from '../components/AddHoldingForm.jsx';
 import HoldingRow from '../components/HoldingRow.jsx';
 import SectorChart from '../components/SectorChart.jsx';
@@ -9,6 +11,9 @@ import EarningsCalendar from '../components/EarningsCalendar.jsx';
 import PortfolioChart from '../components/PortfolioChart.jsx';
 import BenchmarkChart from '../components/BenchmarkChart.jsx';
 import CorrelationMatrix from '../components/CorrelationMatrix.jsx';
+import DividendPanel from '../components/DividendPanel.jsx';
+import RebalancePanel from '../components/RebalancePanel.jsx';
+import PortfolioSwitcher from '../components/PortfolioSwitcher.jsx';
 
 function totalValue(holdings, prices) {
   return holdings.reduce((sum, h) => {
@@ -77,6 +82,8 @@ export default function Dashboard() {
   const { prices, lastUpdated, refresh: refreshPrices } = usePrices(holdings.map(h => h.ticker));
   const { fundamentals } = useFundamentals(holdings.map(h => h.ticker));
   const { candles } = useCandles(holdings.map(h => h.ticker));
+  const { dividends, shortInterest, upgrades } = useMarketData(holdings.map(h => h.ticker));
+  const portfolios = usePortfolios();
 
   const value = totalValue(holdings, prices);
   const cost = totalCost(holdings);
@@ -89,14 +96,17 @@ export default function Dashboard() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <header className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="hud-title text-xl">Portfolio</h1>
-          <p className="text-muted text-xs mt-1 tracking-wide">
-            {lastUpdated
-              ? <>Prices updated {lastUpdated.toLocaleTimeString()}</>
-              : 'Fetching prices…'}
-          </p>
+      <header className="mb-6 flex items-center justify-between flex-wrap gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div>
+            <h1 className="hud-title text-xl">Portfolio</h1>
+            <p className="text-muted text-xs mt-1 tracking-wide">
+              {lastUpdated
+                ? <>Prices updated {lastUpdated.toLocaleTimeString()}</>
+                : 'Fetching prices…'}
+            </p>
+          </div>
+          <PortfolioSwitcher {...portfolios} />
         </div>
         {holdings.length > 0 && (
           <div className="flex items-center gap-2">
@@ -158,7 +168,14 @@ export default function Dashboard() {
       )}
 
       {/* Holdings table */}
-      <section className="card mb-6">
+      {holdings.length > 0 && (
+        <>
+          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
+          <RebalancePanel holdings={holdings} prices={prices} />
+        </>
+      )}
+
+      <section className="card mb-6 mt-4">
         <div className="flex items-center justify-between p-4 border-b border-[rgba(0,212,255,0.1)]">
           <h2 className="hud-label">Holdings</h2>
         </div>
@@ -183,6 +200,7 @@ export default function Dashboard() {
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Cost</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">P&L</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Upside</th>
+                  <th className="hud-label text-right py-2.5 px-4 font-normal">Short%</th>
                   <th className="py-2.5 px-4"></th>
                 </tr>
               </thead>
@@ -194,6 +212,8 @@ export default function Dashboard() {
                     price={prices[h.ticker]}
                     candles={candles[h.ticker]}
                     fundamentals={fundamentals[h.ticker]}
+                    shortInterest={shortInterest[h.ticker]}
+                    latestUpgrade={(upgrades[h.ticker] ?? [])[0]}
                     onRemove={removeHolding}
                   />
                 ))}

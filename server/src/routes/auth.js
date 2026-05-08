@@ -81,6 +81,31 @@ router.get('/me', (req, res) => {
   res.json({ user: req.session?.user ?? null });
 });
 
+// PATCH /auth/me — update email alert settings
+router.patch('/me', (req, res) => {
+  const user = req.session?.user;
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const { alert_email, email_alerts_enabled } = req.body;
+  const db = getDb();
+  db.prepare(
+    'UPDATE users SET alert_email = COALESCE(@alert_email, alert_email), email_alerts_enabled = COALESCE(@enabled, email_alerts_enabled) WHERE id = @id'
+  ).run({
+    alert_email: alert_email ?? null,
+    enabled: email_alerts_enabled != null ? (email_alerts_enabled ? 1 : 0) : null,
+    id: user.id,
+  });
+  const row = db.prepare('SELECT id, name, alert_email, email_alerts_enabled FROM users WHERE id = ?').get(user.id);
+  res.json({ user: row });
+});
+
+// GET /auth/me/settings — fetch user email alert settings
+router.get('/me/settings', (req, res) => {
+  const user = req.session?.user;
+  if (!user) return res.status(401).json({ error: 'Not logged in' });
+  const row = getDb().prepare('SELECT id, name, alert_email, email_alerts_enabled FROM users WHERE id = ?').get(user.id);
+  res.json(row ?? {});
+});
+
 // POST /auth/logout
 router.post('/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));

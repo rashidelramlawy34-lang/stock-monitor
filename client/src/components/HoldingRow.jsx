@@ -8,7 +8,7 @@ function pnl(holding, price) {
   return { value: current - basis, pct: ((current - basis) / basis) * 100 };
 }
 
-export default function HoldingRow({ holding, price, candles, fundamentals, onRemove }) {
+export default function HoldingRow({ holding, price, candles, fundamentals, shortInterest, latestUpgrade, onRemove }) {
   const [confirming, setConfirming] = useState(false);
   const gain = pnl(holding, price?.price);
   const changePct = price?.change_pct;
@@ -20,6 +20,7 @@ export default function HoldingRow({ holding, price, candles, fundamentals, onRe
     : null;
   const logoUrl = fundamentals?.logo_url;
   const initials = holding.ticker.slice(0, 2).toUpperCase();
+  const shortPct = shortInterest?.shortPercent ?? shortInterest?.shortRatio ?? null;
 
   return (
     <tr className="table-row-hover">
@@ -88,6 +89,20 @@ export default function HoldingRow({ holding, price, candles, fundamentals, onRe
           ? <span className={upside >= 0 ? 'text-bull text-xs font-bold' : 'text-bear text-xs font-bold'}>
               {upside >= 0 ? '+' : ''}{upside.toFixed(1)}%
               <span className="ml-0.5 opacity-70">{upside >= 0 ? '↑' : '↓'}</span>
+            </span>
+          : <span className="text-muted text-xs">—</span>}
+        {latestUpgrade && (
+          <span className={`ml-1 text-[9px] font-bold ${latestUpgrade.toGrade > latestUpgrade.fromGrade ? 'text-[#00e676]' : 'text-bear'}`} title={`${latestUpgrade.fromGrade} → ${latestUpgrade.toGrade}`}>
+            {latestUpgrade.toGrade > latestUpgrade.fromGrade ? '▲' : '▼'}
+          </span>
+        )}
+      </td>
+
+      {/* Short interest */}
+      <td className="py-3 px-4 text-right">
+        {shortPct != null
+          ? <span className={`text-xs font-bold ${shortPct > 20 ? 'text-bear' : shortPct > 10 ? 'text-warn' : 'text-muted'}`}>
+              {(shortPct * 100 > 1 ? shortPct : shortPct * 100).toFixed(1)}%
             </span>
           : <span className="text-muted text-xs">—</span>}
       </td>

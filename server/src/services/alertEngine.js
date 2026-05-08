@@ -1,5 +1,6 @@
 import webpush from 'web-push';
 import { getDb } from '../db/schema.js';
+import { sendAlertEmail } from './emailService.js';
 
 const CHECK_INTERVAL = 30_000;
 
@@ -55,6 +56,17 @@ function checkAlerts() {
         title: `Alert: ${alert.ticker} ${direction} $${alert.target_price}`,
         body: `Current price: $${price.price.toFixed(2)}`,
       }).catch(() => {});
+
+      const userRow = db.prepare('SELECT alert_email, email_alerts_enabled FROM users WHERE id = ?').get(alert.user_id);
+      if (userRow?.email_alerts_enabled && userRow.alert_email) {
+        sendAlertEmail({
+          toEmail: userRow.alert_email,
+          ticker: alert.ticker,
+          type: alert.type,
+          targetPrice: alert.target_price,
+          currentPrice: price.price.toFixed(2),
+        }).catch(() => {});
+      }
     }
   }
 }
