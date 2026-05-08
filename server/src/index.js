@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { mkdirSync } from 'fs';
 import session from 'express-session';
 import connectSqlite3 from 'connect-sqlite3';
 
@@ -27,7 +28,8 @@ const PORT = process.env.PORT ?? 3001;
 const isProd = process.env.NODE_ENV === 'production';
 
 const SQLiteStore = connectSqlite3(session);
-const DATA_DIR = process.env.DATA_DIR || './data';
+const DATA_DIR = process.env.DATA_DIR || path.resolve(__dirname, '../../data');
+mkdirSync(DATA_DIR, { recursive: true });
 
 app.use(cors({
   origin: isProd ? false : 'http://localhost:5173',
@@ -35,12 +37,17 @@ app.use(cors({
 }));
 app.use(express.json());
 
+app.set('trust proxy', 1);
 app.use(session({
   store: new SQLiteStore({ db: 'sessions.db', dir: DATA_DIR }),
   secret: process.env.SESSION_SECRET || 'dev-secret-change-in-prod',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: isProd, maxAge: 30 * 24 * 60 * 60 * 1000 },
+  cookie: {
+    secure: false, // Railway terminates HTTPS at proxy; app speaks HTTP
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+  },
 }));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }));
