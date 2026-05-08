@@ -109,9 +109,16 @@ export default function BenchmarkChart({ holdings, candles }) {
 
     const full = buildChartData(timestamps, portfolioReturns, bData.timestamps, pctReturns(bData.closes), bench);
     const cutoff = getRangeCutoff(range);
-    if (cutoff === 0) return full;
-    const filtered = full.filter((_, i) => timestamps[i] >= cutoff);
-    return filtered.length >= 2 ? filtered : full;
+    const base = cutoff === 0 ? full : (full.filter(d => d.ts >= cutoff).length >= 2 ? full.filter(d => d.ts >= cutoff) : full);
+
+    // Re-baseline returns to 0% at the start of the selected range
+    const p0 = base[0]?.Portfolio ?? 0;
+    const b0 = base[0]?.[bench] ?? 0;
+    return base.map(d => ({
+      ...d,
+      Portfolio: +(d.Portfolio - p0).toFixed(2),
+      [bench]: d[bench] != null ? +(d[bench] - b0).toFixed(2) : null,
+    }));
   }, [benchmark, holdings, candles, bench, range]);
 
   if (loading) return null;
