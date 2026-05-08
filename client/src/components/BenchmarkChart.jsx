@@ -5,6 +5,31 @@ import {
 } from 'recharts';
 import { useBenchmark } from '../hooks/useBenchmark.js';
 
+const RANGES = ['1W', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
+
+function getRangeCutoff(range) {
+  const now = Date.now() / 1000;
+  if (range === 'ALL') return 0;
+  if (range === 'YTD') return new Date(new Date().getFullYear(), 0, 1).getTime() / 1000;
+  const days = { '1W': 7, '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+  return now - (days[range] ?? 0) * 86400;
+}
+
+function RangeButton({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
+        active
+          ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
+          : 'border-[rgba(0,212,255,0.12)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function pctReturns(closes) {
   if (!closes || closes.length < 2) return [];
   const base = closes[0];
@@ -53,6 +78,7 @@ function CustomTooltip({ active, payload, label, bench }) {
 
 export default function BenchmarkChart({ holdings, candles }) {
   const [bench, setBench] = useState('SPY');
+  const [range, setRange] = useState('1M');
   const { benchmark, loading } = useBenchmark();
 
   const chartData = useMemo(() => {
@@ -81,8 +107,12 @@ export default function BenchmarkChart({ holdings, candles }) {
     const bData = benchmark[bench];
     if (!bData?.closes?.length) return [];
 
-    return buildChartData(timestamps, portfolioReturns, bData.timestamps, pctReturns(bData.closes), bench);
-  }, [benchmark, holdings, candles, bench]);
+    const full = buildChartData(timestamps, portfolioReturns, bData.timestamps, pctReturns(bData.closes), bench);
+    const cutoff = getRangeCutoff(range);
+    if (cutoff === 0) return full;
+    const filtered = full.filter((_, i) => timestamps[i] >= cutoff);
+    return filtered.length >= 2 ? filtered : full;
+  }, [benchmark, holdings, candles, bench, range]);
 
   if (loading) return null;
   if (chartData.length < 2) return null;
@@ -94,7 +124,7 @@ export default function BenchmarkChart({ holdings, candles }) {
 
   return (
     <div className="card p-5">
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <p className="hud-label mb-1">vs Benchmark</p>
           <p className={`text-lg font-bold font-mono ${outperforming ? 'text-bull' : 'text-bear'}`}>
@@ -116,6 +146,13 @@ export default function BenchmarkChart({ holdings, candles }) {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Range selector */}
+      <div className="flex items-center gap-1.5 mb-4">
+        {RANGES.map(r => (
+          <RangeButton key={r} label={r} active={range === r} onClick={() => setRange(r)} />
+        ))}
       </div>
 
       <ResponsiveContainer width="100%" height={300}>

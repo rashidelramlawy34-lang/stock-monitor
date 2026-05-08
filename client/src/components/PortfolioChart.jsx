@@ -1,8 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
 } from 'recharts';
+
+const RANGES = ['1W', '1M', '3M', '6M', 'YTD', '1Y', 'ALL'];
+
+function getRangeCutoff(range) {
+  const now = Date.now() / 1000;
+  if (range === 'ALL') return 0;
+  if (range === 'YTD') return new Date(new Date().getFullYear(), 0, 1).getTime() / 1000;
+  const days = { '1W': 7, '1M': 30, '3M': 90, '6M': 180, '1Y': 365 };
+  return now - (days[range] ?? 0) * 86400;
+}
 
 function usePortfolioHistory() {
   const [data, setData] = useState([]);
@@ -43,8 +53,30 @@ function CustomTooltip({ active, payload }) {
   );
 }
 
+function RangeButton({ label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
+        active
+          ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
+          : 'border-[rgba(0,212,255,0.12)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
 export default function PortfolioChart() {
   const { data, loading } = usePortfolioHistory();
+  const [range, setRange] = useState('1M');
+
+  const filtered = useMemo(() => {
+    const cutoff = getRangeCutoff(range);
+    const result = data.filter(d => d.ts >= cutoff);
+    return result.length >= 3 ? result : data;
+  }, [data, range]);
 
   if (loading) {
     return (
@@ -64,24 +96,22 @@ export default function PortfolioChart() {
     );
   }
 
-  const first = data[0].value;
-  const last = data[data.length - 1].value;
+  const first = filtered[0].value;
+  const last = filtered[filtered.length - 1].value;
   const change = last - first;
   const changePct = first > 0 ? (change / first) * 100 : 0;
   const positive = change >= 0;
   const strokeColor = positive ? '#00e676' : '#ff3355';
   const gradientId = 'pcg';
 
-  const minVal = Math.min(...data.map(d => d.value));
-  const maxVal = Math.max(...data.map(d => d.value));
+  const minVal = Math.min(...filtered.map(d => d.value));
+  const maxVal = Math.max(...filtered.map(d => d.value));
   const padding = (maxVal - minVal) * 0.12 || 100;
-
-  const openValue = first;
 
   return (
     <div className="card p-5">
       {/* Header */}
-      <div className="flex items-start justify-between mb-5">
+      <div className="flex items-start justify-between mb-4">
         <div>
           <p className="hud-label mb-1">Portfolio Value</p>
           <p className="text-3xl font-bold font-mono text-[#a8d8ea] tracking-tight">
@@ -98,8 +128,15 @@ export default function PortfolioChart() {
         </div>
       </div>
 
+      {/* Range selector */}
+      <div className="flex items-center gap-1.5 mb-4">
+        {RANGES.map(r => (
+          <RangeButton key={r} label={r} active={range === r} onClick={() => setRange(r)} />
+        ))}
+      </div>
+
       <ResponsiveContainer width="100%" height={320}>
-        <AreaChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+        <AreaChart data={filtered} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
@@ -128,7 +165,7 @@ export default function PortfolioChart() {
             width={44}
           />
           <ReferenceLine
-            y={openValue}
+            y={first}
             stroke="rgba(0,212,255,0.15)"
             strokeDasharray="4 4"
           />
@@ -145,7 +182,7 @@ export default function PortfolioChart() {
             dot={false}
             activeDot={{ r: 5, fill: strokeColor, stroke: '#010409', strokeWidth: 2 }}
             isAnimationActive={true}
-            animationDuration={800}
+            animationDuration={600}
             animationEasing="ease-out"
           />
         </AreaChart>
