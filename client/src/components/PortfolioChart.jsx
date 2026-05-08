@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { value, label } = payload[0].payload;
   return (
-    <div className="bg-[#071220] border border-[rgba(0,212,255,0.3)] rounded-sm px-3 py-2 text-xs">
+    <div className="bg-[#071220] border border-[rgba(0,212,255,0.3)] rounded-full px-3 py-2 text-xs">
       <p className="text-muted mb-0.5">{label}</p>
       <p className="font-mono font-semibold text-[#a8d8ea]">
         ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

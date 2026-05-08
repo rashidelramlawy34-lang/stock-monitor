@@ -29,12 +29,12 @@ function AlertRow({ alert, onDelete, onSnooze, onReset }) {
       </td>
       <td className="py-3 px-4">
         {isSnoozed
-          ? <span className="text-xs font-bold px-2 py-0.5 rounded-sm bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider uppercase">
+          ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider uppercase">
               Snoozed {snoozeRemain}h
             </span>
           : alert.triggered
-            ? <span className="text-xs font-bold px-2 py-0.5 rounded-sm bg-[#ff3355]/10 text-bear border border-[#ff3355]/30 tracking-wider uppercase">Triggered</span>
-            : <span className="text-xs font-bold px-2 py-0.5 rounded-sm bg-[rgba(0,212,255,0.05)] text-muted border border-[rgba(0,212,255,0.15)] tracking-wider uppercase">Watching</span>}
+            ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#ff3355]/10 text-bear border border-[#ff3355]/30 tracking-wider uppercase">Triggered</span>
+            : <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[rgba(0,212,255,0.05)] text-muted border border-[rgba(0,212,255,0.15)] tracking-wider uppercase">Watching</span>}
       </td>
       <td className="py-3 px-4 text-right">
         <div className="flex items-center justify-end gap-2">
@@ -120,7 +120,7 @@ export default function AlertsPage() {
           {/* Type selector */}
           <div className="flex flex-col gap-1">
             <label className="hud-label">Type</label>
-            <div className="flex rounded-sm overflow-hidden border border-[rgba(0,212,255,0.2)]">
+            <div className="flex rounded-full overflow-hidden border border-[rgba(0,212,255,0.2)]">
               {[...PRICE_TYPES, ...PCT_TYPES].map(t => (
                 <button
                   key={t} type="button"
@@ -181,7 +181,7 @@ export default function AlertsPage() {
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={`text-xs px-3 py-1.5 rounded-sm border transition-all ${
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
               tab === t.id
                 ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]'
                 : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'

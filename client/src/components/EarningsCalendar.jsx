@@ -34,7 +34,7 @@ export default function EarningsCalendar({ holdings, fundamentals }) {
                 <span className="text-[rgba(0,212,255,0.5)] font-mono">
                   {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
-                <span className={`px-1.5 py-0.5 rounded-sm font-bold text-[10px] tracking-wide border ${
+                <span className={`px-1.5 py-0.5 rounded-full font-bold text-[10px] tracking-wide border ${
                   soon
                     ? 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/30'
                     : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'

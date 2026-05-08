@@ -115,7 +115,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
 
           {/* Tabs */}
           {(advice.bull_case || advice.bear_case) && (
-            <div className="flex gap-0 border border-[rgba(0,212,255,0.2)] rounded-sm overflow-hidden text-xs font-medium w-fit">
+            <div className="flex gap-0 border border-[rgba(0,212,255,0.2)] rounded-lg overflow-hidden text-xs font-medium w-fit">
               {['reasoning', 'bull', 'bear'].map(t => (
                 <button
                   key={t}
@@ -164,7 +164,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
                 {age < 1 ? 'Generated just now' : age < 60 ? `Generated ${age}m ago` : `Generated ${Math.floor(age / 60)}h ago`}
               </span>
               {age > 1440 && (
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider">
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider">
                   STALE
                 </span>
               )}

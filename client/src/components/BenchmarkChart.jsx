@@ -78,7 +78,7 @@ export default function BenchmarkChart({ holdings, candles }) {
             <button
               key={b}
               onClick={() => setBench(b)}
-              className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider ${
+              className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
                 bench === b
                   ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
                   : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff]'

@@ -11,7 +11,7 @@ export default function AlertBanner() {
           ⚡ Alerts Triggered
         </span>
         {triggered.map(a => (
-          <div key={a.id} className="flex items-center gap-1.5 bg-[#ffaa00]/10 border border-[#ffaa00]/40 rounded-sm px-2 py-1 text-xs text-[#ffaa00]">
+          <div key={a.id} className="flex items-center gap-1.5 bg-[#ffaa00]/10 border border-[#ffaa00]/40 rounded-full px-2 py-1 text-xs text-[#ffaa00]">
             <span className="font-mono font-bold">{a.ticker}</span>
             <span>{a.type === 'above' ? '↑' : '↓'} ${a.target_price?.toFixed(2)}</span>
             <button

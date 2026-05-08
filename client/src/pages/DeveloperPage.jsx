@@ -113,7 +113,7 @@ export default function DeveloperPage() {
                       <td className="py-3 px-4">
                         <span className="font-mono font-semibold text-[#a8d8ea]">{u.name}</span>
                         {u.id === user?.id && (
-                          <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-sm bg-[rgba(0,212,255,0.1)] text-arc border border-[rgba(0,212,255,0.2)] tracking-widest">YOU</span>
+                          <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[rgba(0,212,255,0.1)] text-arc border border-[rgba(0,212,255,0.2)] tracking-widest">YOU</span>
                         )}
                       </td>
                       <td className="py-3 px-4 font-mono text-muted text-xs">{u.id}</td>
@@ -147,7 +147,7 @@ export default function DeveloperPage() {
                   {data.recentActivity.map((a, i) => (
                     <tr key={i} className="table-row-hover">
                       <td className="py-2.5 px-4">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border tracking-widest uppercase ${
+                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
                           a.type === 'holding'
                             ? 'bg-[rgba(0,212,255,0.08)] text-arc border-[rgba(0,212,255,0.2)]'
                             : 'bg-[#ffaa00]/10 text-warn border-[#ffaa00]/30'

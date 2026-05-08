@@ -142,7 +142,7 @@ export default function NewsPage() {
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => { setActiveTicker(ALL_TAB); setSentimentFilter('All'); }}
-            className={`px-3 py-1.5 rounded-sm text-sm font-mono font-bold transition-all border tracking-widest ${
+            className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
               activeTicker === ALL_TAB
                 ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
                 : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
@@ -154,7 +154,7 @@ export default function NewsPage() {
             <button
               key={h.ticker}
               onClick={() => { setActiveTicker(h.ticker); setSentimentFilter('All'); }}
-              className={`px-3 py-1.5 rounded-sm text-sm font-mono font-bold transition-all border tracking-widest ${
+              className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
                 activeTicker === h.ticker
                   ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
                   : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
@@ -173,7 +173,7 @@ export default function NewsPage() {
             <button
               key={s}
               onClick={() => setSentimentFilter(s)}
-              className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider uppercase ${
+              className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
                 sentimentFilter === s
                   ? SENTIMENT_STYLE[s].active
                   : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'

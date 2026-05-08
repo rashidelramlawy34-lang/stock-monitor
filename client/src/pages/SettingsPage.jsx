@@ -103,7 +103,7 @@ function KeyField({ label, keyName, description, current, onChange }) {
             {show ? 'Hide' : 'Show'}
           </button>
         </div>
-        <span className={`text-xs font-bold px-2 py-1 rounded-sm border tracking-wider uppercase ${
+        <span className={`text-xs font-bold px-2 py-1 rounded-full border tracking-wider uppercase ${
           isSet
             ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30'
             : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'

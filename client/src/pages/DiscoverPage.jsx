@@ -101,7 +101,7 @@ export default function DiscoverPage() {
           <button
             key={r}
             onClick={() => setRiskFilter(r)}
-            className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider uppercase ${
+            className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
               riskFilter === r
                 ? RISK_STYLES[r]?.active ?? RISK_STYLES.All.active
                 : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
@@ -119,7 +119,7 @@ export default function DiscoverPage() {
             <button
               key={s}
               onClick={() => setSectorFilter(s)}
-              className={`text-xs px-2.5 py-1 rounded-sm border transition-all ${
+              className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
                 sectorFilter === s
                   ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
                   : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.3)]'

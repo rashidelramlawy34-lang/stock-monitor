@@ -140,7 +140,7 @@ function TaxOptimizer({ trades }) {
                   </td>
                   <td className="px-4 py-2 text-right text-muted">{r.holdingDays}d</td>
                   <td className="px-4 py-2 text-right">
-                    <span className={`px-1.5 py-0.5 rounded-sm text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
                       {r.isLongTerm ? 'LT' : 'ST'}
                     </span>
                   </td>
@@ -326,7 +326,7 @@ export default function TradeLogPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`text-xs px-3 py-1.5 rounded-sm border transition-all ${activeTab === tab ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${activeTab === tab ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
           >
             {tab === 'history' ? 'Trade History' : 'Tax Optimizer'}
           </button>
@@ -416,7 +416,7 @@ export default function TradeLogPage() {
                           </td>
                           <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{t.ticker}</td>
                           <td className="py-2.5 px-4">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border tracking-widest uppercase ${
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
                               t.action === 'buy'
                                 ? 'bg-[#00e676]/10 text-bull border-[#00e676]/30'
                                 : 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'

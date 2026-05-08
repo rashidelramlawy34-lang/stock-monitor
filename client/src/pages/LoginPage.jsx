@@ -57,7 +57,7 @@ export default function LoginPage({ onLogin }) {
         </div>
 
         {/* Tab switcher */}
-        <div className="flex mb-6 border border-[rgba(0,212,255,0.2)] rounded-sm overflow-hidden">
+        <div className="flex mb-6 border border-[rgba(0,212,255,0.2)] rounded-full overflow-hidden">
           {['login', 'signup'].map(m => (
             <button
               key={m}

@@ -37,7 +37,7 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-sm border border-[rgba(0,212,255,0.2)] bg-[rgba(0,212,255,0.04)] hover:border-[rgba(0,212,255,0.4)] transition-all text-sm text-arc"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(0,212,255,0.2)] bg-[rgba(0,212,255,0.04)] hover:border-[rgba(0,212,255,0.4)] transition-all text-sm text-arc"
       >
         <span className="font-semibold max-w-[140px] truncate">{activePortfolio?.name ?? 'Portfolio'}</span>
         <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M19 9l-7 7-7-7" /></svg>

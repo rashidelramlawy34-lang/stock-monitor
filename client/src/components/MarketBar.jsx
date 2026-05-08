@@ -36,11 +36,11 @@ export default function MarketBar() {
   });
 
   return (
-    <div className="border-b border-[rgba(0,212,255,0.12)] bg-[#020810] px-4 py-1.5 flex items-center gap-6 text-xs overflow-x-auto">
+    <div className="border-b border-[rgba(0,212,255,0.10)] bg-[#010710] px-4 py-1 flex items-center gap-5 text-xs overflow-x-auto">
       {INDICES.map(({ key, label }) => {
         const d = indices[key];
         if (!d) return (
-          <span key={key} className="text-muted shrink-0 font-hud text-[10px] tracking-widest">{label} —</span>
+          <span key={key} className="text-muted shrink-0 text-[10px] tracking-widest">{label} —</span>
         );
         const pos = d.change_pct >= 0;
         return (
@@ -49,7 +49,7 @@ export default function MarketBar() {
             <span className="font-mono font-semibold text-[#a8d8ea]">
               ${d.price?.toFixed(2)}
             </span>
-            <span className={pos ? 'text-bull font-bold' : 'text-bear font-bold'}>
+            <span className={pos ? 'text-bull font-semibold' : 'text-bear font-semibold'}>
               {pos ? '+' : ''}{d.change_pct?.toFixed(2)}%
             </span>
           </span>
@@ -57,15 +57,15 @@ export default function MarketBar() {
       })}
 
       <span className="ml-auto flex items-center gap-3 shrink-0">
-        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm font-bold text-[10px] tracking-widest uppercase border ${
+        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold text-[10px] tracking-wide uppercase border ${
           open
-            ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30'
-            : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
+            ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/25'
+            : 'bg-[rgba(0,212,255,0.04)] text-muted border-[rgba(0,212,255,0.12)]'
         }`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-[#00e676] animate-pulse' : 'bg-[rgba(0,212,255,0.3)]'}`} />
-          {open ? 'MARKET OPEN' : 'MARKET CLOSED'}
+          <span className={`w-1.5 h-1.5 rounded-full ${open ? 'bg-[#00e676] animate-pulse' : 'bg-[rgba(0,212,255,0.25)]'}`} />
+          {open ? 'OPEN' : 'CLOSED'}
         </span>
-        <span className="font-mono text-[rgba(0,212,255,0.5)] text-[11px]">{etTime} ET</span>
+        <span className="font-mono text-[rgba(0,212,255,0.4)] text-[11px]">{etTime} ET</span>
       </span>
     </div>
   );

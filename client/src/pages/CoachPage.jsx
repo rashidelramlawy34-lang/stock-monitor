@@ -144,7 +144,7 @@ export default function CoachPage() {
                 <span className={`text-lg font-bold ${healthColor[analysis.overall_health] ?? 'text-arc'}`}>
                   {analysis.overall_health}
                 </span>
-                <span className="text-xs text-muted font-mono border border-[rgba(0,212,255,0.2)] px-2 py-0.5 rounded-sm">
+                <span className="text-xs text-muted font-mono border border-[rgba(0,212,255,0.2)] px-2 py-0.5 rounded-full">
                   Diversification: {analysis.diversification_score ?? '—'}/100
                 </span>
               </div>
@@ -186,7 +186,7 @@ export default function CoachPage() {
                 {analysis.suggested_rebalance.map((s, i) => (
                   <div key={i} className="flex items-start gap-4 p-4">
                     <span className="font-mono font-bold text-arc tracking-widest w-14 shrink-0">{s.ticker}</span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border shrink-0 tracking-widest uppercase ${
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 tracking-widest uppercase ${
                       s.action === 'reduce'
                         ? 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'
                         : s.action === 'add'

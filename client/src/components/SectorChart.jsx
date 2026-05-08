@@ -74,7 +74,7 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
         <div className="flex flex-col gap-1.5 min-w-0">
           {data.map((d, i) => (
             <div key={d.name} className="flex items-center gap-2 text-xs">
-              <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
               <span className="text-[rgba(0,212,255,0.5)] truncate">{d.short}</span>
               <span className="ml-auto font-mono text-[#a8d8ea] pl-2">
                 {((d.value / total) * 100).toFixed(0)}%

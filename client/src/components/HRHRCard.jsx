@@ -73,7 +73,7 @@ export default function HRHRCard({ candidate }) {
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
           <span
-            className="text-xs font-bold px-2 py-0.5 rounded-sm border tracking-wide"
+            className="text-xs font-bold px-2 py-0.5 rounded-full border tracking-wide"
             style={{ color: riskColor.text, background: riskColor.bg, borderColor: riskColor.border }}
           >
             {risk_label.toUpperCase()}
@@ -99,12 +99,12 @@ export default function HRHRCard({ candidate }) {
       {/* Entry + catalyst */}
       <div className="flex flex-wrap gap-2">
         {entry_zone && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-sm bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/30">
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/30">
             <span className="opacity-60">Entry</span> {entry_zone}
           </span>
         )}
         {key_catalyst && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-sm bg-[rgba(0,212,255,0.08)] text-[#00d4ff] border border-[rgba(0,212,255,0.2)]">
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[rgba(0,212,255,0.08)] text-[#00d4ff] border border-[rgba(0,212,255,0.2)]">
             ⚡ {key_catalyst}
           </span>
         )}
@@ -147,7 +147,7 @@ export default function HRHRCard({ candidate }) {
         <button
           onClick={toggleWatch}
           disabled={watchBusy}
-          className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-sm border transition-all ${
+          className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full border transition-all ${
             isWatched
               ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
               : 'border-[rgba(0,212,255,0.2)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.4)]'

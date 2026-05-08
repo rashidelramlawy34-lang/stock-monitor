@@ -43,7 +43,7 @@ export default function InsidersPage() {
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`text-xs px-2 py-0.5 rounded-sm border transition-all ${filter === t ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
+              className={`text-xs px-2 py-0.5 rounded-full border transition-all ${filter === t ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
             >{t}</button>
           ))}
         </div>
