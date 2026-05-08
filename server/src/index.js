@@ -4,13 +4,9 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
-import passport from 'passport';
 import connectSqlite3 from 'connect-sqlite3';
 
 dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env') });
-
-// Import passport config as a side effect (registers strategies + serialize/deserialize)
-import './config/passport.js';
 
 import { startAlertEngine } from './services/alertEngine.js';
 import { startHRHRScanner } from './services/hrhrService.js';
@@ -46,8 +42,6 @@ app.use(session({
   saveUninitialized: false,
   cookie: { secure: isProd, maxAge: 30 * 24 * 60 * 60 * 1000 },
 }));
-app.use(passport.initialize());
-app.use(passport.session());
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }));
 

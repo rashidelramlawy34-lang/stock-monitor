@@ -16,7 +16,7 @@ export default function App() {
     const hash = window.location.hash.replace('#', '');
     return ['portfolio','news','advisor','alerts','discover','settings'].includes(hash) ? hash : 'portfolio';
   });
-  const { user, loading } = useAuth();
+  const { user, loading, setUser } = useAuth();
 
   useEffect(() => {
     window.location.hash = page;
@@ -33,7 +33,7 @@ export default function App() {
   }
 
   if (!user) {
-    return <LoginPage />;
+    return <LoginPage onLogin={setUser} />;
   }
 
   return (

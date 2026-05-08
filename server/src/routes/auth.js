@@ -1,32 +1,32 @@
 import { Router } from 'express';
-import passport from 'passport';
+import { getDb } from '../db/schema.js';
 
 const router = Router();
 
-// Redirect to Google for authentication
-router.get('/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
+// Simple name-based login — no OAuth needed
+router.post('/login', (req, res) => {
+  const { name } = req.body;
+  if (!name?.trim()) return res.status(400).json({ error: 'Name is required' });
 
-// Google OAuth callback
-router.get('/google/callback',
-  passport.authenticate('google', { failureRedirect: '/?auth=failed' }),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+  const userId = name.trim().toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 40);
+  const user = { id: userId, name: name.trim() };
 
-// Return current authenticated user or null
-router.get('/me', (req, res) => {
-  res.json({ user: req.user || null });
+  // Upsert into users table
+  const db = getDb();
+  db.prepare(
+    `INSERT OR IGNORE INTO users (id, name, email, avatar) VALUES (@id, @name, NULL, NULL)`
+  ).run(user);
+
+  req.session.user = user;
+  res.json({ user });
 });
 
-// Destroy session and log out
+router.get('/me', (req, res) => {
+  res.json({ user: req.session?.user ?? null });
+});
+
 router.post('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) return res.status(500).json({ error: 'Logout failed' });
-    res.json({ ok: true });
-  });
+  req.session.destroy(() => res.json({ ok: true }));
 });
 
 export default router;

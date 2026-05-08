@@ -1,4 +1,7 @@
 export function requireAuth(req, res, next) {
-  if (req.isAuthenticated()) return next();
+  if (req.session?.user) {
+    req.user = req.session.user;
+    return next();
+  }
   res.status(401).json({ error: 'Not authenticated' });
 }

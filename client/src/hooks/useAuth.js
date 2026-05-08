@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 
 export function useAuth() {
-  const [user, setUser] = useState(undefined); // undefined = loading
+  const [user, setUser] = useState(undefined); // undefined = still loading
 
   useEffect(() => {
     fetch('/auth/me', { credentials: 'include' })
@@ -15,5 +15,5 @@ export function useAuth() {
     setUser(null);
   };
 
-  return { user, loading: user === undefined, logout };
+  return { user, loading: user === undefined, setUser, logout };
 }
