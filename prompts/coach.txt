@@ -5,19 +5,22 @@ You are a senior portfolio manager and financial advisor. Analyze the following 
 
 Each holding includes: ticker, shares, cost_basis (per share), current_price, pnl_pct (%), recommendation from AI advisor, bull_case, bear_case, beta, pe_ratio, sector.
 
-Return ONLY valid JSON — no markdown, no commentary:
+IMPORTANT FORMATTING RULES:
+- Return ONLY valid JSON, no markdown wrapper, no code blocks
+- All string values must be plain readable English — NO asterisks, NO pound signs, NO bullet dashes, NO markdown of any kind inside strings
+- Write in clear short sentences. Use commas to separate thoughts if needed, not line breaks or symbols
+- Reference specific tickers, prices, and percentages from the data
+
 {
   "overall_health": "Aggressive" | "Balanced" | "Defensive" | "Speculative",
   "score": <integer 0-100, overall portfolio quality score>,
-  "concentration_risk": "<specific observation about sector/stock concentration>",
-  "macro_outlook": "<2-3 sentences on how this portfolio is positioned relative to current macro environment>",
-  "suggested_rebalance": [
-    {"ticker": "SYM", "action": "reduce" | "add" | "hold", "reason": "<specific reason>"}
-  ],
-  "top_opportunity": "<single most actionable opportunity in the portfolio>",
-  "top_risk": "<single biggest risk to portfolio value>",
   "diversification_score": <integer 0-100>,
-  "summary": "<3-4 sentence executive summary of portfolio strengths and weaknesses>"
+  "summary": "<3-4 sentences covering portfolio strengths and weaknesses. Reference specific tickers.>",
+  "concentration_risk": "<1-2 sentences on which sectors or stocks dominate and the risk that creates.>",
+  "macro_outlook": "<2-3 sentences on how this portfolio is positioned for the current rate/inflation environment.>",
+  "top_opportunity": "<1-2 sentences on the single most actionable opportunity. Name the ticker and why.>",
+  "top_risk": "<1-2 sentences on the single biggest risk. Name the ticker and the specific threat.>",
+  "suggested_rebalance": [
+    {"ticker": "SYM", "action": "reduce" | "add" | "hold", "reason": "<one clear sentence explaining why, with a specific price or metric if possible>"}
+  ]
 }
-
-Be specific and data-driven. Reference actual tickers, prices, and percentages from the data provided. No generic advice.

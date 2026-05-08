@@ -1,6 +1,17 @@
 import { useEffect } from 'react';
 import { useCoach } from '../hooks/useCoach.js';
 
+// Strip any stray markdown that leaks through from the AI
+function clean(text = '') {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
+    .replace(/\*(.+?)\*/g, '$1')        // *italic*
+    .replace(/^#+\s*/gm, '')            // # headings
+    .replace(/^[-•]\s*/gm, '')          // bullet dashes
+    .replace(/`(.+?)`/g, '$1')          // `code`
+    .trim();
+}
+
 function timeAgo(ts) {
   if (!ts) return '';
   const diff = Math.floor(Date.now() / 1000 - ts);
@@ -94,7 +105,19 @@ export default function CoachPage() {
                   Diversification: {analysis.diversification_score ?? '—'}/100
                 </span>
               </div>
-              <p className="text-sm text-[rgba(0,212,255,0.7)] leading-relaxed">{analysis.summary}</p>
+              <p className="text-sm text-[rgba(0,212,255,0.85)] leading-relaxed">{clean(analysis.summary)}</p>
+            </div>
+          </div>
+
+          {/* Top opportunity + risk */}
+          <div className="grid sm:grid-cols-2 gap-4">
+            <div className="card p-4 border-l-2 border-l-bull">
+              <p className="hud-label mb-2 text-[#00e676]">Top Opportunity</p>
+              <p className="text-sm text-white leading-relaxed">{clean(analysis.top_opportunity)}</p>
+            </div>
+            <div className="card p-4 border-l-2 border-l-bear">
+              <p className="hud-label mb-2 text-bear">Top Risk</p>
+              <p className="text-sm text-white leading-relaxed">{clean(analysis.top_risk)}</p>
             </div>
           </div>
 
@@ -102,23 +125,11 @@ export default function CoachPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4">
               <p className="hud-label mb-2">Macro Outlook</p>
-              <p className="text-sm text-[rgba(0,212,255,0.7)] leading-relaxed">{analysis.macro_outlook}</p>
+              <p className="text-sm text-[rgba(0,212,255,0.8)] leading-relaxed">{clean(analysis.macro_outlook)}</p>
             </div>
             <div className="card p-4">
               <p className="hud-label mb-2">Concentration Risk</p>
-              <p className="text-sm text-[rgba(0,212,255,0.7)] leading-relaxed">{analysis.concentration_risk}</p>
-            </div>
-          </div>
-
-          {/* Top opportunity + risk */}
-          <div className="grid sm:grid-cols-2 gap-4">
-            <div className="card p-4 border-l-2 border-bull">
-              <p className="hud-label mb-2 text-bull">Top Opportunity</p>
-              <p className="text-sm text-[rgba(0,212,255,0.7)]">{analysis.top_opportunity}</p>
-            </div>
-            <div className="card p-4 border-l-2 border-bear">
-              <p className="hud-label mb-2 text-bear">Top Risk</p>
-              <p className="text-sm text-[rgba(0,212,255,0.7)]">{analysis.top_risk}</p>
+              <p className="text-sm text-[rgba(0,212,255,0.8)] leading-relaxed">{clean(analysis.concentration_risk)}</p>
             </div>
           </div>
 
@@ -141,7 +152,7 @@ export default function CoachPage() {
                     }`}>
                       {s.action}
                     </span>
-                    <p className="text-sm text-muted">{s.reason}</p>
+                    <p className="text-sm text-[rgba(0,212,255,0.75)]">{clean(s.reason)}</p>
                   </div>
                 ))}
               </div>
