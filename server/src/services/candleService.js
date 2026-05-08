@@ -1,13 +1,8 @@
 import { getDb } from '../db/schema.js';
-import { getSetting } from './settingsService.js';
+import yahooFinance from 'yahoo-finance2';
 
-const BASE = 'https://finnhub.io/api/v1';
 const CACHE = new Map(); // sym → { ts, data }
 const CACHE_TTL = 4 * 3600; // 4 hours
-
-function apiKey() {
-  return getSetting('FINNHUB_API_KEY') ?? '';
-}
 
 export async function fetchCandles(ticker) {
   const sym = ticker.toUpperCase();
@@ -16,23 +11,22 @@ export async function fetchCandles(ticker) {
   const cached = CACHE.get(sym);
   if (cached && now - cached.ts < CACHE_TTL) return cached.data;
 
-  const key = apiKey();
-  if (key) {
-    try {
-      const from = now - 365 * 86400;
-      const url = `${BASE}/stock/candle?symbol=${sym}&resolution=D&from=${from}&to=${now}&token=${key}`;
-      const res = await fetch(url);
-      if (res.ok) {
-        const json = await res.json();
-        if (json.s === 'ok' && json.c?.length) {
-          const data = { closes: json.c, timestamps: json.t };
-          CACHE.set(sym, { ts: now, data });
-          return data;
-        }
-      }
-    } catch {
-      // fall through to local
+  try {
+    const period1 = new Date(Date.now() - 365 * 86400 * 1000);
+    const result = await yahooFinance.historical(sym, {
+      period1,
+      interval: '1d',
+    }, { validateResult: false });
+
+    if (result?.length >= 2) {
+      const closes = result.map(r => r.adjClose ?? r.close);
+      const timestamps = result.map(r => Math.floor(new Date(r.date).getTime() / 1000));
+      const data = { closes, timestamps };
+      CACHE.set(sym, { ts: now, data });
+      return data;
     }
+  } catch {
+    // fall through to local
   }
 
   return fetchLocal(sym);

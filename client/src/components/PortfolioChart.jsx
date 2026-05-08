@@ -75,7 +75,7 @@ export default function PortfolioChart() {
   const filtered = useMemo(() => {
     const cutoff = getRangeCutoff(range);
     const result = data.filter(d => d.ts >= cutoff);
-    return result.length >= 3 ? result : data;
+    return result.length >= 2 ? result : data;
   }, [data, range]);
 
   if (loading) {
