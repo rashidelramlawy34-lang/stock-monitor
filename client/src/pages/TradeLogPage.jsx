@@ -1,8 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useTrades } from '../hooks/useTrades.js';
 
 function fmt(n, d = 2) {
   return n != null ? Number(n).toFixed(d) : '—';
+}
+
+function detectWashSales(rows) {
+  const washSet = new Set();
+  const sells = rows.filter(r => r.unrealized !== null && r.unrealized < 0);
+
+  for (const loss of sells) {
+    for (const row of rows) {
+      if (row.ticker !== loss.ticker) continue;
+      const gap = Math.abs(row.tradeId - loss.tradeId);
+      if (gap === 0) continue;
+      const buyDate = row.traded_at ?? 0;
+      const sellDate = loss.traded_at ?? 0;
+      const diff = Math.abs(buyDate - sellDate) / 86400;
+      if (diff <= 30) {
+        washSet.add(loss.tradeId);
+        break;
+      }
+    }
+  }
+  return washSet;
 }
 
 function TaxOptimizer({ trades }) {
@@ -10,16 +31,16 @@ function TaxOptimizer({ trades }) {
 
   const tickers = [...new Set(trades.map(t => t.ticker))];
 
-  useEffect(() => {
+  // eslint-disable-next-line
+  useState(() => {
     if (tickers.length === 0) return;
     fetch(`/api/prices?tickers=${tickers.join(',')}`, { credentials: 'include' })
       .then(r => r.ok ? r.json() : {})
       .then(d => setPrices(d))
       .catch(() => {});
-  }, [tickers.join(',')]);
+  });
 
   const now = Date.now() / 1000;
-  const ONE_YEAR = 365 * 86400;
 
   const lots = {};
   for (const t of trades) {
@@ -31,7 +52,6 @@ function TaxOptimizer({ trades }) {
   const rows = [];
   for (const [ticker, { buys, sells }] of Object.entries(lots)) {
     const queue = buys.map(b => ({ ...b, remainingShares: b.shares }));
-
     for (const sell of sells) {
       let remaining = sell.shares;
       while (remaining > 0 && queue.length > 0) {
@@ -51,10 +71,11 @@ function TaxOptimizer({ trades }) {
       const unrealized = currentValue !== null ? currentValue - costBasis : null;
       const holdingDays = Math.floor((now - lot.traded_at) / 86400);
       const isLongTerm = holdingDays >= 365;
-      rows.push({ ticker, shares: lot.remainingShares, costPerShare: lot.price, costBasis, currentPrice, currentValue, unrealized, holdingDays, isLongTerm, tradeId: lot.id });
+      rows.push({ ticker, shares: lot.remainingShares, costPerShare: lot.price, costBasis, currentPrice, currentValue, unrealized, holdingDays, isLongTerm, tradeId: lot.id, traded_at: lot.traded_at });
     }
   }
 
+  const washSaleIds = detectWashSales(rows);
   const gainRows = rows.filter(r => r.unrealized !== null && r.unrealized > 0);
   const lossRows = rows.filter(r => r.unrealized !== null && r.unrealized < 0);
   const ltLoss = lossRows.filter(r => r.isLongTerm);
@@ -84,6 +105,11 @@ function TaxOptimizer({ trades }) {
           <span className="text-muted">ST Gains: </span>
           <span className="text-bull font-bold">${stGain.reduce((s, r) => s + (r.unrealized ?? 0), 0).toFixed(0)}</span>
         </div>
+        {washSaleIds.size > 0 && (
+          <div className="text-xs ml-auto">
+            <span className="text-warn font-bold">⚠ {washSaleIds.size} potential wash sale{washSaleIds.size > 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
 
       <div className="overflow-x-auto">
@@ -97,40 +123,74 @@ function TaxOptimizer({ trades }) {
               <th className="text-right px-4 py-2 font-medium">Unrealized</th>
               <th className="text-right px-4 py-2 font-medium">Days</th>
               <th className="text-right px-4 py-2 font-medium">Term</th>
-              <th className="text-right px-4 py-2 font-medium">Harvest?</th>
+              <th className="text-right px-4 py-2 font-medium">Action</th>
             </tr>
           </thead>
           <tbody>
-            {rows.sort((a, b) => (a.unrealized ?? 0) - (b.unrealized ?? 0)).map((r, i) => (
-              <tr key={i} className="table-row-hover">
-                <td className="px-4 py-2 font-bold text-arc">{r.ticker}</td>
-                <td className="px-4 py-2 text-right text-white">{fmt(r.shares, 4)}</td>
-                <td className="px-4 py-2 text-right text-muted">${fmt(r.costPerShare)}</td>
-                <td className="px-4 py-2 text-right text-muted">{r.currentPrice ? `$${fmt(r.currentPrice)}` : '—'}</td>
-                <td className={`px-4 py-2 text-right font-bold ${r.unrealized === null ? 'text-muted' : r.unrealized >= 0 ? 'text-bull' : 'text-bear'}`}>
-                  {r.unrealized !== null ? `${r.unrealized >= 0 ? '+' : ''}$${fmt(Math.abs(r.unrealized))}` : '—'}
-                </td>
-                <td className="px-4 py-2 text-right text-muted">{r.holdingDays}d</td>
-                <td className="px-4 py-2 text-right">
-                  <span className={`px-1.5 py-0.5 rounded-sm text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
-                    {r.isLongTerm ? 'LT' : 'ST'}
-                  </span>
-                </td>
-                <td className="px-4 py-2 text-right">
-                  {r.unrealized !== null && r.unrealized < 0
-                    ? <span className="text-arc text-[10px] font-bold">HARVEST</span>
-                    : '—'}
-                </td>
-              </tr>
-            ))}
+            {rows.sort((a, b) => (a.unrealized ?? 0) - (b.unrealized ?? 0)).map((r, i) => {
+              const isWash = washSaleIds.has(r.tradeId);
+              return (
+                <tr key={i} className={`table-row-hover ${isWash ? 'bg-[rgba(255,170,0,0.04)]' : ''}`}>
+                  <td className="px-4 py-2 font-bold text-arc">{r.ticker}</td>
+                  <td className="px-4 py-2 text-right text-white">{fmt(r.shares, 4)}</td>
+                  <td className="px-4 py-2 text-right text-muted">${fmt(r.costPerShare)}</td>
+                  <td className="px-4 py-2 text-right text-muted">{r.currentPrice ? `$${fmt(r.currentPrice)}` : '—'}</td>
+                  <td className={`px-4 py-2 text-right font-bold ${r.unrealized === null ? 'text-muted' : r.unrealized >= 0 ? 'text-bull' : 'text-bear'}`}>
+                    {r.unrealized !== null ? `${r.unrealized >= 0 ? '+' : ''}$${fmt(Math.abs(r.unrealized))}` : '—'}
+                  </td>
+                  <td className="px-4 py-2 text-right text-muted">{r.holdingDays}d</td>
+                  <td className="px-4 py-2 text-right">
+                    <span className={`px-1.5 py-0.5 rounded-sm text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
+                      {r.isLongTerm ? 'LT' : 'ST'}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-right">
+                    {isWash
+                      ? <span className="text-warn text-[10px] font-bold" title="Potential wash sale — repurchase within 30 days of a loss sale">⚠ WASH</span>
+                      : r.unrealized !== null && r.unrealized < 0
+                        ? <span className="text-arc text-[10px] font-bold">HARVEST</span>
+                        : '—'}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
       <p className="text-[10px] text-muted p-3 border-t border-[rgba(0,212,255,0.06)]">
-        HARVEST = unrealized loss you can sell to offset gains. Consult a tax advisor before acting.
+        HARVEST = unrealized loss you can sell to offset gains. ⚠ WASH = possible wash sale rule violation. Consult a tax advisor before acting.
       </p>
     </div>
   );
+}
+
+function parseCSV(text) {
+  const lines = text.trim().split('\n').filter(Boolean);
+  if (lines.length < 2) return [];
+  const header = lines[0].toLowerCase().split(',').map(h => h.trim().replace(/"/g, ''));
+
+  const col = (row, names) => {
+    for (const n of names) {
+      const i = header.indexOf(n);
+      if (i >= 0) return row[i]?.replace(/"/g, '').trim() ?? '';
+    }
+    return '';
+  };
+
+  const trades = [];
+  for (let i = 1; i < lines.length; i++) {
+    const row = lines[i].split(',');
+    const ticker = col(row, ['symbol', 'ticker', 'instrument']).toUpperCase();
+    const action = col(row, ['side', 'action', 'type', 'trans type']).toLowerCase().includes('sell') ? 'sell' : 'buy';
+    const shares = parseFloat(col(row, ['quantity', 'shares', 'qty']));
+    const price = parseFloat(col(row, ['price', 'avg price', 'average price', 'execution price']));
+    const fees = parseFloat(col(row, ['fees', 'commission', 'fee'])) || 0;
+    const dateRaw = col(row, ['date', 'trade date', 'activity date', 'process date']);
+    const traded_at = dateRaw ? Math.floor(new Date(dateRaw).getTime() / 1000) : undefined;
+    if (!ticker || isNaN(shares) || isNaN(price)) continue;
+    trades.push({ ticker, action, shares, price, fees, traded_at });
+  }
+  return trades;
 }
 
 export default function TradeLogPage() {
@@ -142,6 +202,10 @@ export default function TradeLogPage() {
   });
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState(null);
+
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvResult, setCsvResult] = useState(null);
+  const fileRef = useRef();
 
   const handleChange = e => setForm(f => ({ ...f, [e.target.name]: e.target.value }));
 
@@ -171,12 +235,51 @@ export default function TradeLogPage() {
     }
   };
 
+  const handleCSV = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const parsed = parseCSV(text);
+    if (parsed.length === 0) {
+      setCsvResult({ error: 'No valid trades found. Check the CSV format.' });
+      return;
+    }
+    setCsvImporting(true);
+    setCsvResult(null);
+    let ok = 0, fail = 0;
+    for (const t of parsed) {
+      try { await addTrade(t); ok++; }
+      catch { fail++; }
+    }
+    setCsvImporting(false);
+    setCsvResult({ ok, fail });
+    e.target.value = '';
+  };
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <h1 className="hud-title text-xl">Trade Log</h1>
-        <p className="text-muted text-xs mt-1 tracking-wide">Record buy/sell transactions and track realized P&L</p>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="hud-title text-xl">Trade Log</h1>
+          <p className="text-muted text-xs mt-1 tracking-wide">Record buy/sell transactions and track realized P&L</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSV} />
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={csvImporting}
+            className="btn-outline text-xs flex items-center gap-1"
+          >
+            {csvImporting ? 'Importing…' : '↑ Import CSV'}
+          </button>
+        </div>
       </div>
+
+      {csvResult && (
+        <div className={`card p-3 mb-4 text-sm ${csvResult.error ? 'text-bear' : 'text-arc'}`}>
+          {csvResult.error ?? `Imported ${csvResult.ok} trade${csvResult.ok !== 1 ? 's' : ''}${csvResult.fail > 0 ? `, ${csvResult.fail} failed` : ''}.`}
+        </div>
+      )}
 
       {/* Log trade form */}
       <form onSubmit={handleSubmit} className="card p-5 mb-6">
@@ -241,112 +344,110 @@ export default function TradeLogPage() {
       )}
 
       {activeTab === 'history' && (
-      <>
-      {/* Realized P&L summary */}
-      {summary.length > 0 && (
-        <div className="card mb-6 overflow-hidden">
-          <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
-            <h2 className="hud-label">Realized P&L Summary</h2>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[rgba(0,212,255,0.08)]">
-                  <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Realized P&L</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Total Bought</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Total Sold</th>
-                </tr>
-              </thead>
-              <tbody>
-                {summary.map(s => (
-                  <tr key={s.ticker} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
-                    <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{s.ticker}</td>
-                    <td className={`py-2.5 px-4 text-right font-mono font-bold ${s.realized_pgl >= 0 ? 'text-bull' : 'text-bear'}`}>
-                      {s.realized_pgl >= 0 ? '+' : ''}${fmt(s.realized_pgl)}
-                    </td>
-                    <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(s.total_bought)}</td>
-                    <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(s.total_sold)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Trade history */}
-      <div className="card overflow-hidden">
-        <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
-          <h2 className="hud-label">Transaction History ({trades.length})</h2>
-        </div>
-
-        {loading && <div className="p-6 text-muted text-sm">Loading…</div>}
-        {error && <div className="p-4 text-bear text-sm">Error: {error}</div>}
-
-        {!loading && trades.length === 0 && (
-          <div className="p-8 text-center text-muted text-sm">No trades logged yet.</div>
-        )}
-
-        {!loading && trades.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[rgba(0,212,255,0.08)]">
-                  <th className="hud-label text-left py-2.5 px-4 font-normal">Date</th>
-                  <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                  <th className="hud-label text-left py-2.5 px-4 font-normal">Action</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Fees</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Total</th>
-                  <th className="py-2.5 px-4" />
-                </tr>
-              </thead>
-              <tbody>
-                {trades.map(t => {
-                  const total = t.action === 'buy'
-                    ? t.shares * t.price + t.fees
-                    : t.shares * t.price - t.fees;
-                  return (
-                    <tr key={t.id} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
-                      <td className="py-2.5 px-4 font-mono text-muted text-xs">
-                        {new Date(t.traded_at * 1000).toLocaleDateString()}
-                      </td>
-                      <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{t.ticker}</td>
-                      <td className="py-2.5 px-4">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border tracking-widest uppercase ${
-                          t.action === 'buy'
-                            ? 'bg-[#00e676]/10 text-bull border-[#00e676]/30'
-                            : 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'
-                        }`}>
-                          {t.action}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">{fmt(t.shares, 4)}</td>
-                      <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">${fmt(t.price)}</td>
-                      <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(t.fees)}</td>
-                      <td className={`py-2.5 px-4 text-right font-mono font-bold ${t.action === 'buy' ? 'text-bear' : 'text-bull'}`}>
-                        {t.action === 'buy' ? '-' : '+'}${fmt(Math.abs(total))}
-                      </td>
-                      <td className="py-2.5 px-4 text-right">
-                        <button
-                          onClick={() => deleteTrade(t.id)}
-                          className="text-muted hover:text-bear transition-colors text-xs"
-                          title="Delete trade"
-                        >
-                          ✕
-                        </button>
-                      </td>
+        <>
+          {summary.length > 0 && (
+            <div className="card mb-6 overflow-hidden">
+              <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+                <h2 className="hud-label">Realized P&L Summary</h2>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                      <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Realized P&L</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total Bought</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total Sold</th>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody>
+                    {summary.map(s => (
+                      <tr key={s.ticker} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
+                        <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{s.ticker}</td>
+                        <td className={`py-2.5 px-4 text-right font-mono font-bold ${s.realized_pgl >= 0 ? 'text-bull' : 'text-bear'}`}>
+                          {s.realized_pgl >= 0 ? '+' : ''}${fmt(s.realized_pgl)}
+                        </td>
+                        <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(s.total_bought)}</td>
+                        <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(s.total_sold)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <div className="card overflow-hidden">
+            <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+              <h2 className="hud-label">Transaction History ({trades.length})</h2>
+            </div>
+
+            {loading && <div className="p-6 text-muted text-sm">Loading…</div>}
+            {error && <div className="p-4 text-bear text-sm">Error: {error}</div>}
+
+            {!loading && trades.length === 0 && (
+              <div className="p-8 text-center text-muted text-sm">No trades logged yet.</div>
+            )}
+
+            {!loading && trades.length > 0 && (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                      <th className="hud-label text-left py-2.5 px-4 font-normal">Date</th>
+                      <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
+                      <th className="hud-label text-left py-2.5 px-4 font-normal">Action</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Fees</th>
+                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total</th>
+                      <th className="py-2.5 px-4" />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {trades.map(t => {
+                      const total = t.action === 'buy'
+                        ? t.shares * t.price + t.fees
+                        : t.shares * t.price - t.fees;
+                      return (
+                        <tr key={t.id} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
+                          <td className="py-2.5 px-4 font-mono text-muted text-xs">
+                            {new Date(t.traded_at * 1000).toLocaleDateString()}
+                          </td>
+                          <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{t.ticker}</td>
+                          <td className="py-2.5 px-4">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-sm border tracking-widest uppercase ${
+                              t.action === 'buy'
+                                ? 'bg-[#00e676]/10 text-bull border-[#00e676]/30'
+                                : 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'
+                            }`}>
+                              {t.action}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">{fmt(t.shares, 4)}</td>
+                          <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">${fmt(t.price)}</td>
+                          <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(t.fees)}</td>
+                          <td className={`py-2.5 px-4 text-right font-mono font-bold ${t.action === 'buy' ? 'text-bear' : 'text-bull'}`}>
+                            {t.action === 'buy' ? '-' : '+'}${fmt(Math.abs(total))}
+                          </td>
+                          <td className="py-2.5 px-4 text-right">
+                            <button
+                              onClick={() => deleteTrade(t.id)}
+                              className="text-muted hover:text-bear transition-colors text-xs"
+                              title="Delete trade"
+                            >
+                              ✕
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-      </>
+        </>
       )}
     </div>
   );

@@ -222,6 +222,17 @@ function applySchema(db) {
     }
   } catch {}
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS coach_score_history (
+      id           INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id      TEXT    NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      score        INTEGER NOT NULL,
+      health       TEXT,
+      generated_at INTEGER NOT NULL DEFAULT (unixepoch())
+    );
+    CREATE INDEX IF NOT EXISTS idx_coach_history_user ON coach_score_history(user_id, generated_at);
+  `);
+
   // Add new columns if they don't exist yet
   const newCols = [
     'ALTER TABLE users ADD COLUMN password_hash TEXT',
@@ -242,6 +253,9 @@ function applySchema(db) {
     // Email alert columns
     'ALTER TABLE users ADD COLUMN email_alerts_enabled INTEGER NOT NULL DEFAULT 0',
     'ALTER TABLE users ADD COLUMN alert_email TEXT',
+    // Alert enhancements
+    'ALTER TABLE alerts ADD COLUMN snoozed_until INTEGER',
+    'ALTER TABLE alerts ADD COLUMN trigger_pct REAL',
   ];
   for (const sql of newCols) { try { db.exec(sql); } catch {} }
 }

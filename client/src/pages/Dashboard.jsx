@@ -1,9 +1,11 @@
+import { useState, useMemo } from 'react';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
 import { useCandles } from '../hooks/useCandles.js';
 import { useMarketData } from '../hooks/useMarketData.js';
 import { usePortfolios } from '../hooks/usePortfolios.js';
+import { useAlerts } from '../hooks/useAlerts.js';
 import AddHoldingForm from '../components/AddHoldingForm.jsx';
 import HoldingRow from '../components/HoldingRow.jsx';
 import SectorChart from '../components/SectorChart.jsx';
@@ -77,6 +79,14 @@ function StatCard({ label, value, sub, color }) {
   );
 }
 
+const SORT_COLS = {
+  ticker: (h, p) => h.ticker,
+  price: (h, p) => p?.price ?? -Infinity,
+  today: (h, p) => p?.change_pct ?? -Infinity,
+  pl: (h, p, _f, costBasis) => p?.price ? (p.price - h.cost_basis) * h.shares : -Infinity,
+  upside: (h, p, f) => (f?.target_mean && p?.price) ? (f.target_mean - p.price) / p.price : -Infinity,
+};
+
 export default function Dashboard() {
   const { holdings, loading, error, addHolding, removeHolding } = usePortfolio();
   const { prices, lastUpdated, refresh: refreshPrices } = usePrices(holdings.map(h => h.ticker));
@@ -84,6 +94,15 @@ export default function Dashboard() {
   const { candles } = useCandles(holdings.map(h => h.ticker));
   const { dividends, shortInterest, upgrades } = useMarketData(holdings.map(h => h.ticker));
   const portfolios = usePortfolios();
+  const { alerts } = useAlerts();
+
+  const [search, setSearch] = useState('');
+  const [sortCol, setSortCol] = useState('ticker');
+  const [sortAsc, setSortAsc] = useState(true);
+  const [expandedTicker, setExpandedTicker] = useState(null);
+
+  const alertTickers = useMemo(() => new Set(alerts.filter(a => !a.triggered).map(a => a.ticker)), [alerts]);
+  const triggeredTickers = useMemo(() => new Set(alerts.filter(a => a.triggered).map(a => a.ticker)), [alerts]);
 
   const value = totalValue(holdings, prices);
   const cost = totalCost(holdings);
@@ -91,8 +110,36 @@ export default function Dashboard() {
   const gainPct = cost > 0 ? (gain / cost) * 100 : 0;
   const todayGain = dailyPnL(holdings, prices);
   const beta = portfolioBeta(holdings, prices, fundamentals);
-
   const betaColor = beta == null ? '' : beta < 1 ? 'text-bull' : beta < 1.5 ? 'text-warn' : 'text-bear';
+
+  const filteredSorted = useMemo(() => {
+    const q = search.toLowerCase();
+    const filtered = q
+      ? holdings.filter(h => h.ticker.toLowerCase().includes(q) || (h.name ?? '').toLowerCase().includes(q))
+      : holdings;
+
+    const fn = SORT_COLS[sortCol];
+    return [...filtered].sort((a, b) => {
+      const va = fn(a, prices[a.ticker], fundamentals[a.ticker]);
+      const vb = fn(b, prices[b.ticker], fundamentals[b.ticker]);
+      if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+      return sortAsc ? va - vb : vb - va;
+    });
+  }, [holdings, prices, fundamentals, search, sortCol, sortAsc]);
+
+  const onSortCol = (col) => {
+    if (sortCol === col) setSortAsc(a => !a);
+    else { setSortCol(col); setSortAsc(true); }
+  };
+
+  const SortTh = ({ col, label, right }) => (
+    <th
+      className={`hud-label ${right ? 'text-right' : 'text-left'} py-2.5 px-4 font-normal cursor-pointer select-none hover:text-arc transition-colors`}
+      onClick={() => onSortCol(col)}
+    >
+      {label}{sortCol === col ? (sortAsc ? ' ↑' : ' ↓') : ''}
+    </th>
+  );
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -110,10 +157,7 @@ export default function Dashboard() {
         </div>
         {holdings.length > 0 && (
           <div className="flex items-center gap-2">
-            <button
-              onClick={() => exportCSV(holdings, prices, fundamentals)}
-              className="btn-outline flex items-center gap-1"
-            >
+            <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline flex items-center gap-1">
               ↓ CSV
             </button>
             <button onClick={refreshPrices} className="btn-outline flex items-center gap-1">
@@ -150,16 +194,10 @@ export default function Dashboard() {
         />
       </div>
 
-      {/* Portfolio chart */}
       {holdings.length > 0 && <PortfolioChart />}
-
-      {/* Benchmark comparison */}
       {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
-
-      {/* Correlation matrix */}
       {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
 
-      {/* Side panels */}
       {holdings.length > 0 && (
         <div className="grid sm:grid-cols-2 gap-4 mb-6">
           <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
@@ -167,7 +205,6 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Holdings table */}
       {holdings.length > 0 && (
         <>
           <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
@@ -176,8 +213,16 @@ export default function Dashboard() {
       )}
 
       <section className="card mb-6 mt-4">
-        <div className="flex items-center justify-between p-4 border-b border-[rgba(0,212,255,0.1)]">
+        <div className="flex items-center justify-between p-4 border-b border-[rgba(0,212,255,0.1)] gap-3 flex-wrap">
           <h2 className="hud-label">Holdings</h2>
+          {holdings.length > 0 && (
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Filter by ticker…"
+              className="input text-xs py-1 w-36"
+            />
+          )}
         </div>
 
         {loading && <p className="p-6 text-muted text-sm">Loading…</p>}
@@ -192,20 +237,20 @@ export default function Dashboard() {
             <table className="w-full text-sm">
               <thead>
                 <tr>
-                  <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Today</th>
+                  <SortTh col="ticker" label="Ticker" />
+                  <SortTh col="price" label="Price" right />
+                  <SortTh col="today" label="Today" right />
                   <th className="hud-label py-2.5 px-4 font-normal">7D</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Cost</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">P&L</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Upside</th>
+                  <SortTh col="pl" label="P&L" right />
+                  <SortTh col="upside" label="Upside" right />
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Short%</th>
                   <th className="py-2.5 px-4"></th>
                 </tr>
               </thead>
               <tbody>
-                {holdings.map(h => (
+                {filteredSorted.map(h => (
                   <HoldingRow
                     key={h.ticker}
                     holding={h}
@@ -214,11 +259,18 @@ export default function Dashboard() {
                     fundamentals={fundamentals[h.ticker]}
                     shortInterest={shortInterest[h.ticker]}
                     latestUpgrade={(upgrades[h.ticker] ?? [])[0]}
+                    hasAlert={alertTickers.has(h.ticker)}
+                    hasTriggeredAlert={triggeredTickers.has(h.ticker)}
+                    expanded={expandedTicker === h.ticker}
+                    onToggleExpand={() => setExpandedTicker(t => t === h.ticker ? null : h.ticker)}
                     onRemove={removeHolding}
                   />
                 ))}
               </tbody>
             </table>
+            {filteredSorted.length === 0 && search && (
+              <p className="p-6 text-muted text-sm text-center">No holdings match "{search}"</p>
+            )}
           </div>
         )}
 

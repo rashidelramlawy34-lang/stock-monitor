@@ -1,14 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { LineChart, Line, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { useCoach } from '../hooks/useCoach.js';
 
-// Strip any stray markdown that leaks through from the AI
 function clean(text = '') {
   return text
-    .replace(/\*\*(.+?)\*\*/g, '$1')   // **bold**
-    .replace(/\*(.+?)\*/g, '$1')        // *italic*
-    .replace(/^#+\s*/gm, '')            // # headings
-    .replace(/^[-•]\s*/gm, '')          // bullet dashes
-    .replace(/`(.+?)`/g, '$1')          // `code`
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/^#+\s*/gm, '')
+    .replace(/^[-•]\s*/gm, '')
+    .replace(/`(.+?)`/g, '$1')
     .trim();
 }
 
@@ -44,12 +44,53 @@ function ScoreRing({ score }) {
   );
 }
 
+function ScoreHistoryChart({ history }) {
+  if (!history || history.length < 2) return null;
+  const data = history.map(h => ({ score: h.score, ts: h.generated_at }));
+  const min = Math.max(0, Math.min(...data.map(d => d.score)) - 10);
+  const max = Math.min(100, Math.max(...data.map(d => d.score)) + 10);
+
+  return (
+    <div className="card p-4 mb-4">
+      <p className="hud-label mb-3 text-[9px]">Score History</p>
+      <ResponsiveContainer width="100%" height={70}>
+        <LineChart data={data}>
+          <ReferenceLine y={70} stroke="rgba(0,230,118,0.2)" strokeDasharray="3 3" />
+          <ReferenceLine y={45} stroke="rgba(255,170,0,0.2)" strokeDasharray="3 3" />
+          <Tooltip
+            contentStyle={{ background: '#0a1628', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 4, fontSize: 10 }}
+            formatter={(v) => [v, 'Score']}
+            labelFormatter={(_, payload) => payload?.[0] ? timeAgo(payload[0].payload.ts) : ''}
+          />
+          <Line
+            type="monotone" dataKey="score"
+            stroke="#00d4ff" strokeWidth={2} dot={false}
+            activeDot={{ r: 3, fill: '#00d4ff' }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+      <div className="flex gap-4 mt-1 text-[9px] text-muted">
+        <span className="flex items-center gap-1"><span className="w-2 h-0.5 bg-[rgba(0,230,118,0.4)]" />70+ Healthy</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-0.5 bg-[rgba(255,170,0,0.4)]" />45+ Balanced</span>
+      </div>
+    </div>
+  );
+}
+
 const healthColor = { Aggressive: 'text-warn', Balanced: 'text-arc', Defensive: 'text-bull', Speculative: 'text-bear' };
 
 export default function CoachPage() {
   const { analysis, loading, error, fetchCached, refresh } = useCoach();
+  const [history, setHistory] = useState([]);
 
   useEffect(() => { fetchCached(); }, [fetchCached]);
+
+  useEffect(() => {
+    fetch('/api/coach/history', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : [])
+      .then(setHistory)
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
@@ -71,6 +112,8 @@ export default function CoachPage() {
           </button>
         </div>
       </div>
+
+      <ScoreHistoryChart history={history} />
 
       {loading && (
         <div className="card p-8 flex flex-col items-center gap-4">

@@ -8,6 +8,14 @@ router.use(requireAuth);
 
 const CACHE_TTL = 24 * 60 * 60; // 24 hours
 
+router.get('/history', (req, res) => {
+  const db = getDb();
+  const rows = db.prepare(
+    'SELECT score, health, generated_at FROM coach_score_history WHERE user_id = ? ORDER BY generated_at ASC LIMIT 30'
+  ).all(req.user.id);
+  res.json(rows);
+});
+
 router.get('/', (req, res) => {
   const db = getDb();
   const row = db.prepare('SELECT * FROM coach_cache WHERE user_id = ?').get(req.user.id);
@@ -66,6 +74,11 @@ router.post('/refresh', async (req, res) => {
       VALUES (?, ?, ?)
       ON CONFLICT(user_id) DO UPDATE SET analysis = excluded.analysis, generated_at = excluded.generated_at
     `).run(userId, analysisJson, now);
+
+    if (analysis.score != null) {
+      db.prepare('INSERT INTO coach_score_history (user_id, score, health, generated_at) VALUES (?, ?, ?, ?)')
+        .run(userId, analysis.score, analysis.overall_health ?? null, now);
+    }
 
     res.json({ ...analysis, generated_at: now });
   } catch (e) {

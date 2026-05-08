@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { useWatchlist } from '../hooks/useWatchlist.js';
+
 const RISK_COLORS = {
   'Low':       { text: '#00e676', bg: 'rgba(0,230,118,0.1)',  border: 'rgba(0,230,118,0.3)'  },
   'Medium':    { text: '#ffaa00', bg: 'rgba(255,170,0,0.1)', border: 'rgba(255,170,0,0.3)'  },
@@ -18,6 +21,21 @@ export default function HRHRCard({ candidate }) {
     key_catalyst,
     conviction,
   } = candidate;
+
+  const { watchlist, addTicker, removeTicker } = useWatchlist();
+  const isWatched = watchlist.some(w => w.ticker === ticker);
+  const [watchBusy, setWatchBusy] = useState(false);
+
+  const toggleWatch = async (e) => {
+    e.stopPropagation();
+    setWatchBusy(true);
+    try {
+      if (isWatched) await removeTicker(ticker);
+      else await addTicker(ticker);
+    } finally {
+      setWatchBusy(false);
+    }
+  };
 
   const riskColor = RISK_COLORS[risk_label] ?? RISK_COLORS['Medium'];
   const hasUpside = target_mean != null && upside_pct != null && upside_pct !== 0;
@@ -110,7 +128,7 @@ export default function HRHRCard({ candidate }) {
         </div>
       )}
 
-      {/* Stats row */}
+      {/* Stats row + watchlist button */}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
         {totalAnalysts > 0 && (
           <span>
@@ -126,6 +144,17 @@ export default function HRHRCard({ candidate }) {
         {target_mean != null && price != null && (
           <span>Target <span className="font-mono text-[#a8d8ea]">${target_mean.toFixed(0)}</span></span>
         )}
+        <button
+          onClick={toggleWatch}
+          disabled={watchBusy}
+          className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-sm border transition-all ${
+            isWatched
+              ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
+              : 'border-[rgba(0,212,255,0.2)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.4)]'
+          }`}
+        >
+          {isWatched ? '★ Watching' : '☆ Watch'}
+        </button>
       </div>
     </div>
   );

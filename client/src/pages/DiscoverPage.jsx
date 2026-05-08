@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useHRHR } from '../hooks/useHRHR';
 import HRHRCard from '../components/HRHRCard';
 
@@ -24,12 +24,20 @@ const RISK_STYLES = {
 export default function DiscoverPage() {
   const { candidates, generatedAt, loading, scanning, error, refresh } = useHRHR();
   const [riskFilter, setRiskFilter] = useState('All');
+  const [sectorFilter, setSectorFilter] = useState('All');
   const [sortBy, setSortBy] = useState('conviction');
 
   const riskLevels = ['All', 'Low', 'Medium', 'High', 'Very High'];
 
+  const sectors = useMemo(() => {
+    const s = new Set();
+    for (const c of candidates) if (c.sector) s.add(c.sector);
+    return ['All', ...Array.from(s).sort()];
+  }, [candidates]);
+
   const filtered = candidates
     .filter(c => riskFilter === 'All' || c.risk_label === riskFilter)
+    .filter(c => sectorFilter === 'All' || c.sector === sectorFilter)
     .slice()
     .sort((a, b) => {
       if (sortBy === 'conviction') return (b.conviction ?? 0) - (a.conviction ?? 0);
@@ -60,8 +68,8 @@ export default function DiscoverPage() {
         </button>
       </div>
 
-      {/* Meta + filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-5">
+      {/* Meta */}
+      <div className="flex flex-wrap items-center gap-3 mb-4">
         {generatedAt && (
           <span className="text-xs text-muted">
             Last scanned: <span className="text-[rgba(0,212,255,0.6)]">{timeAgo(generatedAt)}</span>
@@ -73,24 +81,7 @@ export default function DiscoverPage() {
         >
           How it works ℹ
         </span>
-
-        <div className="ml-auto flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 flex-wrap">
-            {riskLevels.map(r => (
-              <button
-                key={r}
-                onClick={() => setRiskFilter(r)}
-                className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider uppercase ${
-                  riskFilter === r
-                    ? RISK_STYLES[r]?.active ?? RISK_STYLES.All.active
-                    : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
-                }`}
-              >
-                {r}
-              </button>
-            ))}
-          </div>
-
+        <div className="ml-auto flex items-center gap-2">
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
@@ -104,9 +95,44 @@ export default function DiscoverPage() {
         </div>
       </div>
 
+      {/* Risk filter */}
+      <div className="flex items-center gap-1 flex-wrap mb-3">
+        {riskLevels.map(r => (
+          <button
+            key={r}
+            onClick={() => setRiskFilter(r)}
+            className={`text-xs font-bold px-2.5 py-1 rounded-sm border transition-all tracking-wider uppercase ${
+              riskFilter === r
+                ? RISK_STYLES[r]?.active ?? RISK_STYLES.All.active
+                : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
+            }`}
+          >
+            {r}
+          </button>
+        ))}
+      </div>
+
+      {/* Sector filter */}
+      {sectors.length > 2 && (
+        <div className="flex items-center gap-1 flex-wrap mb-5">
+          {sectors.map(s => (
+            <button
+              key={s}
+              onClick={() => setSectorFilter(s)}
+              className={`text-xs px-2.5 py-1 rounded-sm border transition-all ${
+                sectorFilter === s
+                  ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
+                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.3)]'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
       {error && <div className="card p-4 text-bear text-sm mb-6">Error: {error}</div>}
 
-      {/* Scanning skeleton */}
       {((scanning && candidates.length === 0) || (loading && !scanning)) ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -123,7 +149,6 @@ export default function DiscoverPage() {
         </div>
       ) : null}
 
-      {/* Empty state */}
       {!loading && !scanning && filtered.length === 0 && !error && candidates.length === 0 && (
         <div className="card p-12 text-center">
           <p className="text-muted text-sm mb-4">
@@ -133,16 +158,14 @@ export default function DiscoverPage() {
         </div>
       )}
 
-      {/* No results for filter */}
       {!loading && !scanning && filtered.length === 0 && candidates.length > 0 && (
         <div className="card p-8 text-center">
           <p className="text-muted text-sm">
-            No candidates match <strong className="text-[#a8d8ea]">{riskFilter}</strong> risk. Try a different filter.
+            No candidates match the current filters. Try adjusting risk or sector.
           </p>
         </div>
       )}
 
-      {/* Cards grid */}
       {filtered.length > 0 && (
         <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ${scanning ? 'opacity-50 pointer-events-none' : ''}`}>
           {filtered.map(c => (

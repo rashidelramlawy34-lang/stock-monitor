@@ -159,9 +159,16 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           )}
 
           {age !== null && (
-            <span className="text-xs text-muted">
-              {age < 1 ? 'Generated just now' : `Generated ${age}m ago`}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted">
+                {age < 1 ? 'Generated just now' : age < 60 ? `Generated ${age}m ago` : `Generated ${Math.floor(age / 60)}h ago`}
+              </span>
+              {age > 1440 && (
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-sm bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider">
+                  STALE
+                </span>
+              )}
+            </div>
           )}
         </>
       )}
