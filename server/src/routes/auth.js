@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 import { getDb } from '../db/schema.js';
-import { getDb } from '../db/schema.js';
 
 const router = Router();
 
