@@ -1,8 +1,9 @@
 import { getDb } from '../db/schema.js';
-import yahooFinance from 'yahoo-finance2';
 
 const CACHE = new Map(); // sym → { ts, data }
-const CACHE_TTL = 4 * 3600; // 4 hours
+const CACHE_TTL = 4 * 3600;
+
+const YF_HEADERS = { 'User-Agent': 'Mozilla/5.0 (compatible; stock-monitor/1.0)' };
 
 export async function fetchCandles(ticker) {
   const sym = ticker.toUpperCase();
@@ -12,21 +13,24 @@ export async function fetchCandles(ticker) {
   if (cached && now - cached.ts < CACHE_TTL) return cached.data;
 
   try {
-    const period1 = new Date(Date.now() - 365 * 86400 * 1000);
-    const result = await yahooFinance.historical(sym, {
-      period1,
-      interval: '1d',
-    }, { validateResult: false });
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=1d&range=2y`;
+    const res = await fetch(url, { headers: YF_HEADERS });
+    if (res.ok) {
+      const json = await res.json();
+      const result = json?.chart?.result?.[0];
+      const timestamps = result?.timestamp;
+      const closes =
+        result?.indicators?.adjclose?.[0]?.adjclose ??
+        result?.indicators?.quote?.[0]?.close;
 
-    if (result?.length >= 2) {
-      const closes = result.map(r => r.adjClose ?? r.close);
-      const timestamps = result.map(r => Math.floor(new Date(r.date).getTime() / 1000));
-      const data = { closes, timestamps };
-      CACHE.set(sym, { ts: now, data });
-      return data;
+      if (timestamps?.length >= 2 && closes?.length >= 2) {
+        const data = { closes, timestamps };
+        CACHE.set(sym, { ts: now, data });
+        return data;
+      }
     }
   } catch {
-    // fall through to local
+    // fall through
   }
 
   return fetchLocal(sym);
