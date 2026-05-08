@@ -1,0 +1,18 @@
+Based on the following portfolio, suggest 3-5 complementary stocks the investor should consider.
+
+Current holdings: {{HOLDINGS}}
+
+Consider sector diversification, thematic alignment, and current market trends.
+Do NOT suggest any stock already in the holdings list.
+
+Respond with a JSON object in exactly this format:
+{
+  "suggestions": [
+    {
+      "ticker": "AAPL",
+      "name": "Apple Inc.",
+      "rationale": "1-2 sentence reason why it complements this portfolio"
+    }
+  ],
+  "theme": "One-sentence description of the portfolio's dominant theme"
+}

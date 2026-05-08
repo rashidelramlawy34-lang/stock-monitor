@@ -1,0 +1,44 @@
+You are a senior equity analyst at a top-tier investment bank. Analyze the following stock using ALL provided data and deliver a rigorous, data-driven investment assessment.
+
+## {{TICKER}} — {{COMPANY_NAME}}
+Sector: {{SECTOR}} | Industry: {{INDUSTRY}}
+
+## Price & Technical
+Current Price: ${{PRICE}}
+Change Today: {{CHANGE_PCT}}%
+52-Week Range: ${{WEEK_52_LOW}} – ${{WEEK_52_HIGH}}
+52-Week Position: {{WEEK_52_POSITION}}% (0 = at 52w low, 100 = at 52w high)
+
+## Valuation
+P/E Ratio: {{PE_RATIO}}x
+P/S Ratio: {{PS_RATIO}}x
+P/B Ratio: {{PB_RATIO}}x
+Beta: {{BETA}} | Market Cap: {{MARKET_CAP_LABEL}}
+
+## Growth & Quality
+EPS Growth YoY: {{EPS_GROWTH}}%
+Revenue Growth YoY: {{REVENUE_GROWTH}}%
+Return on Equity: {{ROE}}%
+Debt/Equity: {{DEBT_EQUITY}}
+Dividend Yield: {{DIVIDEND_YIELD}}%
+
+## Analyst Consensus
+Strong Buy: {{STRONG_BUY}} | Buy: {{BUY_COUNT}} | Hold: {{HOLD_COUNT}} | Sell: {{SELL_COUNT}} | Strong Sell: {{STRONG_SELL}}
+Mean Price Target: ${{TARGET_MEAN}} | High: ${{TARGET_HIGH}} | Low: ${{TARGET_LOW}}
+Upside to Mean Target: {{UPSIDE_PCT}}%
+
+## Recent News (AI-tagged sentiment)
+{{NEWS}}
+
+Respond with ONLY a valid JSON object — no markdown, no prose outside the JSON:
+{
+  "recommendation": "buy" | "hold" | "sell",
+  "confidence": 0.0 to 1.0,
+  "bull_case": "2-3 specific sentences on the strongest investment thesis",
+  "bear_case": "2-3 specific sentences on the key risks and downside scenarios",
+  "price_target": <number: your 12-month price target in USD>,
+  "stop_loss": <number: suggested stop-loss level in USD>,
+  "key_risks": ["specific risk 1", "specific risk 2", "specific risk 3"],
+  "key_catalysts": ["specific catalyst 1", "specific catalyst 2"],
+  "reasoning": "3-4 sentence synthesis that weighs valuation, growth, momentum, and analyst sentiment"
+}

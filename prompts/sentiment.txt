@@ -1,0 +1,12 @@
+Classify each of the following news headlines as bullish, bearish, or neutral for the stock {{TICKER}}.
+
+Headlines (one per line, numbered):
+{{HEADLINES}}
+
+Respond with a JSON array in exactly this format — one entry per headline, in the same order:
+[
+  { "index": 0, "sentiment": "bullish" | "bearish" | "neutral" },
+  ...
+]
+
+Only output valid JSON. No explanation.

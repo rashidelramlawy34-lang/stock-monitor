@@ -1,0 +1,51 @@
+import { useState } from 'react';
+
+export default function DigestPanel() {
+  const [summary, setSummary] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const generate = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/advice/digest');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setSummary(data.summary);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="card p-5 mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-semibold text-slate-800 dark:text-slate-200">Weekly Digest</h2>
+        <button onClick={generate} disabled={loading} className="btn-primary text-xs">
+          {loading ? 'Generating…' : summary ? 'Regenerate' : 'Generate Digest'}
+        </button>
+      </div>
+
+      {error && <p className="text-bear text-xs">{error}</p>}
+
+      {!summary && !loading && (
+        <p className="text-slate-500 dark:text-slate-500 text-sm">Generate a full portfolio health summary powered by AI.</p>
+      )}
+
+      {loading && (
+        <div className="space-y-2 animate-pulse">
+          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-full" />
+          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-5/6" />
+          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded w-4/6" />
+        </div>
+      )}
+
+      {summary && !loading && (
+        <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed">{summary}</p>
+      )}
+    </div>
+  );
+}

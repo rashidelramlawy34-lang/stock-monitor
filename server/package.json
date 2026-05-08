@@ -1,0 +1,22 @@
+{
+  "name": "stock-monitor-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/index.js",
+    "start": "node src/index.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --testPathPattern=tests/"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.26.0",
+    "better-sqlite3": "^12.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "node-fetch": "^3.3.2",
+    "yahoo-finance2": "^2.11.3"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

@@ -1,0 +1,11 @@
+You are a portfolio analyst. Write a concise weekly digest for the following portfolio.
+
+Portfolio (JSON):
+{{HOLDINGS_JSON}}
+
+Include:
+1. Overall portfolio health (total return %, key winners and losers)
+2. Notable price movements this week
+3. A short 2-3 sentence outlook paragraph
+
+Keep the entire response under 250 words. Use plain prose — no bullet lists, no markdown headers.
