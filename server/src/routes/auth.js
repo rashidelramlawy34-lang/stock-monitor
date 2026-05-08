@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 import { getDb } from '../db/schema.js';
+import { getDb } from '../db/schema.js';
 
 const router = Router();
 
@@ -104,6 +105,25 @@ router.get('/me/settings', (req, res) => {
   if (!user) return res.status(401).json({ error: 'Not logged in' });
   const row = getDb().prepare('SELECT id, name, alert_email, email_alerts_enabled FROM users WHERE id = ?').get(user.id);
   res.json(row ?? {});
+});
+
+// POST /auth/mobile-token — generate a persistent token for mobile apps
+router.post('/mobile-token', (req, res) => {
+  const { username, password } = req.body;
+  if (!username?.trim() || !password) return res.status(400).json({ error: 'Username and password required' });
+
+  const userId = username.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-').slice(0, 40);
+  const db = getDb();
+  const row = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+  if (!row) return res.status(401).json({ error: 'Invalid credentials' });
+
+  if (row.password_hash && !verifyPassword(password, row.password_hash)) {
+    return res.status(401).json({ error: 'Invalid credentials' });
+  }
+
+  const token = randomBytes(32).toString('hex');
+  db.prepare('UPDATE users SET mobile_token = ? WHERE id = ?').run(token, userId);
+  res.json({ token, user: { id: row.id, name: row.name } });
 });
 
 // POST /auth/logout

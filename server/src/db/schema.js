@@ -256,6 +256,7 @@ function applySchema(db) {
     // Alert enhancements
     'ALTER TABLE alerts ADD COLUMN snoozed_until INTEGER',
     'ALTER TABLE alerts ADD COLUMN trigger_pct REAL',
+    'ALTER TABLE users ADD COLUMN mobile_token TEXT',
   ];
   for (const sql of newCols) { try { db.exec(sql); } catch {} }
 }
