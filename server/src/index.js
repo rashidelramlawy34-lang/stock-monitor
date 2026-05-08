@@ -18,10 +18,12 @@ import candlesRouter from './routes/candles.js';
 import hrhrRouter from './routes/hrhr.js';
 import settingsRouter from './routes/settings.js';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+const isProd = process.env.NODE_ENV === 'production';
 
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({ origin: isProd ? false : 'http://localhost:5173' }));
 app.use(express.json());
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', ts: Date.now() }));
@@ -35,6 +37,13 @@ app.use('/api/fundamentals', fundamentalsRouter);
 app.use('/api/candles', candlesRouter);
 app.use('/api/hrhr', hrhrRouter);
 app.use('/api/settings', settingsRouter);
+
+// Serve built frontend in production
+if (isProd) {
+  const clientDist = path.resolve(__dirname, '../../client/dist');
+  app.use(express.static(clientDist));
+  app.get('*', (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+}
 
 app.use((err, req, res, _next) => {
   console.error(err);

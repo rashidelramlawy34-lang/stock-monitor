@@ -7,7 +7,9 @@ import dotenv from 'dotenv';
 dotenv.config({ path: path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../.env') });
 
 const DB_PATH = process.env.DB_PATH
-  ? path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../', process.env.DB_PATH)
+  ? (process.env.DB_PATH.startsWith('/')
+      ? process.env.DB_PATH  // absolute path (production)
+      : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../', process.env.DB_PATH))
   : path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../db/portfolio.db');
 
 let db;

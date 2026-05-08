@@ -1,0 +1,11 @@
+{
+  "name": "stock-monitor",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "cd client && npm install && npm run build",
+    "start": "cd server && node src/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
