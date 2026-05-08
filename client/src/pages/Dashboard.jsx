@@ -71,10 +71,10 @@ function exportCSV(holdings, prices, fundamentals) {
 
 function StatCard({ label, value, sub, color }) {
   return (
-    <div className="card p-4">
-      <p className="hud-label mb-2">{label}</p>
-      <p className={`text-2xl font-bold font-mono tracking-tight ${color || 'text-[#a8d8ea]'}`}>{value}</p>
-      {sub && <p className="text-xs text-muted mt-1">{sub}</p>}
+    <div className="card p-5 border-l-2 border-l-[rgba(0,212,255,0.3)]">
+      <p className="hud-label mb-3">{label}</p>
+      <p className={`text-3xl font-bold font-mono tracking-tight ${color || 'text-[#a8d8ea]'}`}>{value}</p>
+      {sub && <p className="text-xs text-muted mt-1.5">{sub}</p>}
     </div>
   );
 }
@@ -142,78 +142,78 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      <header className="mb-6 flex items-center justify-between flex-wrap gap-3">
+    <div className="p-5 max-w-[1400px] mx-auto">
+      {/* Header */}
+      <header className="mb-5 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3 flex-wrap">
           <div>
             <h1 className="hud-title text-xl">Portfolio</h1>
-            <p className="text-muted text-xs mt-1 tracking-wide">
-              {lastUpdated
-                ? <>Prices updated {lastUpdated.toLocaleTimeString()}</>
-                : 'Fetching prices…'}
+            <p className="text-muted text-xs mt-0.5">
+              {lastUpdated ? <>Updated {lastUpdated.toLocaleTimeString()}</> : 'Fetching prices…'}
             </p>
           </div>
           <PortfolioSwitcher {...portfolios} />
         </div>
         {holdings.length > 0 && (
           <div className="flex items-center gap-2">
-            <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline flex items-center gap-1">
+            <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline flex items-center gap-1.5">
               ↓ CSV
             </button>
-            <button onClick={refreshPrices} className="btn-outline flex items-center gap-1">
+            <button onClick={refreshPrices} className="btn-outline flex items-center gap-1.5">
               ↻ Refresh
             </button>
           </div>
         )}
       </header>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <StatCard
-          label="Portfolio Value"
-          value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
-          sub={`${holdings.length} holding${holdings.length !== 1 ? 's' : ''}`}
-        />
-        <StatCard
-          label="Today's P&L"
-          value={cost > 0 && todayGain !== 0 ? `${todayGain >= 0 ? '+' : ''}$${Math.abs(todayGain).toFixed(2)}` : '—'}
-          sub={cost > 0 && todayGain !== 0 ? 'vs yesterday close' : undefined}
-          color={todayGain >= 0 ? 'text-bull' : 'text-bear'}
-        />
-        <StatCard
-          label="Total P&L"
-          value={cost > 0 ? `${gain >= 0 ? '+' : ''}$${Math.abs(gain).toFixed(2)}` : '—'}
-          sub={cost > 0 ? `${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}% since cost` : undefined}
-          color={gain >= 0 ? 'text-bull' : 'text-bear'}
-        />
-        <StatCard
-          label="Portfolio Beta"
-          value={beta != null ? beta.toFixed(2) : '—'}
-          sub={beta != null ? (beta < 1 ? 'Low volatility' : beta < 1.5 ? 'Moderate risk' : 'High volatility') : undefined}
-          color={betaColor}
-        />
+      {/* Main layout: chart (left, dominant) + stat cards (right column) */}
+      <div className="flex gap-5 mb-5">
+        {/* Left: Chart */}
+        <div className="flex-1 min-w-0 flex flex-col gap-5">
+          {holdings.length > 0 && <PortfolioChart />}
+          {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
+        </div>
+
+        {/* Right: Stat cards stacked */}
+        <div className="flex flex-col gap-4 w-64 shrink-0">
+          <StatCard
+            label="Portfolio Value"
+            value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '—'}
+            sub={`${holdings.length} holding${holdings.length !== 1 ? 's' : ''}`}
+          />
+          <StatCard
+            label="Today's P&L"
+            value={cost > 0 && todayGain !== 0 ? `${todayGain >= 0 ? '+' : ''}$${Math.abs(todayGain).toFixed(0)}` : '—'}
+            sub={cost > 0 && todayGain !== 0 ? 'vs yesterday close' : undefined}
+            color={todayGain >= 0 ? 'text-bull' : 'text-bear'}
+          />
+          <StatCard
+            label="Total P&L"
+            value={cost > 0 ? `${gain >= 0 ? '+' : ''}$${Math.abs(gain).toFixed(0)}` : '—'}
+            sub={cost > 0 ? `${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%` : undefined}
+            color={gain >= 0 ? 'text-bull' : 'text-bear'}
+          />
+          <StatCard
+            label="Portfolio Beta"
+            value={beta != null ? beta.toFixed(2) : '—'}
+            sub={beta != null ? (beta < 1 ? 'Low volatility' : beta < 1.5 ? 'Moderate risk' : 'High volatility') : undefined}
+            color={betaColor}
+          />
+          {holdings.length > 1 && (
+            <div className="card p-5 border-l-2 border-l-[rgba(0,212,255,0.3)]">
+              <p className="hud-label mb-3">Total Cost</p>
+              <p className="text-3xl font-bold font-mono tracking-tight text-[#a8d8ea]">
+                ${cost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </p>
+              <p className="text-xs text-muted mt-1.5">invested capital</p>
+            </div>
+          )}
+        </div>
       </div>
 
-      {holdings.length > 0 && <PortfolioChart />}
-      {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
-      {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
-
-      {holdings.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-4 mb-6">
-          <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
-          <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
-        </div>
-      )}
-
-      {holdings.length > 0 && (
-        <>
-          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
-          <RebalancePanel holdings={holdings} prices={prices} />
-        </>
-      )}
-
-      <section className="card mb-6 mt-4">
-        <div className="flex items-center justify-between p-4 border-b border-[rgba(0,212,255,0.1)] gap-3 flex-wrap">
+      {/* Holdings table — full width */}
+      <section className="card mb-5">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(0,212,255,0.08)] gap-3 flex-wrap">
           <h2 className="hud-label">Holdings</h2>
           {holdings.length > 0 && (
             <input
@@ -225,28 +225,27 @@ export default function Dashboard() {
           )}
         </div>
 
-        {loading && <p className="p-6 text-muted text-sm">Loading…</p>}
-        {error && <p className="p-6 text-bear text-sm">Error: {error}</p>}
-
+        {loading && <p className="px-5 py-6 text-muted text-sm">Loading…</p>}
+        {error && <p className="px-5 py-6 text-bear text-sm">Error: {error}</p>}
         {!loading && holdings.length === 0 && (
-          <p className="p-6 text-muted text-sm">No holdings yet. Add your first stock below.</p>
+          <p className="px-5 py-6 text-muted text-sm">No holdings yet. Add your first stock below.</p>
         )}
 
         {!loading && holdings.length > 0 && (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr>
+                <tr className="border-b border-[rgba(0,212,255,0.06)]">
                   <SortTh col="ticker" label="Ticker" />
                   <SortTh col="price" label="Price" right />
                   <SortTh col="today" label="Today" right />
-                  <th className="hud-label py-2.5 px-4 font-normal">7D</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Cost</th>
+                  <th className="hud-label py-3 px-4 font-normal text-left">7D</th>
+                  <th className="hud-label text-right py-3 px-4 font-normal">Shares</th>
+                  <th className="hud-label text-right py-3 px-4 font-normal">Cost</th>
                   <SortTh col="pl" label="P&L" right />
                   <SortTh col="upside" label="Upside" right />
-                  <th className="hud-label text-right py-2.5 px-4 font-normal">Short%</th>
-                  <th className="py-2.5 px-4"></th>
+                  <th className="hud-label text-right py-3 px-4 font-normal">Short%</th>
+                  <th className="py-3 px-4" />
                 </tr>
               </thead>
               <tbody>
@@ -269,15 +268,30 @@ export default function Dashboard() {
               </tbody>
             </table>
             {filteredSorted.length === 0 && search && (
-              <p className="p-6 text-muted text-sm text-center">No holdings match "{search}"</p>
+              <p className="px-5 py-6 text-muted text-sm text-center">No holdings match "{search}"</p>
             )}
           </div>
         )}
 
-        <div className="p-4 border-t border-[rgba(0,212,255,0.1)]">
+        <div className="px-5 py-4 border-t border-[rgba(0,212,255,0.08)]">
           <AddHoldingForm onAdd={addHolding} />
         </div>
       </section>
+
+      {/* Bottom panels */}
+      {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
+      {holdings.length > 0 && (
+        <div className="grid sm:grid-cols-2 gap-4 mb-5">
+          <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
+          <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
+        </div>
+      )}
+      {holdings.length > 0 && (
+        <>
+          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
+          <RebalancePanel holdings={holdings} prices={prices} />
+        </>
+      )}
     </div>
   );
 }

@@ -80,7 +80,7 @@ export default function Nav({ page, setPage, user }) {
       )}
 
       {/* Desktop sidebar */}
-      <aside className="hidden sm:flex flex-col w-56 min-h-screen bg-[#010710] border-r border-[rgba(0,212,255,0.10)] p-4 shrink-0">
+      <aside className="hidden sm:flex flex-col w-56 min-h-screen bg-[#03080f] border-r border-[rgba(0,212,255,0.08)] p-4 shrink-0">
         {/* Logo / brand */}
         <div className="mb-6 px-2 pt-1">
           <div className="flex items-center gap-3 mb-1.5">

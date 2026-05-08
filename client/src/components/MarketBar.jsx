@@ -36,7 +36,7 @@ export default function MarketBar() {
   });
 
   return (
-    <div className="border-b border-[rgba(0,212,255,0.10)] bg-[#010710] px-4 py-1 flex items-center gap-5 text-xs overflow-x-auto">
+    <div className="border-b border-[rgba(0,212,255,0.08)] bg-[#03080f] px-4 py-1.5 flex items-center gap-5 text-xs overflow-x-auto">
       {INDICES.map(({ key, label }) => {
         const d = indices[key];
         if (!d) return (
