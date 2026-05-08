@@ -1,4 +1,7 @@
 import { useState, useMemo } from 'react';
+import {
+  AreaChart, Area, BarChart, Bar, Cell, ResponsiveContainer,
+} from 'recharts';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
@@ -69,12 +72,40 @@ function exportCSV(holdings, prices, fundamentals) {
   a.click();
 }
 
-function StatCard({ label, value, sub, color }) {
+function StatCard({ label, value, sub, color, sparkData, sparkType }) {
+  const strokeColor = color?.includes('bull') ? '#00e676' : color?.includes('bear') ? '#ff3355' : '#00d4ff';
+  const gradId = `sg-${label.replace(/\s+/g, '')}`;
   return (
     <div className="card p-5 border-l-2 border-l-[rgba(0,212,255,0.3)]">
       <p className="hud-label mb-3">{label}</p>
       <p className={`text-3xl font-bold font-mono tracking-tight ${color || 'text-[#a8d8ea]'}`}>{value}</p>
       {sub && <p className="text-xs text-muted mt-1.5">{sub}</p>}
+      {sparkData?.length > 1 && (
+        <div className="mt-3 -mx-1">
+          <ResponsiveContainer width="100%" height={44}>
+            {sparkType === 'bar' ? (
+              <BarChart data={sparkData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }} barCategoryGap="18%">
+                <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive={false}>
+                  {sparkData.map((d, i) => (
+                    <Cell key={i} fill={d.v >= 0 ? 'rgba(0,230,118,0.55)' : 'rgba(255,51,85,0.55)'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            ) : (
+              <AreaChart data={sparkData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+                <defs>
+                  <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={strokeColor} stopOpacity={0.3} />
+                    <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="v" stroke={strokeColor} strokeWidth={1.5}
+                  fill={`url(#${gradId})`} dot={false} isAnimationActive={false} />
+              </AreaChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }
@@ -111,6 +142,27 @@ export default function Dashboard() {
   const todayGain = dailyPnL(holdings, prices);
   const beta = portfolioBeta(holdings, prices, fundamentals);
   const betaColor = beta == null ? '' : beta < 1 ? 'text-bull' : beta < 1.5 ? 'text-warn' : 'text-bear';
+
+  const todayBars = useMemo(() => {
+    return holdings
+      .map(h => {
+        const p = prices[h.ticker];
+        if (!p?.price || p.change_pct == null) return null;
+        return { v: +(p.change_pct * p.price * h.shares / 100).toFixed(2) };
+      })
+      .filter(Boolean);
+  }, [holdings, prices]);
+
+  const portfolioTrend = useMemo(() => {
+    const holdingCandles = holdings
+      .map(h => ({ h, c: candles?.[h.ticker] }))
+      .filter(({ c }) => c?.closes?.length > 1);
+    if (holdingCandles.length === 0) return [];
+    const len = Math.min(...holdingCandles.map(({ c }) => c.closes.length));
+    return Array.from({ length: len }, (_, i) => ({
+      v: holdingCandles.reduce((sum, { h, c }) => sum + c.closes[i] * h.shares, 0),
+    }));
+  }, [holdings, candles]);
 
   const filteredSorted = useMemo(() => {
     const q = search.toLowerCase();
@@ -180,18 +232,24 @@ export default function Dashboard() {
             label="Portfolio Value"
             value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '—'}
             sub={`${holdings.length} holding${holdings.length !== 1 ? 's' : ''}`}
+            sparkData={portfolioTrend}
+            sparkType="area"
           />
           <StatCard
             label="Today's P&L"
             value={cost > 0 && todayGain !== 0 ? `${todayGain >= 0 ? '+' : ''}$${Math.abs(todayGain).toFixed(0)}` : '—'}
             sub={cost > 0 && todayGain !== 0 ? 'vs yesterday close' : undefined}
             color={todayGain >= 0 ? 'text-bull' : 'text-bear'}
+            sparkData={todayBars}
+            sparkType="bar"
           />
           <StatCard
             label="Total P&L"
             value={cost > 0 ? `${gain >= 0 ? '+' : ''}$${Math.abs(gain).toFixed(0)}` : '—'}
             sub={cost > 0 ? `${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%` : undefined}
             color={gain >= 0 ? 'text-bull' : 'text-bear'}
+            sparkData={portfolioTrend}
+            sparkType="area"
           />
           <StatCard
             label="Portfolio Beta"
