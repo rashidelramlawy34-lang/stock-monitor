@@ -1,5 +1,8 @@
 import { useState, useMemo } from 'react';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import {
+  LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer,
+  CartesianGrid, ReferenceLine,
+} from 'recharts';
 import { useBenchmark } from '../hooks/useBenchmark.js';
 
 function pctReturns(closes) {
@@ -9,7 +12,6 @@ function pctReturns(closes) {
 }
 
 function buildChartData(portfolioTimestamps, portfolioReturns, benchmarkTimestamps, benchmarkReturns, label) {
-  // Align by date string
   const benchMap = {};
   benchmarkTimestamps.forEach((ts, i) => {
     const date = new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -20,10 +22,33 @@ function buildChartData(portfolioTimestamps, portfolioReturns, benchmarkTimestam
     const date = new Date(ts * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     return {
       date,
+      ts,
       Portfolio: +portfolioReturns[i].toFixed(2),
       [label]: benchMap[date] != null ? +benchMap[date].toFixed(2) : null,
     };
   });
+}
+
+function CustomTooltip({ active, payload, label, bench }) {
+  if (!active || !payload?.length) return null;
+  const portfolio = payload.find(p => p.dataKey === 'Portfolio');
+  const benchmark = payload.find(p => p.dataKey === bench);
+  return (
+    <div style={{ background: '#070d18', border: '1px solid rgba(0,212,255,0.25)', borderRadius: 8 }}
+      className="px-3 py-2.5 text-xs shadow-xl">
+      <p className="text-muted mb-2">{label}</p>
+      {portfolio && (
+        <p className="font-mono font-bold mb-1" style={{ color: portfolio.stroke }}>
+          Portfolio: {portfolio.value >= 0 ? '+' : ''}{portfolio.value}%
+        </p>
+      )}
+      {benchmark && benchmark.value != null && (
+        <p className="font-mono" style={{ color: 'rgba(0,212,255,0.6)' }}>
+          {bench}: {benchmark.value >= 0 ? '+' : ''}{benchmark.value}%
+        </p>
+      )}
+    </div>
+  );
 }
 
 export default function BenchmarkChart({ holdings, candles }) {
@@ -33,19 +58,15 @@ export default function BenchmarkChart({ holdings, candles }) {
   const chartData = useMemo(() => {
     if (!benchmark || !holdings.length) return [];
 
-    // Compute weighted portfolio returns
-    // Use the shortest candle series that has data
     const holdingCandles = holdings
       .map(h => candles?.[h.ticker])
       .filter(c => c?.closes?.length > 1);
 
     if (holdingCandles.length === 0) return [];
 
-    // Use first holding's timestamps as reference
     const refCandles = holdingCandles[0];
     const timestamps = refCandles.timestamps;
 
-    // Weighted avg daily % return (equal weight for simplicity)
     const portfolioReturns = refCandles.closes.map((_, idx) => {
       let total = 0, count = 0;
       for (const c of holdingCandles) {
@@ -66,22 +87,29 @@ export default function BenchmarkChart({ holdings, candles }) {
   if (loading) return null;
   if (chartData.length < 2) return null;
 
-  const isPositive = (chartData[chartData.length - 1]?.Portfolio ?? 0) >= 0;
-  const portfolioColor = isPositive ? '#00e676' : '#ff3355';
+  const lastPortfolio = chartData[chartData.length - 1]?.Portfolio ?? 0;
+  const portfolioColor = lastPortfolio >= 0 ? '#00e676' : '#ff3355';
+  const lastBench = chartData[chartData.length - 1]?.[bench] ?? 0;
+  const outperforming = lastPortfolio > lastBench;
 
   return (
-    <div className="card p-4 mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="hud-label">Portfolio vs Benchmark</h2>
-        <div className="flex gap-1">
+    <div className="card p-5">
+      <div className="flex items-center justify-between mb-5">
+        <div>
+          <p className="hud-label mb-1">vs Benchmark</p>
+          <p className={`text-lg font-bold font-mono ${outperforming ? 'text-bull' : 'text-bear'}`}>
+            {outperforming ? '+' : ''}{(lastPortfolio - lastBench).toFixed(2)}% vs {bench}
+          </p>
+        </div>
+        <div className="flex gap-1.5">
           {['SPY', 'QQQ'].map(b => (
             <button
               key={b}
               onClick={() => setBench(b)}
-              className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
+              className={`text-xs font-bold px-3 py-1 rounded-full border transition-all tracking-wider ${
                 bench === b
-                  ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
-                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff]'
+                  ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
+                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
               }`}
             >
               {b}
@@ -89,30 +117,69 @@ export default function BenchmarkChart({ holdings, candles }) {
           ))}
         </div>
       </div>
-      <ResponsiveContainer width="100%" height={180}>
-        <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={chartData} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
+          <CartesianGrid
+            strokeDasharray="0"
+            horizontal={true} vertical={false}
+            stroke="rgba(0,212,255,0.04)"
+          />
           <XAxis
             dataKey="date"
-            tick={{ fill: 'rgba(0,212,255,0.4)', fontSize: 10 }}
+            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fill: 'rgba(0,212,255,0.4)', fontSize: 10 }}
+            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`}
+            width={52}
           />
+          <ReferenceLine y={0} stroke="rgba(0,212,255,0.15)" strokeDasharray="4 4" />
           <Tooltip
-            contentStyle={{ background: '#0d1526', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 4, fontSize: 11 }}
-            formatter={(v, name) => [`${v >= 0 ? '+' : ''}${v}%`, name]}
+            content={<CustomTooltip bench={bench} />}
+            cursor={{ stroke: 'rgba(0,212,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
-          <Legend wrapperStyle={{ fontSize: 10, paddingTop: 8 }} />
-          <Line type="monotone" dataKey="Portfolio" stroke={portfolioColor} strokeWidth={2} dot={false} />
-          <Line type="monotone" dataKey={bench} stroke="rgba(0,212,255,0.5)" strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
+          <Line
+            type="monotone"
+            dataKey="Portfolio"
+            stroke={portfolioColor}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 5, fill: portfolioColor, stroke: '#010409', strokeWidth: 2 }}
+            isAnimationActive={true}
+            animationDuration={700}
+            animationEasing="ease-out"
+          />
+          <Line
+            type="monotone"
+            dataKey={bench}
+            stroke="rgba(0,212,255,0.45)"
+            strokeWidth={1.5}
+            dot={false}
+            strokeDasharray="5 3"
+            activeDot={{ r: 4, fill: '#00d4ff', stroke: '#010409', strokeWidth: 2 }}
+            isAnimationActive={true}
+            animationDuration={700}
+            animationEasing="ease-out"
+          />
         </LineChart>
       </ResponsiveContainer>
+
+      <div className="flex items-center gap-5 mt-3 px-1">
+        <span className="flex items-center gap-1.5 text-[10px] text-muted">
+          <span className="w-4 h-0.5 rounded-full" style={{ background: portfolioColor }} />
+          Portfolio
+        </span>
+        <span className="flex items-center gap-1.5 text-[10px] text-muted">
+          <span className="w-4 h-px" style={{ borderTop: '1.5px dashed rgba(0,212,255,0.45)' }} />
+          {bench}
+        </span>
+      </div>
     </div>
   );
 }
