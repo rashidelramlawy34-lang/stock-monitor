@@ -61,33 +61,28 @@ export default function App() {
 
   if (!user) return <LoginPage onLogin={setUser} />;
 
+  if (page === 'hub') return <HubPage setPage={setPage} user={user} />;
+
   return (
     <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
-
-      {page === 'hub' ? (
-        <HubPage setPage={setPage} user={user} />
-      ) : (
-        <>
-          <AlertBanner />
-          <div style={{ flex: 1 }}>
-            {page === 'portfolio'     && <Dashboard />}
-            {page === 'watchlist'     && <WatchlistPage />}
-            {page === 'news'          && <NewsPage />}
-            {page === 'advisor'       && <AdvisorPage />}
-            {page === 'coach'         && <CoachPage />}
-            {page === 'alerts'        && <AlertsPage />}
-            {page === 'discover'      && <DiscoverPage />}
-            {page === 'insiders'      && <InsidersPage />}
-            {page === 'institutional' && <InstitutionalPage />}
-            {page === 'calendar'      && <CalendarPage />}
-            {page === 'trades'        && <TradeLogPage />}
-            {page === 'settings'      && <SettingsPage />}
-            {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
-          </div>
-          <AuraPanel />
-        </>
-      )}
+      <AlertBanner />
+      <div style={{ flex: 1 }}>
+        {page === 'portfolio'     && <Dashboard />}
+        {page === 'watchlist'     && <WatchlistPage />}
+        {page === 'news'          && <NewsPage />}
+        {page === 'advisor'       && <AdvisorPage />}
+        {page === 'coach'         && <CoachPage />}
+        {page === 'alerts'        && <AlertsPage />}
+        {page === 'discover'      && <DiscoverPage />}
+        {page === 'insiders'      && <InsidersPage />}
+        {page === 'institutional' && <InstitutionalPage />}
+        {page === 'calendar'      && <CalendarPage />}
+        {page === 'trades'        && <TradeLogPage />}
+        {page === 'settings'      && <SettingsPage />}
+        {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
+      </div>
+      <AuraPanel />
     </div>
   );
 }

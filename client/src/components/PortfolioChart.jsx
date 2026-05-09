@@ -43,10 +43,10 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { value, label } = payload[0].payload;
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8 }}
-      className="px-3 py-2.5 text-xs shadow-xl">
-      <p className="text-muted mb-1">{label}</p>
-      <p className="font-mono font-bold text-[var(--accent)] text-base">
+    <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: '0 4px 12px rgba(17,24,39,0.08)' }}
+      className="px-3 py-2.5 text-xs">
+      <p style={{ color: 'var(--text-muted)', marginBottom: 4 }}>{label}</p>
+      <p style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>
         ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
     </div>
@@ -66,7 +66,7 @@ export default function PortfolioChart() {
 
   if (loading) {
     return (
-      <div className="card p-5 animate-pulse">
+      <div className="card animate-pulse" style={{ padding: 20 }}>
         <div className="h-4 bg-[var(--surface-2)] rounded-full w-1/4 mb-4" />
         <div className="h-[320px] bg-[var(--surface-2)] rounded-lg" />
       </div>
@@ -75,9 +75,9 @@ export default function PortfolioChart() {
 
   if (data.length < 3) {
     return (
-      <div className="card p-5">
-        <p className="hud-label mb-2">Portfolio Value</p>
-        <p className="text-xs text-muted">Chart will appear once price history accumulates.</p>
+      <div className="card" style={{ padding: 20 }}>
+        <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>Portfolio value</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Chart will appear once price history accumulates.</p>
       </div>
     );
   }
@@ -95,56 +95,50 @@ export default function PortfolioChart() {
   const padding = (maxVal - minVal) * 0.12 || 100;
 
   return (
-    <div className="card" style={{ padding: '16px 18px' }}>
+    <div className="card" style={{ padding: 20 }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16, gap: 12, flexWrap: 'wrap' }}>
         <div>
-          <p className="stat-label">PORTFOLIO VALUE</p>
-          <p style={{ fontSize: 28, fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--text)', lineHeight: 1.1, marginTop: 6 }}>
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 6 }}>Portfolio value</p>
+          <p style={{ fontSize: 28, fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--text)', lineHeight: 1.1 }}>
             ${last.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-        </div>
-        <div style={{ textAlign: 'right', color: positive ? 'var(--bull)' : 'var(--bear)' }}>
-          <p style={{ fontSize: 16, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
+          <p style={{ fontSize: 13, fontFamily: 'var(--font-mono)', color: strokeColor, marginTop: 4 }}>
             {positive ? '+' : ''}${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            {' '}({positive ? '+' : ''}{changePct.toFixed(2)}%)
           </p>
-          <p style={{ fontSize: 12, fontFamily: 'var(--font-mono)', marginTop: 2 }}>
-            {positive ? '+' : ''}{changePct.toFixed(2)}%
-          </p>
+        </div>
+        <div className="pill-group" style={{ alignSelf: 'flex-start' }}>
+          {RANGES.map(r => (
+            <button key={r} className={`pill${range === r ? ' active' : ''}`} onClick={() => setRange(r)}>{r}</button>
+          ))}
         </div>
       </div>
 
-      {/* Range selector */}
-      <div className="pill-group" style={{ marginBottom: 14 }}>
-        {RANGES.map(r => (
-          <button key={r} className={`pill${range === r ? ' active' : ''}`} onClick={() => setRange(r)}>{r}</button>
-        ))}
-      </div>
-
-      <ResponsiveContainer width="100%" height={320}>
+      <ResponsiveContainer width="100%" height={280}>
         <AreaChart data={filtered} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.25} />
-              <stop offset="60%" stopColor={strokeColor} stopOpacity={0.06} />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.2} />
+              <stop offset="60%" stopColor={strokeColor} stopOpacity={0.04} />
               <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
-            strokeDasharray="0"
+            strokeDasharray="3 3"
             horizontal={true} vertical={false}
-            stroke="var(--surface-2)"
+            stroke="rgba(17,24,39,0.06)"
           />
           <XAxis
             dataKey="dateOnly"
-            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: '#6b7280', fontSize: 11, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[minVal - padding, maxVal + padding]}
-            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: '#6b7280', fontSize: 11, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
@@ -152,12 +146,12 @@ export default function PortfolioChart() {
           />
           <ReferenceLine
             y={first}
-            stroke="var(--border)"
+            stroke="#e4e7eb"
             strokeDasharray="4 4"
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ stroke: 'var(--border-2)', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: '#d1d5db', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
           <Area
             type="monotone"
@@ -166,7 +160,7 @@ export default function PortfolioChart() {
             strokeWidth={2}
             fill={`url(#${gradientId})`}
             dot={false}
-            activeDot={{ r: 5, fill: strokeColor, stroke: '#010409', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: strokeColor, stroke: '#ffffff', strokeWidth: 2 }}
             isAnimationActive={true}
             animationDuration={600}
             animationEasing="ease-out"

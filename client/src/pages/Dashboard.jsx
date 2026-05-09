@@ -72,28 +72,35 @@ function exportCSV(holdings, prices, fundamentals) {
   a.click();
 }
 
-function StatCard({ label, value, sub, color, sparkData, sparkType }) {
-  const strokeColor = color?.includes('bull') ? '#16a34a' : color?.includes('bear') ? '#dc2626' : '#3b82f6';
+function StatCard({ label, value, sub, pnl, sparkData, sparkType }) {
+  const hasPnl = pnl !== undefined && pnl !== null;
+  const positive = pnl >= 0;
+  const valueColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : 'var(--text)';
+  const strokeColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : '#2563eb';
   const gradId = `sg-${label.replace(/\s+/g, '')}`;
-  const valueColor = color?.includes('bull') ? 'var(--bull)' : color?.includes('bear') ? 'var(--bear)' : color?.includes('warn') ? 'var(--amber)' : 'var(--text-2)';
+
   return (
-    <div className="card" style={{ padding: '12px 14px', borderLeft: '2px solid var(--line-strong)' }}>
-      <p className="stat-label">{label}</p>
-      <p className="stat-value" style={{ color: valueColor, marginTop: 6 }}>{value}</p>
-      {sub && <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>{sub}</p>}
+    <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{label}</p>
+      <p style={{ fontSize: 28, fontWeight: 600, color: valueColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)' }}>
+        {value}
+      </p>
+      {sub && (
+        <p style={{ fontSize: 12, color: hasPnl ? valueColor : 'var(--text-2)', marginTop: 4 }}>{sub}</p>
+      )}
       {sparkData?.length > 1 && (
-        <div style={{ marginTop: 10, marginLeft: -4, marginRight: -4 }}>
-          <ResponsiveContainer width="100%" height={44}>
+        <div style={{ marginTop: 10, marginLeft: -4, marginRight: -4, flex: 1, minHeight: 32 }}>
+          <ResponsiveContainer width="100%" height={32}>
             {sparkType === 'bar' ? (
-              <BarChart data={sparkData} margin={{ top: 2, right: 4, bottom: 0, left: 4 }} barCategoryGap="18%">
+              <BarChart data={sparkData} margin={{ top: 0, right: 4, bottom: 0, left: 4 }} barCategoryGap="18%">
                 <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                   {sparkData.map((d, i) => (
-                    <Cell key={i} fill={d.v >= 0 ? 'rgba(0,230,118,0.55)' : 'rgba(255,51,85,0.55)'} />
+                    <Cell key={i} fill={d.v >= 0 ? 'rgba(22,163,74,0.55)' : 'rgba(220,38,38,0.55)'} />
                   ))}
                 </Bar>
               </BarChart>
             ) : (
-              <AreaChart data={sparkData} margin={{ top: 2, right: 4, bottom: 0, left: 4 }}>
+              <AreaChart data={sparkData} margin={{ top: 0, right: 4, bottom: 0, left: 4 }}>
                 <defs>
                   <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={strokeColor} stopOpacity={0.3} />
@@ -112,10 +119,10 @@ function StatCard({ label, value, sub, color, sparkData, sparkType }) {
 }
 
 const SORT_COLS = {
-  ticker: (h, p) => h.ticker,
+  ticker: (h) => h.ticker,
   price: (h, p) => p?.price ?? -Infinity,
   today: (h, p) => p?.change_pct ?? -Infinity,
-  pl: (h, p, _f, costBasis) => p?.price ? (p.price - h.cost_basis) * h.shares : -Infinity,
+  pl: (h, p) => p?.price ? (p.price - h.cost_basis) * h.shares : -Infinity,
   upside: (h, p, f) => (f?.target_mean && p?.price) ? (f.target_mean - p.price) / p.price : -Infinity,
 };
 
@@ -132,6 +139,7 @@ export default function Dashboard() {
   const [sortCol, setSortCol] = useState('ticker');
   const [sortAsc, setSortAsc] = useState(true);
   const [expandedTicker, setExpandedTicker] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
 
   const alertTickers = useMemo(() => new Set(alerts.filter(a => !a.triggered).map(a => a.ticker)), [alerts]);
   const triggeredTickers = useMemo(() => new Set(alerts.filter(a => a.triggered).map(a => a.ticker)), [alerts]);
@@ -142,7 +150,6 @@ export default function Dashboard() {
   const gainPct = cost > 0 ? (gain / cost) * 100 : 0;
   const todayGain = dailyPnL(holdings, prices);
   const beta = portfolioBeta(holdings, prices, fundamentals);
-  const betaColor = beta == null ? '' : beta < 1 ? 'text-bull' : beta < 1.5 ? 'text-warn' : 'text-bear';
 
   const todayBars = useMemo(() => {
     return holdings
@@ -185,175 +192,182 @@ export default function Dashboard() {
     else { setSortCol(col); setSortAsc(true); }
   };
 
+  const thStyle = (right) => ({
+    fontSize: 11, color: 'var(--text-muted)', padding: '10px 20px',
+    fontWeight: 400, textAlign: right ? 'right' : 'left',
+    cursor: 'pointer', userSelect: 'none', whiteSpace: 'nowrap',
+  });
+
   const SortTh = ({ col, label, right }) => (
-    <th
-      className={`hud-label ${right ? 'text-right' : 'text-left'} py-2.5 px-4 font-normal cursor-pointer select-none hover:text-arc transition-colors`}
-      onClick={() => onSortCol(col)}
-    >
+    <th style={thStyle(right)} onClick={() => onSortCol(col)}>
       {label}{sortCol === col ? (sortAsc ? ' ↑' : ' ↓') : ''}
     </th>
   );
 
   return (
-    <div style={{ padding: '18px 20px 28px', maxWidth: 1400, margin: '0 auto' }}>
-      {/* Header */}
-      <header style={{ marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <h1 className="hud-title" style={{ fontSize: 16 }}>PORTFOLIO</h1>
-            <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
-              {lastUpdated ? <>Updated {lastUpdated.toLocaleTimeString()}</> : 'Fetching prices…'}
-            </p>
-          </div>
-          <PortfolioSwitcher {...portfolios} />
-        </div>
-        {holdings.length > 0 && (
+    <div style={{ padding: '24px', maxWidth: 1280, margin: '0 auto' }}>
+
+      {/* ── Tier 1: Header zone ────────────────────────────────── */}
+      <div style={{ marginBottom: 32 }}>
+        {/* Top bar */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, flexWrap: 'wrap', gap: 8 }}>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+            {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : 'Fetching prices…'}
+          </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline flex items-center gap-1.5">
-              ↓ CSV
-            </button>
-            <button onClick={refreshPrices} className="btn-outline flex items-center gap-1.5">
-              ↻ Refresh
-            </button>
+            <PortfolioSwitcher {...portfolios} />
+            {holdings.length > 0 && (
+              <>
+                <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline">↓ CSV</button>
+                <button onClick={refreshPrices} className="btn-outline">↻</button>
+              </>
+            )}
           </div>
-        )}
-      </header>
-
-      {/* Main layout: chart (left, dominant) + stat cards (right column) */}
-      <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
-        {/* Left: Charts */}
-        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
-          {holdings.length > 0 && <PortfolioChart />}
-          {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
         </div>
 
-        {/* Right: Stat cards stacked — 256px per spec */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 256, flexShrink: 0 }}>
+        {/* Stat row — 4 cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginTop: 16 }}>
           <StatCard
-            label="Portfolio Value"
+            label="Total value"
             value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '—'}
-            sub={`${holdings.length} holding${holdings.length !== 1 ? 's' : ''}`}
+            sub={holdings.length > 0 ? `${holdings.length} holding${holdings.length !== 1 ? 's' : ''}` : undefined}
             sparkData={portfolioTrend}
             sparkType="area"
           />
           <StatCard
-            label="Today's P&L"
+            label="Today"
             value={cost > 0 && todayGain !== 0 ? `${todayGain >= 0 ? '+' : ''}$${Math.abs(todayGain).toFixed(0)}` : '—'}
             sub={cost > 0 && todayGain !== 0 ? 'vs yesterday close' : undefined}
-            color={todayGain >= 0 ? 'text-bull' : 'text-bear'}
+            pnl={cost > 0 ? todayGain : undefined}
             sparkData={todayBars}
             sparkType="bar"
           />
           <StatCard
-            label="Total P&L"
+            label="Total return"
             value={cost > 0 ? `${gain >= 0 ? '+' : ''}$${Math.abs(gain).toFixed(0)}` : '—'}
             sub={cost > 0 ? `${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%` : undefined}
-            color={gain >= 0 ? 'text-bull' : 'text-bear'}
+            pnl={cost > 0 ? gain : undefined}
             sparkData={portfolioTrend}
             sparkType="area"
           />
           <StatCard
-            label="Portfolio Beta"
+            label="Beta"
             value={beta != null ? beta.toFixed(2) : '—'}
             sub={beta != null ? (beta < 1 ? 'Low volatility' : beta < 1.5 ? 'Moderate risk' : 'High volatility') : undefined}
-            color={betaColor}
           />
-          {holdings.length > 1 && (
-            <div className="card" style={{ padding: '12px 14px', borderLeft: '2px solid var(--line-strong)' }}>
-              <p className="stat-label">Total Cost</p>
-              <p className="stat-value" style={{ marginTop: 6 }}>
-                ${cost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-              <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>invested capital</p>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* Holdings table — full width */}
-      <section className="card" style={{ marginBottom: 18 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid var(--line)', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <h2 className="hud-label">HOLDINGS</h2>
-            {holdings.length > 0 && (
-              <span className="s-tag">{holdings.length} POSITIONS</span>
-            )}
+      {/* ── Tier 2: Primary content ────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
+        {holdings.length > 0 && <PortfolioChart />}
+
+        {/* Holdings card */}
+        <section className="card">
+          {/* Card header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: showAddForm ? 'none' : '1px solid var(--border)', gap: 12, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h2 style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>Holdings</h2>
+              {holdings.length > 0 && (
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 10, padding: '1px 8px' }}>
+                  {holdings.length}
+                </span>
+              )}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {holdings.length > 0 && (
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Filter…"
+                  className="input text-xs py-1 w-32"
+                />
+              )}
+              <button
+                onClick={() => setShowAddForm(v => !v)}
+                className="btn-outline"
+                style={{ fontSize: 13 }}
+              >
+                {showAddForm ? 'Cancel' : '+ Add holding'}
+              </button>
+            </div>
           </div>
-          {holdings.length > 0 && (
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Filter by ticker…"
-              className="input text-xs py-1 w-36"
-            />
+
+          {/* Collapsible add form */}
+          <AddHoldingForm
+            onAdd={addHolding}
+            open={showAddForm}
+            onClose={() => setShowAddForm(false)}
+          />
+
+          {/* Table */}
+          {loading && <p style={{ padding: '20px 24px', fontSize: 13, color: 'var(--text-muted)' }}>Loading…</p>}
+          {error && <p style={{ padding: '20px 24px', fontSize: 13, color: 'var(--loss)' }}>Error: {error}</p>}
+          {!loading && holdings.length === 0 && (
+            <p style={{ padding: '20px 24px', fontSize: 13, color: 'var(--text-muted)' }}>
+              No holdings yet. Use the button above to add your first stock.
+            </p>
           )}
-        </div>
 
-        {loading && <p className="px-5 py-6 text-muted text-sm">Loading…</p>}
-        {error && <p className="px-5 py-6 text-bear text-sm">Error: {error}</p>}
-        {!loading && holdings.length === 0 && (
-          <p className="px-5 py-6 text-muted text-sm">No holdings yet. Add your first stock below.</p>
-        )}
+          {!loading && holdings.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <SortTh col="ticker" label="Ticker" />
+                    <SortTh col="price" label="Price" right />
+                    <SortTh col="today" label="Today" right />
+                    <th style={{ ...thStyle(false), cursor: 'default' }}>7D</th>
+                    <th style={thStyle(true)}>Shares</th>
+                    <th style={thStyle(true)}>Cost</th>
+                    <SortTh col="pl" label="P&L" right />
+                    <SortTh col="upside" label="Upside" right />
+                    <th style={thStyle(true)}>Short %</th>
+                    <th style={{ padding: '10px 20px' }} />
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredSorted.map(h => (
+                    <HoldingRow
+                      key={h.ticker}
+                      holding={h}
+                      price={prices[h.ticker]}
+                      candles={candles[h.ticker]}
+                      fundamentals={fundamentals[h.ticker]}
+                      shortInterest={shortInterest[h.ticker]}
+                      latestUpgrade={(upgrades[h.ticker] ?? [])[0]}
+                      hasAlert={alertTickers.has(h.ticker)}
+                      hasTriggeredAlert={triggeredTickers.has(h.ticker)}
+                      expanded={expandedTicker === h.ticker}
+                      onToggleExpand={() => setExpandedTicker(t => t === h.ticker ? null : h.ticker)}
+                      onRemove={removeHolding}
+                    />
+                  ))}
+                </tbody>
+              </table>
+              {filteredSorted.length === 0 && search && (
+                <p style={{ padding: '20px 24px', fontSize: 13, color: 'var(--text-muted)', textAlign: 'center' }}>
+                  No holdings match "{search}"
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
 
-        {!loading && holdings.length > 0 && (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-[var(--border)]">
-                  <SortTh col="ticker" label="Ticker" />
-                  <SortTh col="price" label="Price" right />
-                  <SortTh col="today" label="Today" right />
-                  <th className="hud-label py-3 px-4 font-normal text-left">7D</th>
-                  <th className="hud-label text-right py-3 px-4 font-normal">Shares</th>
-                  <th className="hud-label text-right py-3 px-4 font-normal">Cost</th>
-                  <SortTh col="pl" label="P&L" right />
-                  <SortTh col="upside" label="Upside" right />
-                  <th className="hud-label text-right py-3 px-4 font-normal">Short%</th>
-                  <th className="py-3 px-4" />
-                </tr>
-              </thead>
-              <tbody>
-                {filteredSorted.map(h => (
-                  <HoldingRow
-                    key={h.ticker}
-                    holding={h}
-                    price={prices[h.ticker]}
-                    candles={candles[h.ticker]}
-                    fundamentals={fundamentals[h.ticker]}
-                    shortInterest={shortInterest[h.ticker]}
-                    latestUpgrade={(upgrades[h.ticker] ?? [])[0]}
-                    hasAlert={alertTickers.has(h.ticker)}
-                    hasTriggeredAlert={triggeredTickers.has(h.ticker)}
-                    expanded={expandedTicker === h.ticker}
-                    onToggleExpand={() => setExpandedTicker(t => t === h.ticker ? null : h.ticker)}
-                    onRemove={removeHolding}
-                  />
-                ))}
-              </tbody>
-            </table>
-            {filteredSorted.length === 0 && search && (
-              <p className="px-5 py-6 text-muted text-sm text-center">No holdings match "{search}"</p>
-            )}
-          </div>
-        )}
-
-        <div className="px-5 py-4 border-t border-[var(--border)]">
-          <AddHoldingForm onAdd={addHolding} />
-        </div>
-      </section>
-
-      {/* Bottom grid — 3 columns on xl */}
+      {/* ── Tier 3: Supporting widgets ─────────────────────────── */}
       {holdings.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18, marginBottom: 18 }}>
-          {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
           <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
-          <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
-        </div>
-      )}
-      {holdings.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
-          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
+          <BenchmarkChart holdings={holdings} candles={candles} />
           <RebalancePanel holdings={holdings} prices={prices} />
+          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
+          {holdings.length > 1 && (
+            <div style={{ gridColumn: 'span 2' }}>
+              <CorrelationMatrix holdings={holdings} candles={candles} />
+            </div>
+          )}
+          <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
         </div>
       )}
     </div>

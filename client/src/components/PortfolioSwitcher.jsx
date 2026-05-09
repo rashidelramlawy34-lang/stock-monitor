@@ -34,64 +34,99 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
   }
 
   return (
-    <div className="relative" ref={ref}>
+    <div style={{ position: 'relative' }} ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-2)] bg-[var(--surface-2)] hover:border-[var(--border-2)] transition-all text-sm text-arc"
+        className="btn-outline"
+        style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13 }}
       >
-        <span className="font-semibold max-w-[140px] truncate">{activePortfolio?.name ?? 'Portfolio'}</span>
-        <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M19 9l-7 7-7-7" /></svg>
+        <span style={{ maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {activePortfolio?.name ?? 'Portfolio'}
+        </span>
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} style={{ flexShrink: 0 }}>
+          <path d="M19 9l-7 7-7-7" />
+        </svg>
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1 w-52 card z-50 shadow-xl">
-          <div className="py-1">
-            {portfolios.map(p => (
-              <div key={p.id} className="flex items-center group">
-                {renaming === p.id ? (
-                  <form onSubmit={e => handleRename(e, p.id)} className="flex-1 flex gap-1 px-2 py-1">
-                    <input
-                      autoFocus
-                      value={renameVal}
-                      onChange={e => setRenameVal(e.target.value)}
-                      className="input flex-1 text-xs px-2 py-0.5"
-                      onBlur={() => setRenaming(null)}
-                    />
-                    <button type="submit" className="text-[var(--gain)] text-xs">✓</button>
-                  </form>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => { setActive(p.id); setOpen(false); }}
-                      className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${p.id === activeId ? 'text-arc' : 'text-[var(--text-2)] hover:text-arc'}`}
-                    >
-                      {p.id === activeId && <span className="text-[8px]">●</span>}
-                      <span className="truncate">{p.name}</span>
-                      {p.is_default === 1 && <span className="ml-auto text-[9px] text-muted">default</span>}
-                    </button>
-                    <div className="hidden group-hover:flex gap-1 pr-2 shrink-0">
-                      <button
-                        onClick={() => { setRenaming(p.id); setRenameVal(p.name); }}
-                        className="text-muted hover:text-arc text-[10px] px-1"
-                        title="Rename"
-                      >✎</button>
-                      {!p.is_default && (
-                        <button
-                          onClick={() => { if (confirm(`Delete "${p.name}"?`)) deletePortfolio(p.id).catch(err => alert(err.message)); }}
-                          className="text-muted hover:text-bear text-[10px] px-1"
-                          title="Delete"
-                        >✕</button>
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', right: 0,
+          width: 208, background: 'var(--surface-1)',
+          border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+          boxShadow: '0 4px 12px rgba(17,24,39,0.10)', zIndex: 50,
+        }}>
+          <div style={{ padding: '4px 0' }}>
+            {portfolios.map(p => {
+              const isActive = p.id === activeId;
+              return (
+                <div key={p.id} className="group" style={{ display: 'flex', alignItems: 'center', position: 'relative' }}>
+                  {renaming === p.id ? (
+                    <form onSubmit={e => handleRename(e, p.id)} style={{ flex: 1, display: 'flex', gap: 4, padding: '4px 8px' }}>
+                      <input
+                        autoFocus
+                        value={renameVal}
+                        onChange={e => setRenameVal(e.target.value)}
+                        className="input flex-1 text-xs px-2 py-0.5"
+                        onBlur={() => setRenaming(null)}
+                      />
+                      <button type="submit" style={{ color: 'var(--gain)', fontSize: 12 }}>✓</button>
+                    </form>
+                  ) : (
+                    <>
+                      {isActive && (
+                        <span style={{
+                          position: 'absolute', left: 0, top: 0, bottom: 0,
+                          width: 3, borderRadius: '0 2px 2px 0', background: 'var(--accent)',
+                        }} />
                       )}
-                    </div>
-                  </>
-                )}
-              </div>
-            ))}
+                      <button
+                        onClick={() => { setActive(p.id); setOpen(false); }}
+                        style={{
+                          flex: 1, display: 'flex', alignItems: 'center', gap: 6,
+                          padding: '8px 12px 8px 14px', fontSize: 13, textAlign: 'left',
+                          background: isActive ? 'var(--surface-2)' : 'transparent',
+                          color: isActive ? 'var(--text)' : 'var(--text-2)',
+                          transition: 'background 0.1s',
+                          border: 'none', width: '100%', cursor: 'pointer',
+                        }}
+                        onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'var(--surface-2)'; }}
+                        onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent'; }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+                          {p.name}
+                        </span>
+                        {p.is_default === 1 && (
+                          <span style={{ fontSize: 9, color: 'var(--text-muted)', marginLeft: 'auto', flexShrink: 0 }}>default</span>
+                        )}
+                      </button>
+                      <div className="hidden group-hover:flex gap-1 pr-2 shrink-0">
+                        <button
+                          onClick={() => { setRenaming(p.id); setRenameVal(p.name); }}
+                          style={{ color: 'var(--text-muted)', fontSize: 10, padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+                          onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                          onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                          title="Rename"
+                        >✎</button>
+                        {!p.is_default && (
+                          <button
+                            onClick={() => { if (confirm(`Delete "${p.name}"?`)) deletePortfolio(p.id).catch(err => alert(err.message)); }}
+                            style={{ color: 'var(--text-muted)', fontSize: 10, padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer' }}
+                            onMouseEnter={e => e.currentTarget.style.color = 'var(--loss)'}
+                            onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+                            title="Delete"
+                          >✕</button>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          <div className="border-t border-[var(--border)] py-1">
+          <div style={{ borderTop: '1px solid var(--border)', padding: '4px 0' }}>
             {creating ? (
-              <form onSubmit={handleCreate} className="flex gap-1 px-2 py-1">
+              <form onSubmit={handleCreate} style={{ display: 'flex', gap: 4, padding: '4px 8px' }}>
                 <input
                   autoFocus
                   placeholder="Portfolio name"
@@ -99,15 +134,17 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
                   onChange={e => setNewName(e.target.value)}
                   className="input flex-1 text-xs px-2 py-0.5"
                 />
-                <button type="submit" className="text-[var(--gain)] text-xs px-1">✓</button>
-                <button type="button" onClick={() => setCreating(false)} className="text-muted text-xs px-1">✕</button>
+                <button type="submit" style={{ color: 'var(--gain)', fontSize: 12, padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer' }}>✓</button>
+                <button type="button" onClick={() => setCreating(false)} style={{ color: 'var(--text-muted)', fontSize: 12, padding: '0 4px', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
               </form>
             ) : (
               <button
                 onClick={() => setCreating(true)}
-                className="w-full text-left px-3 py-1.5 text-xs text-muted hover:text-arc transition-colors"
+                style={{ width: '100%', textAlign: 'left', padding: '6px 12px', fontSize: 12, color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.color = 'var(--text)'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
               >
-                + New Portfolio
+                + New portfolio
               </button>
             )}
           </div>
