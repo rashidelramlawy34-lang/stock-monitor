@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
 import {
   AreaChart, Area, BarChart, Bar, Cell, ResponsiveContainer,
 } from 'recharts';
@@ -72,21 +73,51 @@ function exportCSV(holdings, prices, fundamentals) {
   a.click();
 }
 
-function StatCard({ label, value, sub, pnl, sparkData, sparkType }) {
+function useCountUp(target, duration = 800) {
+  const [value, setValue] = useState(0);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    if (target == null || !isFinite(target)) { setValue(target); return; }
+    const start = performance.now();
+    const from = 0;
+    const tick = (now) => {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setValue(from + (target - from) * eased);
+      if (t < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, [target, duration]);
+
+  return value;
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: 'easeOut' } },
+};
+
+function StatCard({ label, value, sub, pnl, sparkData, sparkType, countUp, formatter }) {
   const hasPnl = pnl !== undefined && pnl !== null;
   const positive = pnl >= 0;
   const valueColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : 'var(--text)';
   const strokeColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : '#2563eb';
   const gradId = `sg-${label.replace(/\s+/g, '')}`;
+  const animated = useCountUp(countUp ?? 0);
+  const displayValue = (countUp != null && isFinite(countUp))
+    ? (formatter ? formatter(animated) : `${Math.round(animated)}`)
+    : value;
 
   return (
-    <div className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{label}</p>
-      <p style={{ fontSize: 28, fontWeight: 600, color: valueColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)' }}>
-        {value}
+    <motion.div variants={cardVariants} className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 8 }}>{label}</p>
+      <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, color: valueColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)' }}>
+        {displayValue}
       </p>
       {sub && (
-        <p style={{ fontSize: 12, color: hasPnl ? valueColor : 'var(--text-2)', marginTop: 4 }}>{sub}</p>
+        <p style={{ fontSize: 'var(--text-xs)', color: hasPnl ? valueColor : 'var(--text-2)', marginTop: 4 }}>{sub}</p>
       )}
       {sparkData?.length > 1 && (
         <div style={{ marginTop: 10, marginLeft: -4, marginRight: -4, flex: 1, minHeight: 32 }}>
@@ -114,7 +145,7 @@ function StatCard({ label, value, sub, pnl, sparkData, sparkType }) {
           </ResponsiveContainer>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -225,11 +256,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stat row — 4 cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginTop: 16 }}>
+        {/* Stat row — 4 cards, stagger-enter */}
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.06 } } }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16, marginTop: 16 }}
+        >
           <StatCard
             label="Total value"
             value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '—'}
+            countUp={cost > 0 ? value : undefined}
+            formatter={(v) => `$${Math.round(v).toLocaleString('en-US')}`}
             sub={holdings.length > 0 ? `${holdings.length} holding${holdings.length !== 1 ? 's' : ''}` : undefined}
             sparkData={portfolioTrend}
             sparkType="area"
@@ -237,6 +275,8 @@ export default function Dashboard() {
           <StatCard
             label="Today"
             value={cost > 0 && todayGain !== 0 ? `${todayGain >= 0 ? '+' : ''}$${Math.abs(todayGain).toFixed(0)}` : '—'}
+            countUp={cost > 0 && todayGain !== 0 ? Math.abs(todayGain) : undefined}
+            formatter={(v) => `${todayGain >= 0 ? '+' : '-'}$${Math.round(v).toLocaleString('en-US')}`}
             sub={cost > 0 && todayGain !== 0 ? 'vs yesterday close' : undefined}
             pnl={cost > 0 ? todayGain : undefined}
             sparkData={todayBars}
@@ -245,6 +285,8 @@ export default function Dashboard() {
           <StatCard
             label="Total return"
             value={cost > 0 ? `${gain >= 0 ? '+' : ''}$${Math.abs(gain).toFixed(0)}` : '—'}
+            countUp={cost > 0 ? Math.abs(gain) : undefined}
+            formatter={(v) => `${gain >= 0 ? '+' : '-'}$${Math.round(v).toLocaleString('en-US')}`}
             sub={cost > 0 ? `${gainPct >= 0 ? '+' : ''}${gainPct.toFixed(2)}%` : undefined}
             pnl={cost > 0 ? gain : undefined}
             sparkData={portfolioTrend}
@@ -255,7 +297,7 @@ export default function Dashboard() {
             value={beta != null ? beta.toFixed(2) : '—'}
             sub={beta != null ? (beta < 1 ? 'Low volatility' : beta < 1.5 ? 'Moderate risk' : 'High volatility') : undefined}
           />
-        </div>
+        </motion.div>
       </div>
 
       {/* ── Tier 2: Primary content ────────────────────────────── */}
@@ -265,7 +307,7 @@ export default function Dashboard() {
         {/* Holdings card */}
         <section className="card">
           {/* Card header */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: showAddForm ? 'none' : '1px solid var(--border)', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid var(--border)', gap: 12, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <h2 style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 400 }}>Holdings</h2>
               {holdings.length > 0 && (
@@ -284,11 +326,11 @@ export default function Dashboard() {
                 />
               )}
               <button
-                onClick={() => setShowAddForm(v => !v)}
+                onClick={() => setShowAddForm(true)}
                 className="btn-outline"
                 style={{ fontSize: 13 }}
               >
-                {showAddForm ? 'Cancel' : '+ Add holding'}
+                + Add holding
               </button>
             </div>
           </div>
@@ -355,21 +397,33 @@ export default function Dashboard() {
         </section>
       </div>
 
-      {/* ── Tier 3: Supporting widgets ─────────────────────────── */}
-      {holdings.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
-          <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
-          <BenchmarkChart holdings={holdings} candles={candles} />
-          <RebalancePanel holdings={holdings} prices={prices} />
-          <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
-          {holdings.length > 1 && (
-            <div style={{ gridColumn: 'span 2' }}>
-              <CorrelationMatrix holdings={holdings} candles={candles} />
-            </div>
-          )}
-          <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
-        </div>
-      )}
+      {/* ── Tier 3: Supporting widgets (scroll-reveal) ────────── */}
+      {holdings.length > 0 && (() => {
+        const widgets = [
+          { key: 'sector',    node: <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} /> },
+          { key: 'benchmark', node: <BenchmarkChart holdings={holdings} candles={candles} /> },
+          { key: 'rebalance', node: <RebalancePanel holdings={holdings} prices={prices} /> },
+          { key: 'dividends', node: <DividendPanel dividends={dividends} holdings={holdings} prices={prices} /> },
+          ...(holdings.length > 1 ? [{ key: 'corr', node: <CorrelationMatrix holdings={holdings} candles={candles} />, span2: true }] : []),
+          { key: 'earnings',  node: <EarningsCalendar holdings={holdings} fundamentals={fundamentals} /> },
+        ];
+        return (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: 16 }}>
+            {widgets.map((w, i) => (
+              <motion.div
+                key={w.key}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-80px' }}
+                transition={{ duration: 0.32, ease: 'easeOut', delay: i * 0.06 }}
+                style={w.span2 ? { gridColumn: 'span 2' } : undefined}
+              >
+                {w.node}
+              </motion.div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 }

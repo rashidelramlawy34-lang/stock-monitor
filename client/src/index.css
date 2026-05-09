@@ -37,6 +37,15 @@
   --radius-sm:   4px;
   --radius-pill: 999px;
 
+  /* Type scale */
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;
+  --text-lg:   16px;
+  --text-xl:   22px;
+  --text-2xl:  28px;
+  --text-3xl:  36px;
+
   /* Legacy shims — keep old names pointing at new tokens so
      unrefactored components don't break between tickets     */
   --font-body:   var(--font-sans);
@@ -133,9 +142,13 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, transform 0.16s ease-out, box-shadow 0.16s ease-out;
   }
-  .card:hover { border-color: var(--border-2); }
+  .card:hover {
+    border-color: var(--border-2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(17, 24, 39, 0.10);
+  }
 
   /* ── Buttons ────────────────────────────────────────── */
   .btn-primary {
@@ -151,7 +164,8 @@
     font-family: var(--font-sans);
     display: inline-flex; align-items: center; gap: 6px;
   }
-  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-hover); transform: scale(1.02); }
+  .btn-primary { transition: background 0.15s, transform 0.12s ease-out; }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .btn-outline {
@@ -163,11 +177,11 @@
     color: var(--text);
     background: transparent;
     cursor: pointer;
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.15s, color 0.15s, transform 0.12s ease-out;
     display: inline-flex; align-items: center; gap: 4px;
     font-family: var(--font-sans);
   }
-  .btn-outline:hover { border-color: var(--text-muted); }
+  .btn-outline:hover { border-color: var(--text-muted); transform: scale(1.02); }
 
   .btn-ghost {
     color: var(--text-2);

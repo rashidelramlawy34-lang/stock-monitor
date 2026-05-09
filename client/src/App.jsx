@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { useAuth } from './hooks/useAuth';
 import MarketBar from './components/MarketBar.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -61,28 +62,45 @@ export default function App() {
 
   if (!user) return <LoginPage onLogin={setUser} />;
 
-  if (page === 'hub') return <HubPage setPage={setPage} user={user} />;
+  if (page === 'hub') return (
+    <MotionConfig reducedMotion="user">
+      <HubPage setPage={setPage} user={user} />
+    </MotionConfig>
+  );
 
   return (
-    <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
-      <AlertBanner />
-      <div style={{ flex: 1 }}>
-        {page === 'portfolio'     && <Dashboard />}
-        {page === 'watchlist'     && <WatchlistPage />}
-        {page === 'news'          && <NewsPage />}
-        {page === 'advisor'       && <AdvisorPage />}
-        {page === 'coach'         && <CoachPage />}
-        {page === 'alerts'        && <AlertsPage />}
-        {page === 'discover'      && <DiscoverPage />}
-        {page === 'insiders'      && <InsidersPage />}
-        {page === 'institutional' && <InstitutionalPage />}
-        {page === 'calendar'      && <CalendarPage />}
-        {page === 'trades'        && <TradeLogPage />}
-        {page === 'settings'      && <SettingsPage />}
-        {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
+    <MotionConfig reducedMotion="user">
+      <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
+        <AlertBanner />
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={page}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              style={{ flex: 1 }}
+            >
+              {page === 'portfolio'     && <Dashboard />}
+              {page === 'watchlist'     && <WatchlistPage />}
+              {page === 'news'          && <NewsPage />}
+              {page === 'advisor'       && <AdvisorPage />}
+              {page === 'coach'         && <CoachPage />}
+              {page === 'alerts'        && <AlertsPage />}
+              {page === 'discover'      && <DiscoverPage />}
+              {page === 'insiders'      && <InsidersPage />}
+              {page === 'institutional' && <InstitutionalPage />}
+              {page === 'calendar'      && <CalendarPage />}
+              {page === 'trades'        && <TradeLogPage />}
+              {page === 'settings'      && <SettingsPage />}
+              {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <AuraPanel />
       </div>
-      <AuraPanel />
-    </div>
+    </MotionConfig>
   );
 }

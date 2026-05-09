@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useReducedMotion } from 'framer-motion';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
@@ -37,7 +38,7 @@ const ORB_SIZE    = 280;
 const PLANET_SIZE = 44;
 const STATS_H     = 68;
 const LS_KEY      = 'sentinel-hub-v2';
-const RINGS     = [220, 355];
+const RINGS     = [220, 295];
 const COMET_SPD = 48;
 
 // Inner ring noticeably faster, outer ring slow and weighty
@@ -124,6 +125,8 @@ export default function HubPage({ setPage, user }) {
 
   const containerRef  = useRef(null);
   const [cSize, setCSize] = useState({ w: window.innerWidth, h: window.innerHeight - 40 });
+  const [warpingId, setWarpingId] = useState(null);
+  const prefersReducedMotion = useReducedMotion();
 
   // All RAF state in refs — no React re-renders per frame
   const anglesRef    = useRef({});
@@ -214,6 +217,22 @@ export default function HubPage({ setPage, user }) {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  // ── Warp navigation ───────────────────────────────────────
+  const handleWarp = useCallback((id) => {
+    if (prefersReducedMotion) {
+      setPage(id);
+      return;
+    }
+    // Pulse the planet up
+    const el = planetRefs.current[id];
+    if (el) el.style.transform = 'scale(1.6)';
+    setWarpingId(id);
+    setTimeout(() => setPage(id), 380);
+  }, [setPage, prefersReducedMotion]);
+
+  const handleWarpRef = useRef(handleWarp);
+  handleWarpRef.current = handleWarp;
+
   // ── Drag ──────────────────────────────────────────────────
   const onMouseDown = useCallback((e, id) => {
     e.preventDefault();
@@ -253,7 +272,7 @@ export default function HubPage({ setPage, user }) {
       const d = dragRef.current;
       if (!d) return;
       if (!movedRef.current) {
-        setPage(d.id);
+        handleWarpRef.current(d.id);
       } else {
         // Snap to nearest ring at release
         const mx   = d.lastMx ?? 0;
@@ -606,6 +625,17 @@ export default function HubPage({ setPage, user }) {
           </div>
         );
       })}
+
+      {/* Warp-to-black overlay */}
+      <div
+        style={{
+          position: 'absolute', inset: 0, zIndex: 50,
+          background: '#010409',
+          opacity: warpingId ? 1 : 0,
+          transition: 'opacity 0.28s ease-in',
+          pointerEvents: warpingId ? 'all' : 'none',
+        }}
+      />
 
       {/* Bottom stats bar */}
       <div style={{

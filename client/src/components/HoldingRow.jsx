@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import Sparkline from './Sparkline';
 import TechnicalsChart from './TechnicalsChart';
 
@@ -139,25 +140,38 @@ export default function HoldingRow({
         </td>
       </tr>
 
-      {/* Expanded technicals */}
-      {expanded && closes.length >= 30 && (
-        <tr>
-          <td colSpan={10} style={{ background: 'var(--surface-1)', padding: 0 }}>
-            <div className="h-detail">
-              <TechnicalsChart closes={closes} timestamps={timestamps} ticker={holding.ticker} />
-            </div>
-          </td>
-        </tr>
-      )}
-      {expanded && closes.length < 30 && (
-        <tr>
-          <td colSpan={10} style={{ background: 'var(--surface-1)', padding: '10px 18px' }}>
-            <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              Not enough candle data to show technicals (need at least 30 days).
-            </p>
-          </td>
-        </tr>
-      )}
+      {/* Expanded technicals — AnimatePresence height animation */}
+      <AnimatePresence>
+        {expanded && (
+          <motion.tr
+            key="detail"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <td colSpan={10} style={{ padding: 0, background: 'var(--surface-1)' }}>
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: 'auto' }}
+                exit={{ height: 0 }}
+                transition={{ duration: 0.28, ease: [0.4, 0, 0.2, 1] }}
+                style={{ overflow: 'hidden' }}
+              >
+                {closes.length >= 30 ? (
+                  <div className="h-detail">
+                    <TechnicalsChart closes={closes} timestamps={timestamps} ticker={holding.ticker} />
+                  </div>
+                ) : (
+                  <p style={{ fontSize: 11, color: 'var(--text-muted)', padding: '10px 18px' }}>
+                    Not enough candle data to show technicals (need at least 30 days).
+                  </p>
+                )}
+              </motion.div>
+            </td>
+          </motion.tr>
+        )}
+      </AnimatePresence>
     </>
   );
 }
