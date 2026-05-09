@@ -73,18 +73,19 @@ function exportCSV(holdings, prices, fundamentals) {
 }
 
 function StatCard({ label, value, sub, color, sparkData, sparkType }) {
-  const strokeColor = color?.includes('bull') ? '#00e676' : color?.includes('bear') ? '#ff3355' : '#00d4ff';
+  const strokeColor = color?.includes('bull') ? '#16a34a' : color?.includes('bear') ? '#dc2626' : '#3b82f6';
   const gradId = `sg-${label.replace(/\s+/g, '')}`;
+  const valueColor = color?.includes('bull') ? 'var(--bull)' : color?.includes('bear') ? 'var(--bear)' : color?.includes('warn') ? 'var(--amber)' : 'var(--text-2)';
   return (
-    <div className="card p-5 border-l-2 border-l-[rgba(0,212,255,0.3)]">
-      <p className="hud-label mb-3">{label}</p>
-      <p className={`text-3xl font-bold font-mono tracking-tight ${color || 'text-[#a8d8ea]'}`}>{value}</p>
-      {sub && <p className="text-xs text-muted mt-1.5">{sub}</p>}
+    <div className="card" style={{ padding: '12px 14px', borderLeft: '2px solid var(--line-strong)' }}>
+      <p className="stat-label">{label}</p>
+      <p className="stat-value" style={{ color: valueColor, marginTop: 6 }}>{value}</p>
+      {sub && <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>{sub}</p>}
       {sparkData?.length > 1 && (
-        <div className="mt-3 -mx-1">
+        <div style={{ marginTop: 10, marginLeft: -4, marginRight: -4 }}>
           <ResponsiveContainer width="100%" height={44}>
             {sparkType === 'bar' ? (
-              <BarChart data={sparkData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }} barCategoryGap="18%">
+              <BarChart data={sparkData} margin={{ top: 2, right: 4, bottom: 0, left: 4 }} barCategoryGap="18%">
                 <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                   {sparkData.map((d, i) => (
                     <Cell key={i} fill={d.v >= 0 ? 'rgba(0,230,118,0.55)' : 'rgba(255,51,85,0.55)'} />
@@ -92,7 +93,7 @@ function StatCard({ label, value, sub, color, sparkData, sparkType }) {
                 </Bar>
               </BarChart>
             ) : (
-              <AreaChart data={sparkData} margin={{ top: 2, right: 2, bottom: 0, left: 2 }}>
+              <AreaChart data={sparkData} margin={{ top: 2, right: 4, bottom: 0, left: 4 }}>
                 <defs>
                   <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor={strokeColor} stopOpacity={0.3} />
@@ -194,20 +195,20 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="p-5 max-w-[1400px] mx-auto">
+    <div style={{ padding: '18px 20px 28px', maxWidth: 1400, margin: '0 auto' }}>
       {/* Header */}
-      <header className="mb-5 flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-3 flex-wrap">
+      <header style={{ marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
           <div>
-            <h1 className="hud-title text-xl">Portfolio</h1>
-            <p className="text-muted text-xs mt-0.5">
+            <h1 className="hud-title" style={{ fontSize: 16 }}>PORTFOLIO</h1>
+            <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 2 }}>
               {lastUpdated ? <>Updated {lastUpdated.toLocaleTimeString()}</> : 'Fetching prices…'}
             </p>
           </div>
           <PortfolioSwitcher {...portfolios} />
         </div>
         {holdings.length > 0 && (
-          <div className="flex items-center gap-2">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <button onClick={() => exportCSV(holdings, prices, fundamentals)} className="btn-outline flex items-center gap-1.5">
               ↓ CSV
             </button>
@@ -219,15 +220,15 @@ export default function Dashboard() {
       </header>
 
       {/* Main layout: chart (left, dominant) + stat cards (right column) */}
-      <div className="flex gap-5 mb-5">
-        {/* Left: Chart */}
-        <div className="flex-1 min-w-0 flex flex-col gap-5">
+      <div style={{ display: 'flex', gap: 18, marginBottom: 18 }}>
+        {/* Left: Charts */}
+        <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 18 }}>
           {holdings.length > 0 && <PortfolioChart />}
           {holdings.length > 0 && <BenchmarkChart holdings={holdings} candles={candles} />}
         </div>
 
-        {/* Right: Stat cards stacked */}
-        <div className="flex flex-col gap-4 w-64 shrink-0">
+        {/* Right: Stat cards stacked — 256px per spec */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, width: 256, flexShrink: 0 }}>
           <StatCard
             label="Portfolio Value"
             value={cost > 0 ? `$${value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}` : '—'}
@@ -258,21 +259,26 @@ export default function Dashboard() {
             color={betaColor}
           />
           {holdings.length > 1 && (
-            <div className="card p-5 border-l-2 border-l-[rgba(0,212,255,0.3)]">
-              <p className="hud-label mb-3">Total Cost</p>
-              <p className="text-3xl font-bold font-mono tracking-tight text-[#a8d8ea]">
+            <div className="card" style={{ padding: '12px 14px', borderLeft: '2px solid var(--line-strong)' }}>
+              <p className="stat-label">Total Cost</p>
+              <p className="stat-value" style={{ marginTop: 6 }}>
                 ${cost.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
-              <p className="text-xs text-muted mt-1.5">invested capital</p>
+              <p style={{ fontSize: 10, color: 'var(--muted)', marginTop: 4 }}>invested capital</p>
             </div>
           )}
         </div>
       </div>
 
       {/* Holdings table — full width */}
-      <section className="card mb-5">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[rgba(0,212,255,0.08)] gap-3 flex-wrap">
-          <h2 className="hud-label">Holdings</h2>
+      <section className="card" style={{ marginBottom: 18 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: '1px solid var(--line)', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <h2 className="hud-label">HOLDINGS</h2>
+            {holdings.length > 0 && (
+              <span className="s-tag">{holdings.length} POSITIONS</span>
+            )}
+          </div>
           {holdings.length > 0 && (
             <input
               value={search}
@@ -293,7 +299,7 @@ export default function Dashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[rgba(0,212,255,0.06)]">
+                <tr className="border-b border-[var(--border)]">
                   <SortTh col="ticker" label="Ticker" />
                   <SortTh col="price" label="Price" right />
                   <SortTh col="today" label="Today" right />
@@ -331,24 +337,24 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="px-5 py-4 border-t border-[rgba(0,212,255,0.08)]">
+        <div className="px-5 py-4 border-t border-[var(--border)]">
           <AddHoldingForm onAdd={addHolding} />
         </div>
       </section>
 
-      {/* Bottom panels */}
-      {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
+      {/* Bottom grid — 3 columns on xl */}
       {holdings.length > 0 && (
-        <div className="grid sm:grid-cols-2 gap-4 mb-5">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18, marginBottom: 18 }}>
+          {holdings.length > 1 && <CorrelationMatrix holdings={holdings} candles={candles} />}
           <SectorChart holdings={holdings} prices={prices} fundamentals={fundamentals} />
           <EarningsCalendar holdings={holdings} fundamentals={fundamentals} />
         </div>
       )}
       {holdings.length > 0 && (
-        <>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 18 }}>
           <DividendPanel dividends={dividends} holdings={holdings} prices={prices} />
           <RebalancePanel holdings={holdings} prices={prices} />
-        </>
+        </div>
       )}
     </div>
   );

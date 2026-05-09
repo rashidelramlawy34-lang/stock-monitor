@@ -43,7 +43,7 @@ export default function InsidersPage() {
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`text-xs px-2 py-0.5 rounded-full border transition-all ${filter === t ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
+              className={`text-xs px-2 py-0.5 rounded-full border transition-all ${filter === t ? 'border-[var(--accent)] text-[var(--accent)] bg-[var(--surface-2)]' : 'border-[var(--border)] text-muted hover:text-[var(--text)]'}`}
             >{t}</button>
           ))}
         </div>
@@ -56,7 +56,7 @@ export default function InsidersPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="text-muted border-b border-[rgba(0,212,255,0.1)]">
+                <tr className="text-muted border-b border-[var(--border)]">
                   <th className="text-left px-4 py-2 font-medium">Name</th>
                   <th className="text-left px-4 py-2 font-medium">Ticker</th>
                   <th className="text-left px-4 py-2 font-medium">Action</th>
@@ -77,7 +77,7 @@ export default function InsidersPage() {
                     <tr key={i} className="table-row-hover">
                       <td className="px-4 py-2 text-white truncate max-w-[160px]">{tx.name ?? '—'}</td>
                       <td className="px-4 py-2 font-bold text-arc">{tx.ticker}</td>
-                      <td className={`px-4 py-2 font-semibold ${isBuy ? 'text-[#00e676]' : 'text-bear'}`}>
+                      <td className={`px-4 py-2 font-semibold ${isBuy ? 'text-gain' : 'text-bear'}`}>
                         {isBuy ? '▲ Buy' : '▼ Sell'}
                       </td>
                       <td className="px-4 py-2 text-right text-white">{shares.toLocaleString()}</td>

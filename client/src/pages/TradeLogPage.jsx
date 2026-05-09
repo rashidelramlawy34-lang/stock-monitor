@@ -88,7 +88,7 @@ function TaxOptimizer({ trades }) {
   return (
     <div>
       {/* Summary chips */}
-      <div className="flex flex-wrap gap-3 p-4 border-b border-[rgba(0,212,255,0.1)]">
+      <div className="flex flex-wrap gap-3 p-4 border-b border-[var(--border)]">
         <div className="text-xs">
           <span className="text-muted">LT Losses: </span>
           <span className="text-bear font-bold">${Math.abs(ltLoss.reduce((s, r) => s + (r.unrealized ?? 0), 0)).toFixed(0)}</span>
@@ -115,7 +115,7 @@ function TaxOptimizer({ trades }) {
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-[rgba(0,212,255,0.08)] text-muted">
+            <tr className="border-b border-[var(--border)] text-muted">
               <th className="text-left px-4 py-2 font-medium">Ticker</th>
               <th className="text-right px-4 py-2 font-medium">Shares</th>
               <th className="text-right px-4 py-2 font-medium">Cost/sh</th>
@@ -130,7 +130,7 @@ function TaxOptimizer({ trades }) {
             {rows.sort((a, b) => (a.unrealized ?? 0) - (b.unrealized ?? 0)).map((r, i) => {
               const isWash = washSaleIds.has(r.tradeId);
               return (
-                <tr key={i} className={`table-row-hover ${isWash ? 'bg-[rgba(255,170,0,0.04)]' : ''}`}>
+                <tr key={i} className={`table-row-hover ${isWash ? 'bg-[var(--warn-soft)]' : ''}`}>
                   <td className="px-4 py-2 font-bold text-arc">{r.ticker}</td>
                   <td className="px-4 py-2 text-right text-white">{fmt(r.shares, 4)}</td>
                   <td className="px-4 py-2 text-right text-muted">${fmt(r.costPerShare)}</td>
@@ -140,7 +140,7 @@ function TaxOptimizer({ trades }) {
                   </td>
                   <td className="px-4 py-2 text-right text-muted">{r.holdingDays}d</td>
                   <td className="px-4 py-2 text-right">
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${r.isLongTerm ? 'text-[#00e676] bg-[rgba(0,230,118,0.1)]' : 'text-warn bg-[rgba(255,170,0,0.1)]'}`}>
+                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${r.isLongTerm ? 'text-[var(--gain)] bg-[var(--gain-soft)]' : 'text-warn bg-[var(--warn-soft)]'}`}>
                       {r.isLongTerm ? 'LT' : 'ST'}
                     </span>
                   </td>
@@ -157,7 +157,7 @@ function TaxOptimizer({ trades }) {
           </tbody>
         </table>
       </div>
-      <p className="text-[10px] text-muted p-3 border-t border-[rgba(0,212,255,0.06)]">
+      <p className="text-[10px] text-muted p-3 border-t border-[var(--border)]">
         HARVEST = unrealized loss you can sell to offset gains. ⚠ WASH = possible wash sale rule violation. Consult a tax advisor before acting.
       </p>
     </div>
@@ -276,7 +276,7 @@ export default function TradeLogPage() {
       </div>
 
       {csvResult && (
-        <div className={`card p-3 mb-4 text-sm ${csvResult.error ? 'text-bear' : 'text-arc'}`}>
+        <div className={`card p-3 mb-4 text-sm ${csvResult.error ? 'text-bear' : 'text-[var(--accent)]'}`}>
           {csvResult.error ?? `Imported ${csvResult.ok} trade${csvResult.ok !== 1 ? 's' : ''}${csvResult.fail > 0 ? `, ${csvResult.fail} failed` : ''}.`}
         </div>
       )}
@@ -326,7 +326,7 @@ export default function TradeLogPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${activeTab === tab ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]' : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${activeTab === tab ? 'border-[var(--border-2)] text-arc bg-[var(--surface-2)]' : 'border-[var(--border)] text-muted hover:text-arc'}`}
           >
             {tab === 'history' ? 'Trade History' : 'Tax Optimizer'}
           </button>
@@ -335,7 +335,7 @@ export default function TradeLogPage() {
 
       {activeTab === 'tax' && (
         <div className="card overflow-hidden mb-6">
-          <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+          <div className="p-4 border-b border-[var(--border)]">
             <h2 className="hud-label">Tax Lot Optimizer</h2>
             <p className="text-xs text-muted mt-1">Open lots from buy trades, sorted by unrealized P&L</p>
           </div>
@@ -347,13 +347,13 @@ export default function TradeLogPage() {
         <>
           {summary.length > 0 && (
             <div className="card mb-6 overflow-hidden">
-              <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+              <div className="p-4 border-b border-[var(--border)]">
                 <h2 className="hud-label">Realized P&L Summary</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                    <tr className="border-b border-[var(--border)]">
                       <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
                       <th className="hud-label text-right py-2.5 px-4 font-normal">Realized P&L</th>
                       <th className="hud-label text-right py-2.5 px-4 font-normal">Total Bought</th>
@@ -362,7 +362,7 @@ export default function TradeLogPage() {
                   </thead>
                   <tbody>
                     {summary.map(s => (
-                      <tr key={s.ticker} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
+                      <tr key={s.ticker} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
                         <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{s.ticker}</td>
                         <td className={`py-2.5 px-4 text-right font-mono font-bold ${s.realized_pgl >= 0 ? 'text-bull' : 'text-bear'}`}>
                           {s.realized_pgl >= 0 ? '+' : ''}${fmt(s.realized_pgl)}
@@ -378,7 +378,7 @@ export default function TradeLogPage() {
           )}
 
           <div className="card overflow-hidden">
-            <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+            <div className="p-4 border-b border-[var(--border)]">
               <h2 className="hud-label">Transaction History ({trades.length})</h2>
             </div>
 
@@ -393,7 +393,7 @@ export default function TradeLogPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                    <tr className="border-b border-[var(--border)]">
                       <th className="hud-label text-left py-2.5 px-4 font-normal">Date</th>
                       <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
                       <th className="hud-label text-left py-2.5 px-4 font-normal">Action</th>
@@ -410,7 +410,7 @@ export default function TradeLogPage() {
                         ? t.shares * t.price + t.fees
                         : t.shares * t.price - t.fees;
                       return (
-                        <tr key={t.id} className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)]">
+                        <tr key={t.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
                           <td className="py-2.5 px-4 font-mono text-muted text-xs">
                             {new Date(t.traded_at * 1000).toLocaleDateString()}
                           </td>
@@ -418,14 +418,14 @@ export default function TradeLogPage() {
                           <td className="py-2.5 px-4">
                             <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
                               t.action === 'buy'
-                                ? 'bg-[#00e676]/10 text-bull border-[#00e676]/30'
-                                : 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'
+                                ? 'bg-[var(--gain-soft)] text-bull border-[var(--border)]'
+                                : 'bg-[var(--loss-soft)] text-bear border-[var(--border)]'
                             }`}>
                               {t.action}
                             </span>
                           </td>
-                          <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">{fmt(t.shares, 4)}</td>
-                          <td className="py-2.5 px-4 text-right font-mono text-[#a8d8ea]">${fmt(t.price)}</td>
+                          <td className="py-2.5 px-4 text-right font-mono text-[var(--text-2)]">{fmt(t.shares, 4)}</td>
+                          <td className="py-2.5 px-4 text-right font-mono text-[var(--text-2)]">${fmt(t.price)}</td>
                           <td className="py-2.5 px-4 text-right font-mono text-muted">${fmt(t.fees)}</td>
                           <td className={`py-2.5 px-4 text-right font-mono font-bold ${t.action === 'buy' ? 'text-bear' : 'text-bull'}`}>
                             {t.action === 'buy' ? '-' : '+'}${fmt(Math.abs(total))}

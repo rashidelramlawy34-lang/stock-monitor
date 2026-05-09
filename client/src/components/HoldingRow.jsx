@@ -30,7 +30,8 @@ export default function HoldingRow({
   return (
     <>
       <tr
-        className={`table-row-hover cursor-pointer ${expanded ? 'bg-[rgba(0,212,255,0.04)]' : ''}`}
+        className="table-row-hover cursor-pointer"
+        style={{ background: expanded ? 'var(--cyan-bg)' : undefined }}
         onClick={onToggleExpand}
       >
         {/* Ticker + logo + alert dot */}
@@ -38,7 +39,7 @@ export default function HoldingRow({
           <div className="flex items-center gap-2">
             {(hasAlert || hasTriggeredAlert) && (
               <span
-                className={`w-1.5 h-1.5 rounded-full shrink-0 ${hasTriggeredAlert ? 'bg-bear shadow-[0_0_5px_#ff3355]' : 'bg-warn shadow-[0_0_5px_#ffaa00]'}`}
+                className={`w-1.5 h-1.5 rounded-full shrink-0 ${hasTriggeredAlert ? 'bg-bear' : 'bg-warn'}`}
                 title={hasTriggeredAlert ? 'Alert triggered!' : 'Active alert watching'}
               />
             )}
@@ -46,24 +47,24 @@ export default function HoldingRow({
               ? <img
                   src={logoUrl}
                   alt=""
-                  className="w-5 h-5 rounded object-contain bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.15)]"
+                  className="w-5 h-5 rounded object-contain bg-[var(--surface-2)] border border-[var(--border)]"
                   onError={e => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex'; }}
                 />
               : null}
             <span
-              className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center bg-[rgba(0,212,255,0.08)] text-[rgba(0,212,255,0.6)] shrink-0 border border-[rgba(0,212,255,0.15)] ${logoUrl ? 'hidden' : 'flex'}`}
+              className={`w-5 h-5 rounded text-[9px] font-bold flex items-center justify-center bg-[var(--surface-2)] text-[var(--text-2)] shrink-0 border border-[var(--border)] ${logoUrl ? 'hidden' : 'flex'}`}
             >
               {initials}
             </span>
-            <span className="font-mono font-semibold text-[#a8d8ea] tracking-wide">{holding.ticker}</span>
-            {expanded && <span className="text-[10px] text-arc ml-1">▲</span>}
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text-2)', letterSpacing: '0.05em' }}>{holding.ticker}</span>
+            {expanded && <span style={{ fontSize: 10, color: 'var(--cyan)', marginLeft: 4 }}>▲</span>}
           </div>
         </td>
 
         {/* Price */}
         <td className="py-3 px-4 text-right">
           {price?.price != null
-            ? <span className="font-mono font-medium text-[#a8d8ea]">${price.price.toFixed(2)}</span>
+            ? <span className="font-mono font-medium text-[var(--text-2)]">${price.price.toFixed(2)}</span>
             : <span className="text-muted">—</span>}
         </td>
 
@@ -82,10 +83,10 @@ export default function HoldingRow({
         </td>
 
         {/* Shares */}
-        <td className="py-3 px-4 text-right text-[rgba(0,212,255,0.5)] font-mono">{holding.shares}</td>
+        <td className="py-3 px-4 text-right text-[var(--text-2)] font-mono">{holding.shares}</td>
 
         {/* Avg cost */}
-        <td className="py-3 px-4 text-right text-[rgba(0,212,255,0.5)] font-mono">
+        <td className="py-3 px-4 text-right text-[var(--text-2)] font-mono">
           ${Number(holding.cost_basis).toFixed(2)}
         </td>
 
@@ -108,7 +109,7 @@ export default function HoldingRow({
               </span>
             : <span className="text-muted text-xs">—</span>}
           {latestUpgrade && (
-            <span className={`ml-1 text-[9px] font-bold ${latestUpgrade.toGrade > latestUpgrade.fromGrade ? 'text-[#00e676]' : 'text-bear'}`} title={`${latestUpgrade.fromGrade} → ${latestUpgrade.toGrade}`}>
+            <span className={`ml-1 text-[9px] font-bold ${latestUpgrade.toGrade > latestUpgrade.fromGrade ? 'text-[var(--gain)]' : 'text-bear'}`} title={`${latestUpgrade.fromGrade} → ${latestUpgrade.toGrade}`}>
               {latestUpgrade.toGrade > latestUpgrade.fromGrade ? '▲' : '▼'}
             </span>
           )}
@@ -127,8 +128,8 @@ export default function HoldingRow({
         <td className="py-3 px-4 text-right" onClick={e => e.stopPropagation()}>
           {confirming
             ? <span className="flex gap-2 justify-end">
-                <button onClick={() => onRemove(holding.ticker)} className="text-xs text-bear hover:text-[#ff3355] underline">Confirm</button>
-                <button onClick={() => setConfirming(false)} className="text-xs text-muted hover:text-[#a8d8ea]">Cancel</button>
+                <button onClick={() => onRemove(holding.ticker)} className="text-xs text-bear hover:text-[var(--loss)] underline">Confirm</button>
+                <button onClick={() => setConfirming(false)} className="text-xs text-muted hover:text-[var(--text-2)]">Cancel</button>
               </span>
             : <button
                 onClick={() => setConfirming(true)}
@@ -141,15 +142,19 @@ export default function HoldingRow({
       {/* Expanded technicals */}
       {expanded && closes.length >= 30 && (
         <tr>
-          <td colSpan={10} className="px-4 pb-4 pt-1 bg-[rgba(0,212,255,0.02)]">
-            <TechnicalsChart closes={closes} timestamps={timestamps} ticker={holding.ticker} />
+          <td colSpan={10} style={{ background: 'var(--card-2)', padding: 0 }}>
+            <div className="h-detail">
+              <TechnicalsChart closes={closes} timestamps={timestamps} ticker={holding.ticker} />
+            </div>
           </td>
         </tr>
       )}
       {expanded && closes.length < 30 && (
         <tr>
-          <td colSpan={10} className="px-6 pb-4 pt-1 text-xs text-muted bg-[rgba(0,212,255,0.02)]">
-            Not enough candle data to show technicals (need at least 30 days).
+          <td colSpan={10} style={{ background: 'var(--card-2)', padding: '10px 18px' }}>
+            <p style={{ fontSize: 11, color: 'var(--muted)' }}>
+              Not enough candle data to show technicals (need at least 30 days).
+            </p>
           </td>
         </tr>
       )}

@@ -8,13 +8,13 @@ function WatchRow({ item, price, onRemove }) {
   const pos = chg >= 0;
 
   return (
-    <tr className="border-b border-[rgba(0,212,255,0.06)] hover:bg-[rgba(0,212,255,0.02)] transition-colors">
+    <tr className="border-b border-[var(--border)] hover:bg-[var(--surface-2)] transition-colors">
       <td className="py-3 px-4">
         <span className="font-mono font-bold text-arc tracking-widest">{item.ticker}</span>
         {item.note && <p className="text-xs text-muted mt-0.5">{item.note}</p>}
       </td>
       <td className="py-3 px-4 text-right font-mono">
-        {p != null ? <span className="text-[#a8d8ea]">${p.toFixed(2)}</span> : <span className="text-muted">—</span>}
+        {p != null ? <span className="text-[var(--text-2)]">${p.toFixed(2)}</span> : <span className="text-muted">—</span>}
       </td>
       <td className="py-3 px-4 text-right font-mono">
         {chg != null ? (
@@ -110,7 +110,7 @@ export default function WatchlistPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                <tr className="border-b border-[var(--border)]">
                   <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
                   <th className="hud-label text-right py-2.5 px-4 font-normal">Today</th>

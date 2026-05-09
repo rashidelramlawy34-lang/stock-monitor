@@ -40,7 +40,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg)' }}>
-        <div style={{ animation: 'orbPulse 1.6s ease-in-out infinite' }}>
+        <div style={{ animation: 'hexFade 1.6s ease-in-out infinite' }}>
           <svg viewBox="0 0 40 40" width="40" height="40">
             {[17, 12, 4].map((r, i) => (
               <polygon key={r} points={(() => {

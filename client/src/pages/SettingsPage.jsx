@@ -63,9 +63,9 @@ function EmailAlertsSection() {
             type="checkbox"
             checked={!!current.email_alerts_enabled}
             onChange={e => setDraft(d => ({ ...d, email_alerts_enabled: e.target.checked ? 1 : 0 }))}
-            className="w-3.5 h-3.5 accent-[#00d4ff]"
+            className="w-3.5 h-3.5 accent-[var(--accent)]"
           />
-          <span className="text-sm text-[rgba(0,212,255,0.7)]">Enable email alerts</span>
+          <span className="text-sm text-[var(--text-2)]">Enable email alerts</span>
         </label>
       </div>
 
@@ -98,15 +98,15 @@ function KeyField({ label, keyName, description, current, onChange }) {
           <button
             type="button"
             onClick={() => setShow(s => !s)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-[#00d4ff] text-xs transition-colors"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted hover:text-[var(--accent)] text-xs transition-colors"
           >
             {show ? 'Hide' : 'Show'}
           </button>
         </div>
         <span className={`text-xs font-bold px-2 py-1 rounded-full border tracking-wider uppercase ${
           isSet
-            ? 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/30'
-            : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
+            ? 'bg-[var(--gain-soft)] text-gain border-gain/30'
+            : 'bg-[var(--surface-2)] text-muted border-[var(--border)]'
         }`}>
           {isSet ? '✓ Set' : 'Not Set'}
         </span>
@@ -290,11 +290,11 @@ export default function SettingsPage() {
       </div>
 
       {/* Info */}
-      <div className="mt-0 card p-4 bg-[rgba(0,212,255,0.03)]">
+      <div className="mt-0 card p-4">
         <p className="hud-label mb-3">How Keys Are Used</p>
-        <ul className="text-xs text-[rgba(0,212,255,0.5)] space-y-1.5 list-disc list-inside">
-          <li><span className="text-[#a8d8ea] font-medium">Anthropic</span> — AI Advisor analysis, Portfolio Digest, and Discover deep analysis</li>
-          <li><span className="text-[#a8d8ea] font-medium">Finnhub</span> — Real-time prices, fundamentals, analyst ratings, earnings calendar, and news</li>
+        <ul className="text-xs text-muted space-y-1.5 list-disc list-inside">
+          <li><span className="text-[var(--text-2)] font-medium">Anthropic</span> — AI Advisor analysis, Portfolio Digest, and Discover deep analysis</li>
+          <li><span className="text-[var(--text-2)] font-medium">Finnhub</span> — Real-time prices, fundamentals, analyst ratings, earnings calendar, and news</li>
           <li>Keys set via environment variables take precedence over keys saved here</li>
           <li>Keys are only used server-side — never sent to the browser</li>
         </ul>

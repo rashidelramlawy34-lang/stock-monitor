@@ -37,35 +37,24 @@ export default function LoginPage({ onLogin }) {
   const switchMode = (m) => { setMode(m); setError(''); setPassword(''); setConfirm(''); };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#020810]">
-      <div className="fixed inset-0 bg-grid-hud bg-grid-hud opacity-30 pointer-events-none" />
-
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg)]">
       <div className="relative z-10 w-full max-w-sm px-6">
-        {/* Arc reactor */}
-        <div className="flex justify-center mb-8">
-          <div className="arc-reactor w-20 h-20">
-            <div className="arc-reactor w-10 h-10">
-              <div className="w-4 h-4 rounded-full bg-[rgba(0,212,255,0.4)] border-2 border-[#00d4ff]" />
-            </div>
-          </div>
-        </div>
-
         {/* Brand */}
         <div className="text-center mb-8">
-          <h1 className="hud-title text-2xl mb-1">S.M.I.</h1>
-          <p className="text-muted text-[10px] tracking-[0.25em] uppercase">Stark Market Intelligence</p>
+          <h1 className="text-2xl font-bold mb-1">Stock Monitor</h1>
+          <p className="text-muted text-[10px] tracking-wide uppercase">Portfolio Intelligence</p>
         </div>
 
         {/* Tab switcher */}
-        <div className="flex mb-6 border border-[rgba(0,212,255,0.2)] rounded-full overflow-hidden">
+        <div className="flex mb-6 border border-[var(--border-2)] rounded-full overflow-hidden">
           {['login', 'signup'].map(m => (
             <button
               key={m}
               onClick={() => switchMode(m)}
-              className={`flex-1 py-2 text-xs font-bold tracking-widest uppercase transition-all ${
+              className={`flex-1 py-2 text-xs font-bold tracking-wide uppercase transition-all ${
                 mode === m
-                  ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff]'
-                  : 'text-muted hover:text-[#a8d8ea]'
+                  ? 'bg-[var(--surface-2)] text-[var(--accent)]'
+                  : 'text-muted hover:text-[var(--text-2)]'
               }`}
             >
               {m === 'login' ? 'Sign In' : 'Create Account'}
@@ -123,7 +112,7 @@ export default function LoginPage({ onLogin }) {
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <span className="w-3 h-3 border-2 border-[rgba(0,212,255,0.3)] border-t-[#00d4ff] rounded-full animate-spin" />
+                <span className="w-3 h-3 border-2 border-[var(--border-2)] border-t-[var(--accent)] rounded-full animate-spin" />
                 {mode === 'signup' ? 'Creating Account…' : 'Signing In…'}
               </span>
             ) : mode === 'signup' ? 'Create Account →' : 'Sign In →'}
@@ -136,7 +125,7 @@ export default function LoginPage({ onLogin }) {
             : 'Already have an account? '}
           <button
             onClick={() => switchMode(mode === 'login' ? 'signup' : 'login')}
-            className="text-[rgba(0,212,255,0.6)] hover:text-[#00d4ff] underline transition-colors"
+            className="text-[var(--text-2)] hover:text-[var(--accent)] underline transition-colors"
           >
             {mode === 'login' ? 'Create one' : 'Sign in'}
           </button>

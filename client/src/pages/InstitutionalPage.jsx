@@ -41,13 +41,13 @@ export default function InstitutionalPage() {
           <p className="hud-label text-[10px] mb-3">Top-5 Holder Concentration by Ticker</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={barData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-              <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: 'rgba(0,212,255,0.5)' }} />
-              <YAxis tick={{ fontSize: 9, fill: 'rgba(0,212,255,0.3)' }} width={35} unit="%" />
+              <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: '#6b7280' }} />
+              <YAxis tick={{ fontSize: 9, fill: '#6b7280' }} width={35} unit="%" />
               <Tooltip
-                contentStyle={{ background: '#0a1828', border: '1px solid rgba(0,212,255,0.3)', fontSize: 11 }}
+                contentStyle={{ background: 'var(--surface-1)', border: '1px solid var(--border-2)', fontSize: 11 }}
                 formatter={v => [`${v}%`, 'Ownership']}
               />
-              <Bar dataKey="pct" fill="rgba(0,212,255,0.5)" radius={[2, 2, 0, 0]} />
+              <Bar dataKey="pct" fill="#2563eb" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -72,8 +72,8 @@ export default function InstitutionalPage() {
                           <span className="text-white truncate max-w-[140px]">{holder.institutionName ?? holder.name ?? '—'}</span>
                           <span className="text-arc ml-2 shrink-0">{pct.toFixed(2)}%</span>
                         </div>
-                        <div className="h-1 bg-[rgba(0,212,255,0.1)] rounded-full overflow-hidden">
-                          <div className="h-full bg-[rgba(0,212,255,0.4)] rounded-full" style={{ width: `${Math.min(pct * 5, 100)}%` }} />
+                        <div className="h-1 bg-[var(--surface-2)] rounded-full overflow-hidden">
+                          <div className="h-full bg-[#2563eb] rounded-full" style={{ width: `${Math.min(pct * 5, 100)}%` }} />
                         </div>
                       </div>
                     );

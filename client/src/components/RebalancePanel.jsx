@@ -51,12 +51,12 @@ export default function RebalancePanel({ holdings = [], prices = {} }) {
             {!balanced && (
               <span className="text-warn text-xs">Total: {totalTarget.toFixed(1)}% (must = 100%)</span>
             )}
-            {balanced && <span className="text-[#00e676] text-xs">✓ Balanced</span>}
+            {balanced && <span className="text-[var(--gain)] text-xs">✓ Balanced</span>}
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="text-muted border-b border-[rgba(0,212,255,0.1)]">
+                <tr className="text-muted border-b border-[var(--border)]">
                   <th className="text-left py-1.5 font-medium">Ticker</th>
                   <th className="text-right py-1.5 font-medium">Current</th>
                   <th className="text-right py-1.5 font-medium">Target %</th>
@@ -80,7 +80,7 @@ export default function RebalancePanel({ holdings = [], prices = {} }) {
                         className="input w-16 text-right px-1.5 py-0.5 text-xs"
                       />
                     </td>
-                    <td className={`text-right py-1.5 font-semibold ${r.diff >= 0 ? 'text-[#00e676]' : 'text-bear'}`}>
+                    <td className={`text-right py-1.5 font-semibold ${r.diff >= 0 ? 'text-[var(--gain)]' : 'text-bear'}`}>
                       {r.diff >= 0 ? '+' : ''}{r.diff.toFixed(2) !== '0.00' ? `$${Math.abs(r.diff).toFixed(0)}` : '—'}
                       {r.diff > 0 ? ' Buy' : r.diff < 0 ? ' Sell' : ''}
                     </td>

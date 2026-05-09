@@ -9,7 +9,7 @@ export default {
         gain:   '#16a34a',
         loss:   '#dc2626',
         warn:   '#d97706',
-        accent: { DEFAULT: '#3b82f6', hover: '#2563eb' },
+        accent: { DEFAULT: '#2563eb', hover: '#1d4ed8' },
         // Legacy aliases — old components use text-bull / text-bear Tailwind classes
         bull:   '#16a34a',
         bear:   '#dc2626',

@@ -15,20 +15,6 @@ function getRangeCutoff(range) {
   return now - (days[range] ?? 0) * 86400;
 }
 
-function RangeButton({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
-        active
-          ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
-          : 'border-[rgba(0,212,255,0.12)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
 
 function pctReturns(closes) {
   if (!closes || closes.length < 2) return [];
@@ -59,7 +45,7 @@ function CustomTooltip({ active, payload, label, bench }) {
   const portfolio = payload.find(p => p.dataKey === 'Portfolio');
   const benchmark = payload.find(p => p.dataKey === bench);
   return (
-    <div style={{ background: '#070d18', border: '1px solid rgba(0,212,255,0.25)', borderRadius: 8 }}
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8 }}
       className="px-3 py-2.5 text-xs shadow-xl">
       <p className="text-muted mb-2">{label}</p>
       {portfolio && (
@@ -68,7 +54,7 @@ function CustomTooltip({ active, payload, label, bench }) {
         </p>
       )}
       {benchmark && benchmark.value != null && (
-        <p className="font-mono" style={{ color: 'rgba(0,212,255,0.6)' }}>
+        <p className="font-mono" style={{ color: 'var(--text-2)' }}>
           {bench}: {benchmark.value >= 0 ? '+' : ''}{benchmark.value}%
         </p>
       )}
@@ -125,40 +111,30 @@ export default function BenchmarkChart({ holdings, candles }) {
   if (chartData.length < 2) return null;
 
   const lastPortfolio = chartData[chartData.length - 1]?.Portfolio ?? 0;
-  const portfolioColor = lastPortfolio >= 0 ? '#00e676' : '#ff3355';
+  const portfolioColor = lastPortfolio >= 0 ? '#16a34a' : '#dc2626';
   const lastBench = chartData[chartData.length - 1]?.[bench] ?? 0;
   const outperforming = lastPortfolio > lastBench;
 
   return (
-    <div className="card p-5">
-      <div className="flex items-start justify-between mb-4">
+    <div className="card" style={{ padding: '16px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <p className="hud-label mb-1">vs Benchmark</p>
-          <p className={`text-lg font-bold font-mono ${outperforming ? 'text-bull' : 'text-bear'}`}>
+          <p className="stat-label">VS BENCHMARK</p>
+          <p style={{ fontSize: 16, fontWeight: 600, fontFamily: 'var(--font-mono)', color: outperforming ? 'var(--bull)' : 'var(--bear)', marginTop: 6 }}>
             {outperforming ? '+' : ''}{(lastPortfolio - lastBench).toFixed(2)}% vs {bench}
           </p>
         </div>
-        <div className="flex gap-1.5">
+        <div className="pill-group">
           {['SPY', 'QQQ'].map(b => (
-            <button
-              key={b}
-              onClick={() => setBench(b)}
-              className={`text-xs font-bold px-3 py-1 rounded-full border transition-all tracking-wider ${
-                bench === b
-                  ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
-                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
-              }`}
-            >
-              {b}
-            </button>
+            <button key={b} className={`pill${bench === b ? ' active' : ''}`} onClick={() => setBench(b)}>{b}</button>
           ))}
         </div>
       </div>
 
       {/* Range selector */}
-      <div className="flex items-center gap-1.5 mb-4">
+      <div className="pill-group" style={{ marginBottom: 14 }}>
         {RANGES.map(r => (
-          <RangeButton key={r} label={r} active={range === r} onClick={() => setRange(r)} />
+          <button key={r} className={`pill${range === r ? ' active' : ''}`} onClick={() => setRange(r)}>{r}</button>
         ))}
       </div>
 
@@ -167,26 +143,26 @@ export default function BenchmarkChart({ holdings, candles }) {
           <CartesianGrid
             strokeDasharray="0"
             horizontal={true} vertical={false}
-            stroke="rgba(0,212,255,0.04)"
+            stroke="var(--surface-2)"
           />
           <XAxis
             dataKey="date"
-            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
-            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `${v >= 0 ? '+' : ''}${v.toFixed(1)}%`}
             width={52}
           />
-          <ReferenceLine y={0} stroke="rgba(0,212,255,0.15)" strokeDasharray="4 4" />
+          <ReferenceLine y={0} stroke="var(--border)" strokeDasharray="4 4" />
           <Tooltip
             content={<CustomTooltip bench={bench} />}
-            cursor={{ stroke: 'rgba(0,212,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: 'var(--border-2)', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
           <Line
             type="monotone"
@@ -202,11 +178,11 @@ export default function BenchmarkChart({ holdings, candles }) {
           <Line
             type="monotone"
             dataKey={bench}
-            stroke="rgba(0,212,255,0.45)"
+            stroke="#3b82f6"
             strokeWidth={1.5}
             dot={false}
             strokeDasharray="5 3"
-            activeDot={{ r: 4, fill: '#00d4ff', stroke: '#010409', strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: '#3b82f6', stroke: '#010409', strokeWidth: 2 }}
             isAnimationActive={true}
             animationDuration={700}
             animationEasing="ease-out"
@@ -220,7 +196,7 @@ export default function BenchmarkChart({ holdings, candles }) {
           Portfolio
         </span>
         <span className="flex items-center gap-1.5 text-[10px] text-muted">
-          <span className="w-4 h-px" style={{ borderTop: '1.5px dashed rgba(0,212,255,0.45)' }} />
+          <span className="w-4 h-px" style={{ borderTop: '1.5px dashed #3b82f6' }} />
           {bench}
         </span>
       </div>

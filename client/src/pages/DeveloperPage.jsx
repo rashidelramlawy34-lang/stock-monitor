@@ -77,11 +77,11 @@ export default function DeveloperPage() {
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
               <div>
                 <p className="text-muted text-xs mb-0.5">User ID</p>
-                <p className="font-mono text-[#00d4ff]">{user?.id}</p>
+                <p className="font-mono text-[var(--accent)]">{user?.id}</p>
               </div>
               <div>
                 <p className="text-muted text-xs mb-0.5">Display Name</p>
-                <p className="font-mono text-[#a8d8ea]">{user?.name}</p>
+                <p className="font-mono text-[var(--text-2)]">{user?.name}</p>
               </div>
               <div>
                 <p className="text-muted text-xs mb-0.5">Session</p>
@@ -92,13 +92,13 @@ export default function DeveloperPage() {
 
           {/* All accounts */}
           <div className="card mb-6 overflow-hidden">
-            <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+            <div className="p-4 border-b border-[var(--border)]">
               <h2 className="hud-label">All Accounts ({data.users.length})</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                  <tr className="border-b border-[var(--border)]">
                     <th className="hud-label text-left py-2.5 px-4 font-normal">Username</th>
                     <th className="hud-label text-left py-2.5 px-4 font-normal">ID</th>
                     <th className="hud-label text-right py-2.5 px-4 font-normal">Holdings</th>
@@ -109,11 +109,11 @@ export default function DeveloperPage() {
                 </thead>
                 <tbody>
                   {data.users.map(u => (
-                    <tr key={u.id} className={`table-row-hover ${u.id === user?.id ? 'bg-[rgba(0,212,255,0.04)]' : ''}`}>
+                    <tr key={u.id} className={`table-row-hover ${u.id === user?.id ? 'bg-[var(--surface-2)]' : ''}`}>
                       <td className="py-3 px-4">
-                        <span className="font-mono font-semibold text-[#a8d8ea]">{u.name}</span>
+                        <span className="font-mono font-semibold text-[var(--text-2)]">{u.name}</span>
                         {u.id === user?.id && (
-                          <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[rgba(0,212,255,0.1)] text-arc border border-[rgba(0,212,255,0.2)] tracking-widest">YOU</span>
+                          <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--accent)] border border-[var(--border-2)] tracking-widest">YOU</span>
                         )}
                       </td>
                       <td className="py-3 px-4 font-mono text-muted text-xs">{u.id}</td>
@@ -130,13 +130,13 @@ export default function DeveloperPage() {
 
           {/* Recent activity */}
           <div className="card overflow-hidden">
-            <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+            <div className="p-4 border-b border-[var(--border)]">
               <h2 className="hud-label">Recent Activity (last 20)</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-[rgba(0,212,255,0.08)]">
+                  <tr className="border-b border-[var(--border)]">
                     <th className="hud-label text-left py-2.5 px-4 font-normal">Type</th>
                     <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
                     <th className="hud-label text-left py-2.5 px-4 font-normal">User</th>
@@ -149,13 +149,13 @@ export default function DeveloperPage() {
                       <td className="py-2.5 px-4">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
                           a.type === 'holding'
-                            ? 'bg-[rgba(0,212,255,0.08)] text-arc border-[rgba(0,212,255,0.2)]'
-                            : 'bg-[#ffaa00]/10 text-warn border-[#ffaa00]/30'
+                            ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--border-2)]'
+                            : 'bg-[var(--warn-soft)] text-warn border-[var(--border)]'
                         }`}>
                           {a.type}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 font-mono font-bold text-[#00d4ff] tracking-widest">{a.detail}</td>
+                      <td className="py-2.5 px-4 font-mono font-bold text-[var(--accent)] tracking-widest">{a.detail}</td>
                       <td className="py-2.5 px-4 font-mono text-muted text-xs">{a.user_id}</td>
                       <td className="py-2.5 px-4 text-right font-mono text-muted text-xs">{timeAgo(a.ts)}</td>
                     </tr>

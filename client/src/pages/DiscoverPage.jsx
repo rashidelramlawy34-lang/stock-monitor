@@ -14,11 +14,11 @@ function timeAgo(ts) {
 }
 
 const RISK_STYLES = {
-  All:        { active: 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]' },
-  Low:        { active: 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/40' },
-  Medium:     { active: 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/40' },
-  High:       { active: 'bg-[#ff8c00]/10 text-[#ff8c00] border-[#ff8c00]/40' },
-  'Very High':{ active: 'bg-[#ff3355]/10 text-[#ff3355] border-[#ff3355]/40' },
+  All:        { active: 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--border-2)]' },
+  Low:        { active: 'bg-[var(--gain-soft)] text-[var(--gain)] border-[var(--border)]' },
+  Medium:     { active: 'bg-[var(--warn-soft)] text-[var(--warn)] border-[var(--border)]' },
+  High:       { active: 'bg-[rgba(255,140,0,0.1)] text-[#ff8c00] border-[rgba(255,140,0,0.4)]' },
+  'Very High':{ active: 'bg-[var(--loss-soft)] text-[var(--loss)] border-[var(--border)]' },
 };
 
 export default function DiscoverPage() {
@@ -63,7 +63,7 @@ export default function DiscoverPage() {
           className="btn-primary shrink-0 flex items-center gap-2"
         >
           {scanning
-            ? <><span className="w-3.5 h-3.5 border-2 border-[rgba(0,212,255,0.3)] border-t-[#00d4ff] rounded-full animate-spin" />Scanning…</>
+            ? <><span className="w-3.5 h-3.5 border-2 border-[var(--border-2)] border-t-[var(--accent)] rounded-full animate-spin" />Scanning…</>
             : '↻ Run Scan'}
         </button>
       </div>
@@ -72,7 +72,7 @@ export default function DiscoverPage() {
       <div className="flex flex-wrap items-center gap-3 mb-4">
         {generatedAt && (
           <span className="text-xs text-muted">
-            Last scanned: <span className="text-[rgba(0,212,255,0.6)]">{timeAgo(generatedAt)}</span>
+            Last scanned: <span className="text-[var(--text-2)]">{timeAgo(generatedAt)}</span>
           </span>
         )}
         <span
@@ -104,7 +104,7 @@ export default function DiscoverPage() {
             className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
               riskFilter === r
                 ? RISK_STYLES[r]?.active ?? RISK_STYLES.All.active
-                : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
+                : 'bg-transparent border-[var(--border)] text-muted hover:border-[var(--border-2)] hover:text-[var(--text-2)]'
             }`}
           >
             {r}
@@ -121,8 +121,8 @@ export default function DiscoverPage() {
               onClick={() => setSectorFilter(s)}
               className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
                 sectorFilter === s
-                  ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
-                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.3)]'
+                  ? 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
+                  : 'border-[var(--border)] text-muted hover:text-arc hover:border-[var(--border-2)]'
               }`}
             >
               {s}
@@ -138,12 +138,12 @@ export default function DiscoverPage() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="card p-5 animate-pulse h-56">
               <div className="flex justify-between mb-3">
-                <div className="h-5 bg-[rgba(0,212,255,0.08)] rounded w-1/4" />
-                <div className="h-5 bg-[rgba(0,212,255,0.08)] rounded w-1/5" />
+                <div className="h-5 bg-[var(--surface-2)] rounded w-1/4" />
+                <div className="h-5 bg-[var(--surface-2)] rounded w-1/5" />
               </div>
-              <div className="h-3 bg-[rgba(0,212,255,0.08)] rounded w-full mb-2" />
-              <div className="h-3 bg-[rgba(0,212,255,0.08)] rounded w-4/5 mb-6" />
-              <div className="h-2 bg-[rgba(0,212,255,0.08)] rounded w-full mt-4" />
+              <div className="h-3 bg-[var(--surface-2)] rounded w-full mb-2" />
+              <div className="h-3 bg-[var(--surface-2)] rounded w-4/5 mb-6" />
+              <div className="h-2 bg-[var(--surface-2)] rounded w-full mt-4" />
             </div>
           ))}
         </div>

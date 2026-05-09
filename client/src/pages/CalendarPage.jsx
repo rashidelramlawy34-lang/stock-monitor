@@ -83,10 +83,10 @@ export default function CalendarPage() {
                 return (
                   <div
                     key={i}
-                    className={`flex items-start gap-3 px-2 py-1.5 rounded-full text-xs ${soon ? 'bg-[rgba(255,170,0,0.05)] border border-[rgba(255,170,0,0.15)]' : ''}`}
+                    className={`flex items-start gap-3 px-2 py-1.5 rounded-full text-xs ${soon ? 'bg-[var(--warn-soft)] border border-[var(--border)]' : ''}`}
                   >
                     <span className="text-muted w-[60px] shrink-0">{e.date.slice(0, 10)}</span>
-                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${e.type === 'earnings' ? 'bg-[rgba(0,212,255,0.1)] text-arc' : 'bg-[rgba(0,230,118,0.08)] text-[#00e676]'}`}>
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${e.type === 'earnings' ? 'bg-[var(--surface-2)] text-arc' : 'bg-[var(--gain-soft)] text-[var(--gain)]'}`}>
                       {e.type === 'earnings' ? 'EARN' : 'ECON'}
                     </span>
                     <span className={`flex-1 ${soon ? 'text-warn' : 'text-white'}`}>{e.name}</span>

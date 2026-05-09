@@ -50,13 +50,13 @@ export default function NewsCard({ article, showTicker }) {
       className="block card p-4 transition-colors group relative"
     >
       <div className="flex items-start justify-between gap-3">
-        <p className="text-sm text-[#a8d8ea] group-hover:text-[#00d4ff] leading-snug flex-1 transition-colors">
+        <p className="text-sm text-[var(--text-2)] group-hover:text-[var(--accent)] leading-snug flex-1 transition-colors">
           {article.headline}
         </p>
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={togglePin}
-            className={`text-xs transition-colors p-0.5 rounded ${pinned ? 'text-[#ffaa00]' : 'text-muted hover:text-[#ffaa00]'}`}
+            className={`text-xs transition-colors p-0.5 rounded ${pinned ? 'text-[var(--warn)]' : 'text-muted hover:text-[var(--warn)]'}`}
             title={pinned ? 'Unpin' : 'Pin article'}
           >
             {pinned ? '★' : '☆'}

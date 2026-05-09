@@ -31,30 +31,30 @@ function SentimentTrend({ articles }) {
       <ResponsiveContainer width="100%" height={60}>
         <BarChart data={data} barSize={8} barGap={2}>
           <Tooltip
-            contentStyle={{ background: '#0a1628', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 4 }}
-            labelStyle={{ color: 'rgba(0,212,255,0.6)', fontSize: 10 }}
+            contentStyle={{ background: 'var(--surface-1)', border: '1px solid var(--border-2)', borderRadius: 4 }}
+            labelStyle={{ color: 'var(--text-muted)', fontSize: 10 }}
             itemStyle={{ fontSize: 10 }}
             formatter={(v, name) => [v, name.charAt(0).toUpperCase() + name.slice(1)]}
           />
-          <Bar dataKey="bullish" stackId="a" fill="#00e676" radius={[0, 0, 0, 0]} />
-          <Bar dataKey="neutral" stackId="a" fill="#ffaa00" />
-          <Bar dataKey="bearish" stackId="a" fill="#ff3355" radius={[2, 2, 0, 0]} />
+          <Bar dataKey="bullish" stackId="a" fill="#16a34a" radius={[0, 0, 0, 0]} />
+          <Bar dataKey="neutral" stackId="a" fill="#d97706" />
+          <Bar dataKey="bearish" stackId="a" fill="#dc2626" radius={[2, 2, 0, 0]} />
         </BarChart>
       </ResponsiveContainer>
       <div className="flex gap-4 mt-1.5 text-[9px] text-muted">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#00e676]" />Bullish</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#ffaa00]" />Neutral</span>
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#ff3355]" />Bearish</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#16a34a]" />Bullish</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#d97706]" />Neutral</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-[#dc2626]" />Bearish</span>
       </div>
     </div>
   );
 }
 
 const SENTIMENT_STYLE = {
-  All:     { active: 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]' },
-  Bullish: { active: 'bg-[#00e676]/10 text-[#00e676] border-[#00e676]/40' },
-  Bearish: { active: 'bg-[#ff3355]/10 text-[#ff3355] border-[#ff3355]/40' },
-  Neutral: { active: 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/40' },
+  All:     { active: 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--accent)]' },
+  Bullish: { active: 'bg-gain-soft text-gain border-gain' },
+  Bearish: { active: 'bg-loss-soft text-loss border-loss' },
+  Neutral: { active: 'bg-warn-soft text-warn border-warn' },
 };
 
 export default function NewsPage() {
@@ -144,8 +144,8 @@ export default function NewsPage() {
             onClick={() => { setActiveTicker(ALL_TAB); setSentimentFilter('All'); }}
             className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
               activeTicker === ALL_TAB
-                ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
-                : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
+                ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--accent)]'
+                : 'border-[var(--border)] text-muted hover:text-[var(--text)] hover:border-[var(--border-2)]'
             }`}
           >
             ALL
@@ -156,8 +156,8 @@ export default function NewsPage() {
               onClick={() => { setActiveTicker(h.ticker); setSentimentFilter('All'); }}
               className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
                 activeTicker === h.ticker
-                  ? 'bg-[rgba(0,212,255,0.1)] text-[#00d4ff] border-[rgba(0,212,255,0.5)] shadow-[0_0_10px_rgba(0,212,255,0.2)]'
-                  : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
+                  ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--accent)]'
+                  : 'border-[var(--border)] text-muted hover:text-[var(--text)] hover:border-[var(--border-2)]'
               }`}
             >
               {h.ticker}
@@ -176,7 +176,7 @@ export default function NewsPage() {
               className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
                 sentimentFilter === s
                   ? SENTIMENT_STYLE[s].active
-                  : 'bg-transparent border-[rgba(0,212,255,0.15)] text-muted hover:border-[rgba(0,212,255,0.3)] hover:text-[#a8d8ea]'
+                  : 'bg-transparent border-[var(--border)] text-muted hover:border-[var(--border-2)] hover:text-[var(--text)]'
               }`}
             >
               {s}{s !== 'All' && counts[s] > 0 ? ` (${counts[s]})` : ''}
@@ -213,7 +213,7 @@ export default function NewsPage() {
       {/* Pinned articles */}
       {!isLoading && pinnedArticles.length > 0 && (
         <div className="mb-5">
-          <p className="hud-label mb-2 text-[#ffaa00]">★ Pinned</p>
+          <p className="hud-label mb-2 text-[var(--warn)]">★ Pinned</p>
           <div className="flex flex-col gap-3">
             {pinnedArticles.map((a, i) => (
               <NewsCard key={`pin-${a.id ?? i}`} article={a} showTicker={activeTicker === ALL_TAB} />

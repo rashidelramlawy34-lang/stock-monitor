@@ -43,30 +43,16 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { value, label } = payload[0].payload;
   return (
-    <div style={{ background: '#070d18', border: '1px solid rgba(0,212,255,0.25)', borderRadius: 8 }}
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8 }}
       className="px-3 py-2.5 text-xs shadow-xl">
       <p className="text-muted mb-1">{label}</p>
-      <p className="font-mono font-bold text-[#00d4ff] text-base">
+      <p className="font-mono font-bold text-[var(--accent)] text-base">
         ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
       </p>
     </div>
   );
 }
 
-function RangeButton({ label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider ${
-        active
-          ? 'bg-[rgba(0,212,255,0.12)] text-[#00d4ff] border-[rgba(0,212,255,0.4)]'
-          : 'border-[rgba(0,212,255,0.12)] text-muted hover:text-[#00d4ff] hover:border-[rgba(0,212,255,0.3)]'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
 
 export default function PortfolioChart() {
   const { data, loading } = usePortfolioHistory();
@@ -81,8 +67,8 @@ export default function PortfolioChart() {
   if (loading) {
     return (
       <div className="card p-5 animate-pulse">
-        <div className="h-4 bg-[rgba(0,212,255,0.06)] rounded-full w-1/4 mb-4" />
-        <div className="h-[320px] bg-[rgba(0,212,255,0.03)] rounded-lg" />
+        <div className="h-4 bg-[var(--surface-2)] rounded-full w-1/4 mb-4" />
+        <div className="h-[320px] bg-[var(--surface-2)] rounded-lg" />
       </div>
     );
   }
@@ -101,7 +87,7 @@ export default function PortfolioChart() {
   const change = last - first;
   const changePct = first > 0 ? (change / first) * 100 : 0;
   const positive = change >= 0;
-  const strokeColor = positive ? '#00e676' : '#ff3355';
+  const strokeColor = positive ? '#16a34a' : '#dc2626';
   const gradientId = 'pcg';
 
   const minVal = Math.min(...filtered.map(d => d.value));
@@ -109,29 +95,29 @@ export default function PortfolioChart() {
   const padding = (maxVal - minVal) * 0.12 || 100;
 
   return (
-    <div className="card p-5">
+    <div className="card" style={{ padding: '16px 18px' }}>
       {/* Header */}
-      <div className="flex items-start justify-between mb-4">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 14 }}>
         <div>
-          <p className="hud-label mb-1">Portfolio Value</p>
-          <p className="text-3xl font-bold font-mono text-[#a8d8ea] tracking-tight">
+          <p className="stat-label">PORTFOLIO VALUE</p>
+          <p style={{ fontSize: 28, fontWeight: 600, fontFamily: 'var(--font-mono)', color: 'var(--text)', lineHeight: 1.1, marginTop: 6 }}>
             ${last.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
         </div>
-        <div className={`text-right ${positive ? 'text-bull' : 'text-bear'}`}>
-          <p className="text-xl font-bold font-mono">
+        <div style={{ textAlign: 'right', color: positive ? 'var(--bull)' : 'var(--bear)' }}>
+          <p style={{ fontSize: 16, fontWeight: 600, fontFamily: 'var(--font-mono)' }}>
             {positive ? '+' : ''}${Math.abs(change).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </p>
-          <p className="text-sm font-semibold font-mono">
+          <p style={{ fontSize: 12, fontFamily: 'var(--font-mono)', marginTop: 2 }}>
             {positive ? '+' : ''}{changePct.toFixed(2)}%
           </p>
         </div>
       </div>
 
       {/* Range selector */}
-      <div className="flex items-center gap-1.5 mb-4">
+      <div className="pill-group" style={{ marginBottom: 14 }}>
         {RANGES.map(r => (
-          <RangeButton key={r} label={r} active={range === r} onClick={() => setRange(r)} />
+          <button key={r} className={`pill${range === r ? ' active' : ''}`} onClick={() => setRange(r)}>{r}</button>
         ))}
       </div>
 
@@ -147,18 +133,18 @@ export default function PortfolioChart() {
           <CartesianGrid
             strokeDasharray="0"
             horizontal={true} vertical={false}
-            stroke="rgba(0,212,255,0.04)"
+            stroke="var(--surface-2)"
           />
           <XAxis
             dataKey="dateOnly"
-            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[minVal - padding, maxVal + padding]}
-            tick={{ fill: 'rgba(0,212,255,0.35)', fontSize: 10, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-3)', fontSize: 10, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
@@ -166,12 +152,12 @@ export default function PortfolioChart() {
           />
           <ReferenceLine
             y={first}
-            stroke="rgba(0,212,255,0.15)"
+            stroke="var(--border)"
             strokeDasharray="4 4"
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ stroke: 'rgba(0,212,255,0.3)', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: 'var(--border-2)', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
           <Area
             type="monotone"

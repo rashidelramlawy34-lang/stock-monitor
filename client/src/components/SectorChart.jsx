@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Sector } from 'recharts';
 
 const COLORS = [
-  '#00d4ff', '#00e676', '#ffaa00', '#ff3355', '#0066ff',
+  '#3b82f6', '#16a34a', '#d97706', '#dc2626', '#0066ff',
   '#ff6b35', '#ffa800', '#00b8e6', '#8b5cf6', '#06b6d4',
 ];
 
@@ -37,11 +37,11 @@ function CustomTooltip({ active, payload }) {
   if (!active || !payload?.length) return null;
   const { name, value, pct } = payload[0].payload;
   return (
-    <div style={{ background: '#070d18', border: '1px solid rgba(0,212,255,0.25)', borderRadius: 8 }}
+    <div style={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 8 }}
       className="px-3 py-2.5 text-xs shadow-xl">
       <p className="text-muted mb-1">{name}</p>
-      <p className="font-mono font-bold text-[#a8d8ea]">${value.toLocaleString()}</p>
-      <p className="font-mono text-[#00d4ff] mt-0.5">{pct}%</p>
+      <p className="font-mono font-bold text-[var(--text-2)]">${value.toLocaleString()}</p>
+      <p className="font-mono text-[var(--accent)] mt-0.5">{pct}%</p>
     </div>
   );
 }
@@ -118,8 +118,8 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
               onMouseLeave={() => setActiveIdx(null)}
             >
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
-              <span className="text-[rgba(0,212,255,0.55)] truncate">{d.short}</span>
-              <span className="ml-auto font-mono text-[#a8d8ea] pl-2 shrink-0">{d.pct}%</span>
+              <span className="text-[var(--text-2)] truncate">{d.short}</span>
+              <span className="ml-auto font-mono text-[var(--text-2)] pl-2 shrink-0">{d.pct}%</span>
             </div>
           ))}
         </div>

@@ -50,7 +50,7 @@ export default function AdvisorPage() {
             className="btn-outline flex items-center gap-1.5 disabled:opacity-40"
           >
             {refreshingAll ? (
-              <><span className="w-3 h-3 border-2 border-[rgba(0,212,255,0.3)] border-t-[#00d4ff] rounded-full animate-spin" />Refreshing…</>
+              <><span className="w-3 h-3 border-2 border-[var(--border-2)] border-t-[var(--accent)] rounded-full animate-spin" />Refreshing…</>
             ) : '↻ Refresh All'}
           </button>
         )}
@@ -62,9 +62,9 @@ export default function AdvisorPage() {
         <div className="grid sm:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map(i => (
             <div key={i} className="card p-5 animate-pulse h-40">
-              <div className="h-4 bg-[rgba(0,212,255,0.08)] rounded w-1/4 mb-3" />
-              <div className="h-2 bg-[rgba(0,212,255,0.08)] rounded w-full mb-2" />
-              <div className="h-2 bg-[rgba(0,212,255,0.08)] rounded w-3/4" />
+              <div className="h-4 bg-[var(--surface-2)] rounded w-1/4 mb-3" />
+              <div className="h-2 bg-[var(--surface-2)] rounded w-full mb-2" />
+              <div className="h-2 bg-[var(--surface-2)] rounded w-3/4" />
             </div>
           ))}
         </div>
@@ -84,9 +84,9 @@ export default function AdvisorPage() {
             const holds = holdings.filter(h => advice[h.ticker]?.recommendation === 'hold').length;
             return (
               <div className="flex items-center gap-4 mb-4 text-xs">
-                {buys > 0 && <span className="flex items-center gap-1.5 text-bull font-bold"><span className="w-2 h-2 rounded-full bg-bull shadow-[0_0_6px_#00e676]" />{buys} Buy</span>}
-                {holds > 0 && <span className="flex items-center gap-1.5 text-warn font-bold"><span className="w-2 h-2 rounded-full bg-warn shadow-[0_0_6px_#ffaa00]" />{holds} Hold</span>}
-                {sells > 0 && <span className="flex items-center gap-1.5 text-bear font-bold"><span className="w-2 h-2 rounded-full bg-bear shadow-[0_0_6px_#ff3355]" />{sells} Sell</span>}
+                {buys > 0 && <span className="flex items-center gap-1.5 text-bull font-bold"><span className="w-2 h-2 rounded-full bg-bull" />{buys} Buy</span>}
+                {holds > 0 && <span className="flex items-center gap-1.5 text-warn font-bold"><span className="w-2 h-2 rounded-full bg-warn" />{holds} Hold</span>}
+                {sells > 0 && <span className="flex items-center gap-1.5 text-bear font-bold"><span className="w-2 h-2 rounded-full bg-bear" />{sells} Sell</span>}
               </div>
             );
           })()}
@@ -115,13 +115,13 @@ export default function AdvisorPage() {
 
             return (
               <div className="card mb-6 overflow-hidden">
-                <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+                <div className="p-4 border-b border-[var(--border)]">
                   <h2 className="hud-label">Recent Analyst Actions</h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
                     <thead>
-                      <tr className="text-muted border-b border-[rgba(0,212,255,0.08)]">
+                      <tr className="text-muted border-b border-[var(--border)]">
                         <th className="text-left px-4 py-2 font-medium">Ticker</th>
                         <th className="text-left px-4 py-2 font-medium">Firm</th>
                         <th className="text-left px-4 py-2 font-medium">Action</th>
@@ -137,7 +137,7 @@ export default function AdvisorPage() {
                           <tr key={i} className="table-row-hover">
                             <td className="px-4 py-2 font-bold text-arc">{u.ticker}</td>
                             <td className="px-4 py-2 text-white truncate max-w-[120px]">{u.company ?? '—'}</td>
-                            <td className={`px-4 py-2 font-semibold ${isUpgrade ? 'text-[#00e676]' : isDowngrade ? 'text-bear' : 'text-warn'}`}>
+                            <td className={`px-4 py-2 font-semibold ${isUpgrade ? 'text-[var(--gain)]' : isDowngrade ? 'text-bear' : 'text-warn'}`}>
                               {u.action ?? '—'}
                             </td>
                             <td className="px-4 py-2 text-muted">

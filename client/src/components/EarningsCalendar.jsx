@@ -27,17 +27,17 @@ export default function EarningsCalendar({ holdings, fundamentals }) {
           return (
             <div key={ticker} className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="font-mono font-semibold text-[#00d4ff] shrink-0">{ticker}</span>
+                <span className="font-mono font-semibold text-[var(--accent)] shrink-0">{ticker}</span>
                 <span className="text-muted truncate">{company}</span>
               </div>
               <div className="flex items-center gap-2 shrink-0 ml-2">
-                <span className="text-[rgba(0,212,255,0.5)] font-mono">
+                <span className="text-[var(--text-2)] font-mono">
                   {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                 </span>
                 <span className={`px-1.5 py-0.5 rounded-full font-bold text-[10px] tracking-wide border ${
                   soon
-                    ? 'bg-[#ffaa00]/10 text-[#ffaa00] border-[#ffaa00]/30'
-                    : 'bg-[rgba(0,212,255,0.05)] text-muted border-[rgba(0,212,255,0.15)]'
+                    ? 'bg-[var(--warn-soft)] text-warn border-[var(--border)]'
+                    : 'bg-[var(--surface-2)] text-muted border-[var(--border)]'
                 }`}>
                   {days === 0 ? 'TODAY' : days === 1 ? 'TMRW' : `${days}D`}
                 </span>

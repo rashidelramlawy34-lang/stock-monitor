@@ -20,35 +20,35 @@ function AlertRow({ alert, onDelete, onSnooze, onReset }) {
 
   return (
     <tr className="table-row-hover">
-      <td className="py-3 px-4 font-mono font-bold text-[#00d4ff] tracking-widest">{alert.ticker}</td>
-      <td className="py-3 px-4 text-[rgba(0,212,255,0.5)]">{typeLabel(alert.type)}</td>
-      <td className="py-3 px-4 text-right font-mono text-[#a8d8ea]">
+      <td className="py-3 px-4 font-mono font-bold text-[var(--accent)] tracking-widest">{alert.ticker}</td>
+      <td className="py-3 px-4 text-[var(--text-2)]">{typeLabel(alert.type)}</td>
+      <td className="py-3 px-4 text-right font-mono text-[var(--text-2)]">
         {isPct
           ? `${alert.trigger_pct}%`
           : alert.target_price != null ? `$${Number(alert.target_price).toFixed(2)}` : '—'}
       </td>
       <td className="py-3 px-4">
         {isSnoozed
-          ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#ffaa00]/10 text-warn border border-[#ffaa00]/30 tracking-wider uppercase">
+          ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--warn-soft)] text-warn border border-[var(--border)] tracking-wider uppercase">
               Snoozed {snoozeRemain}h
             </span>
           : alert.triggered
-            ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[#ff3355]/10 text-bear border border-[#ff3355]/30 tracking-wider uppercase">Triggered</span>
-            : <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[rgba(0,212,255,0.05)] text-muted border border-[rgba(0,212,255,0.15)] tracking-wider uppercase">Watching</span>}
+            ? <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--loss-soft)] text-bear border border-[var(--border)] tracking-wider uppercase">Triggered</span>
+            : <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-[var(--surface-2)] text-muted border border-[var(--border)] tracking-wider uppercase">Watching</span>}
       </td>
       <td className="py-3 px-4 text-right">
         <div className="flex items-center justify-end gap-2">
           {alert.triggered && !isSnoozed && (
             <button
               onClick={() => onSnooze(alert.id, 24)}
-              className="text-xs text-warn hover:text-[#ffaa00] transition-colors"
+              className="text-xs text-warn hover:text-[var(--warn)] transition-colors"
               title="Snooze 24h"
             >Snooze</button>
           )}
           {(alert.triggered || isSnoozed) && (
             <button
               onClick={() => onReset(alert.id)}
-              className="text-xs text-arc hover:text-[#00d4ff] transition-colors"
+              className="text-xs text-arc hover:text-[var(--accent)] transition-colors"
               title="Reset alert"
             >Reset</button>
           )}
@@ -120,15 +120,15 @@ export default function AlertsPage() {
           {/* Type selector */}
           <div className="flex flex-col gap-1">
             <label className="hud-label">Type</label>
-            <div className="flex rounded-full overflow-hidden border border-[rgba(0,212,255,0.2)]">
+            <div className="flex rounded-full overflow-hidden border border-[var(--border-2)]">
               {[...PRICE_TYPES, ...PCT_TYPES].map(t => (
                 <button
                   key={t} type="button"
                   onClick={() => setForm(f => ({ ...f, type: t, target_price: '', trigger_pct: '' }))}
                   className={`px-2.5 py-1.5 text-xs font-bold transition-all tracking-wide uppercase ${
                     form.type === t
-                      ? 'bg-[rgba(0,212,255,0.15)] text-[#00d4ff]'
-                      : 'text-muted hover:text-[#a8d8ea] hover:bg-[rgba(0,212,255,0.05)]'
+                      ? 'bg-[var(--surface-2)] text-[var(--accent)]'
+                      : 'text-muted hover:text-[var(--text-2)] hover:bg-[var(--surface-2)]'
                   }`}
                 >
                   {t === 'above' ? '↑ $' : t === 'below' ? '↓ $' : t === 'pct_rise' ? '↑ %' : '↓ %'}
@@ -183,8 +183,8 @@ export default function AlertsPage() {
             onClick={() => setTab(t.id)}
             className={`text-xs px-3 py-1.5 rounded-full border transition-all ${
               tab === t.id
-                ? 'border-[rgba(0,212,255,0.6)] text-arc bg-[rgba(0,212,255,0.08)]'
-                : 'border-[rgba(0,212,255,0.15)] text-muted hover:text-arc'
+                ? 'border-[var(--border-2)] text-arc bg-[var(--surface-2)]'
+                : 'border-[var(--border)] text-muted hover:text-arc'
             }`}
           >
             {t.label}
@@ -204,7 +204,7 @@ export default function AlertsPage() {
         <div className="card overflow-hidden">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[rgba(0,212,255,0.1)]">
+              <tr className="border-b border-[var(--border)]">
                 <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
                 <th className="hud-label text-left py-2.5 px-4 font-normal">Type</th>
                 <th className="hud-label text-right py-2.5 px-4 font-normal">Target</th>

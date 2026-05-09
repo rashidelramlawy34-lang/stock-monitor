@@ -24,11 +24,11 @@ function timeAgo(ts) {
 function ScoreRing({ score }) {
   const r = 30, circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color = score >= 70 ? '#00e676' : score >= 45 ? '#ffaa00' : '#ff3355';
+  const color = score >= 70 ? '#16a34a' : score >= 45 ? '#d97706' : '#dc2626';
 
   return (
     <svg width="80" height="80" className="shrink-0">
-      <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(0,212,255,0.1)" strokeWidth="6" />
+      <circle cx="40" cy="40" r={r} fill="none" stroke="var(--surface-2)" strokeWidth="6" />
       <circle
         cx="40" cy="40" r={r}
         fill="none" stroke={color} strokeWidth="6"
@@ -58,14 +58,14 @@ function ScoreHistoryChart({ history }) {
           <ReferenceLine y={70} stroke="rgba(0,230,118,0.2)" strokeDasharray="3 3" />
           <ReferenceLine y={45} stroke="rgba(255,170,0,0.2)" strokeDasharray="3 3" />
           <Tooltip
-            contentStyle={{ background: '#0a1628', border: '1px solid rgba(0,212,255,0.2)', borderRadius: 4, fontSize: 10 }}
+            contentStyle={{ background: 'var(--surface)', border: '1px solid var(--border-2)', borderRadius: 4, fontSize: 10 }}
             formatter={(v) => [v, 'Score']}
             labelFormatter={(_, payload) => payload?.[0] ? timeAgo(payload[0].payload.ts) : ''}
           />
           <Line
             type="monotone" dataKey="score"
-            stroke="#00d4ff" strokeWidth={2} dot={false}
-            activeDot={{ r: 3, fill: '#00d4ff' }}
+            stroke="#3b82f6" strokeWidth={2} dot={false}
+            activeDot={{ r: 3, fill: '#3b82f6' }}
           />
         </LineChart>
       </ResponsiveContainer>
@@ -117,10 +117,10 @@ export default function CoachPage() {
 
       {loading && (
         <div className="card p-8 flex flex-col items-center gap-4">
-          <div className="arc-reactor w-12 h-12">
-            <div className="w-5 h-5 rounded-full bg-[rgba(0,212,255,0.2)] border border-[rgba(0,212,255,0.8)]" />
+          <div className="w-12 h-12 flex items-center justify-center">
+            <div className="w-5 h-5 rounded-full bg-[var(--surface-2)] border border-[var(--accent)]" />
           </div>
-          <p className="text-arc text-sm tracking-wide">JARVIS is analyzing your portfolio…</p>
+          <p className="text-arc text-sm">Analyzing your portfolio…</p>
           <p className="text-muted text-xs">This may take 10–20 seconds</p>
         </div>
       )}
@@ -144,18 +144,18 @@ export default function CoachPage() {
                 <span className={`text-lg font-bold ${healthColor[analysis.overall_health] ?? 'text-arc'}`}>
                   {analysis.overall_health}
                 </span>
-                <span className="text-xs text-muted font-mono border border-[rgba(0,212,255,0.2)] px-2 py-0.5 rounded-full">
+                <span className="text-xs text-muted font-mono border border-[var(--border-2)] px-2 py-0.5 rounded-full">
                   Diversification: {analysis.diversification_score ?? '—'}/100
                 </span>
               </div>
-              <p className="text-sm text-[rgba(0,212,255,0.85)] leading-relaxed">{clean(analysis.summary)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.summary)}</p>
             </div>
           </div>
 
           {/* Top opportunity + risk */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4 border-l-2 border-l-bull">
-              <p className="hud-label mb-2 text-[#00e676]">Top Opportunity</p>
+              <p className="hud-label mb-2 text-[var(--gain)]">Top Opportunity</p>
               <p className="text-sm text-white leading-relaxed">{clean(analysis.top_opportunity)}</p>
             </div>
             <div className="card p-4 border-l-2 border-l-bear">
@@ -168,34 +168,34 @@ export default function CoachPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4">
               <p className="hud-label mb-2">Macro Outlook</p>
-              <p className="text-sm text-[rgba(0,212,255,0.8)] leading-relaxed">{clean(analysis.macro_outlook)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.macro_outlook)}</p>
             </div>
             <div className="card p-4">
               <p className="hud-label mb-2">Concentration Risk</p>
-              <p className="text-sm text-[rgba(0,212,255,0.8)] leading-relaxed">{clean(analysis.concentration_risk)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.concentration_risk)}</p>
             </div>
           </div>
 
           {/* Rebalance suggestions */}
           {analysis.suggested_rebalance?.length > 0 && (
             <div className="card overflow-hidden">
-              <div className="p-4 border-b border-[rgba(0,212,255,0.1)]">
+              <div className="p-4 border-b border-[var(--border)]">
                 <h2 className="hud-label">Rebalance Suggestions</h2>
               </div>
-              <div className="divide-y divide-[rgba(0,212,255,0.06)]">
+              <div className="divide-y divide-[var(--border)]">
                 {analysis.suggested_rebalance.map((s, i) => (
                   <div key={i} className="flex items-start gap-4 p-4">
                     <span className="font-mono font-bold text-arc tracking-widest w-14 shrink-0">{s.ticker}</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 tracking-widest uppercase ${
                       s.action === 'reduce'
-                        ? 'bg-[#ff3355]/10 text-bear border-[#ff3355]/30'
+                        ? 'bg-[var(--loss-soft)] text-bear border-[var(--border)]'
                         : s.action === 'add'
-                          ? 'bg-[#00e676]/10 text-bull border-[#00e676]/30'
-                          : 'bg-[rgba(0,212,255,0.08)] text-arc border-[rgba(0,212,255,0.2)]'
+                          ? 'bg-[var(--gain-soft)] text-bull border-[var(--border)]'
+                          : 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
                     }`}>
                       {s.action}
                     </span>
-                    <p className="text-sm text-[rgba(0,212,255,0.75)]">{clean(s.reason)}</p>
+                    <p className="text-sm text-[var(--text-2)]">{clean(s.reason)}</p>
                   </div>
                 ))}
               </div>

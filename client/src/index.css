@@ -1,32 +1,32 @@
-/* Keep Orbitron in import — HubPage.jsx still uses it */
+/* Orbitron kept in import — HubPage.jsx uses it via .hub-scope */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@400;500;600;700;900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ── Institutional design tokens ─────────────────────── */
+/* ── Light institutional design tokens ───────────────── */
 :root {
   /* Surfaces */
-  --bg:          #0b0d10;
-  --surface-1:   #131619;
-  --surface-2:   #1a1d21;
-  --border:      #232830;
-  --border-2:    #2e343d;
+  --bg:          #f7f8fa;
+  --surface-1:   #ffffff;
+  --surface-2:   #f1f3f5;
+  --border:      #e4e7eb;
+  --border-2:    #d1d5db;
 
   /* Type */
-  --text:        #e6e8eb;
-  --text-2:      #a1a7b0;
+  --text:        #111827;
+  --text-2:      #4b5563;
   --text-muted:  #6b7280;
 
   /* Semantic */
   --gain:        #16a34a;
-  --gain-soft:   rgba(22, 163, 74, 0.12);
+  --gain-soft:   rgba(22, 163, 74, 0.10);
   --loss:        #dc2626;
-  --loss-soft:   rgba(220, 38, 38, 0.12);
+  --loss-soft:   rgba(220, 38, 38, 0.08);
   --warn:        #d97706;
-  --warn-soft:   rgba(217, 119, 6, 0.12);
-  --accent:      #3b82f6;
-  --accent-hover:#2563eb;
+  --warn-soft:   rgba(217, 119, 6, 0.10);
+  --accent:      #2563eb;
+  --accent-hover:#1d4ed8;
 
   /* Typography */
   --font-sans:   'Inter', system-ui, -apple-system, sans-serif;
@@ -37,10 +37,54 @@
   --radius-sm:   4px;
   --radius-pill: 999px;
 
-  /* ── Legacy aliases: DO NOT use in new components ──────
-     These exist solely so HubPage.jsx and other not-yet-
-     refactored components continue to compile correctly.  */
-  --font-body:     var(--font-sans);
+  /* Legacy shims — keep old names pointing at new tokens so
+     unrefactored components don't break between tickets     */
+  --font-body:   var(--font-sans);
+  --bull:        var(--gain);
+  --bull-bg:     var(--gain-soft);
+  --bull-dim:    rgba(22, 163, 74, 0.55);
+  --bear:        var(--loss);
+  --bear-bg:     var(--loss-soft);
+  --bear-dim:    rgba(220, 38, 38, 0.55);
+  --amber:       var(--warn);
+  --muted:       var(--text-muted);
+  --dim:         var(--text-muted);
+  --line:        var(--border);
+  --line-strong: var(--border-2);
+  --card:        var(--surface-1);
+  --card-2:      var(--surface-2);
+  --bg-1:        var(--surface-1);
+  --warn-old:    var(--warn);
+}
+
+/* ── HubPage dark scope ───────────────────────────────
+   Applied via className="hub-scope" on HubPage's root.
+   Overrides every token so the dark orbital canvas looks
+   identical to the pre-rebrand SENTINEL theme.           */
+.hub-scope {
+  /* Core surface overrides */
+  --bg:          #010409;
+  --surface-1:   #070d18;
+  --surface-2:   #0a1320;
+  --border:      rgba(0, 212, 255, 0.09);
+  --border-2:    rgba(0, 212, 255, 0.22);
+
+  /* Type overrides */
+  --text:        #d6e9f5;
+  --text-2:      #a8d8ea;
+  --text-muted:  rgba(0, 212, 255, 0.45);
+
+  /* Semantic overrides — vivid on dark */
+  --gain:        #00e676;
+  --gain-soft:   rgba(0, 230, 118, 0.08);
+  --loss:        #ff3355;
+  --loss-soft:   rgba(255, 51, 85, 0.08);
+  --warn:        #ffb547;
+  --warn-soft:   rgba(255, 181, 71, 0.08);
+  --accent:      #00d4ff;
+  --accent-hover:#00b8e6;
+
+  /* Legacy SENTINEL tokens — HubPage inline styles use these */
   --font-brand:    'Orbitron', sans-serif;
   --cyan:          #00d4ff;
   --cyan-dim:      rgba(0, 212, 255, 0.55);
@@ -49,18 +93,17 @@
   --cyan-bg-hover: rgba(0, 212, 255, 0.03);
   --bull:          var(--gain);
   --bull-bg:       var(--gain-soft);
-  --bull-dim:      rgba(22, 163, 74, 0.55);
+  --bull-dim:      rgba(0, 230, 118, 0.55);
   --bear:          var(--loss);
   --bear-bg:       var(--loss-soft);
-  --bear-dim:      rgba(220, 38, 38, 0.55);
+  --bear-dim:      rgba(255, 51, 85, 0.55);
   --amber:         var(--warn);
   --muted:         var(--text-muted);
-  --dim:           rgba(107, 114, 128, 0.55);
+  --dim:           rgba(0, 212, 255, 0.28);
   --line:          var(--border);
   --line-strong:   var(--border-2);
   --card:          var(--surface-1);
   --card-2:        var(--surface-2);
-  --bg-1:          var(--surface-1);
 }
 
 @layer base {
@@ -74,7 +117,6 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  /* No scanlines, no radial glow backdrops */
   #root { position: relative; }
   * { box-sizing: border-box; }
   ::-webkit-scrollbar { width: 5px; height: 5px; }
@@ -85,16 +127,15 @@
 
 @layer components {
 
-  /* ── Card ──────────────────────────────────────────── */
+  /* ── Card ───────────────────────────────────────────── */
   .card {
     background: var(--surface-1);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
     transition: border-color 0.15s;
   }
   .card:hover { border-color: var(--border-2); }
-  /* No ::before / ::after corner brackets */
 
   /* ── Buttons ────────────────────────────────────────── */
   .btn-primary {
@@ -126,7 +167,7 @@
     display: inline-flex; align-items: center; gap: 4px;
     font-family: var(--font-sans);
   }
-  .btn-outline:hover { border-color: var(--text-2); }
+  .btn-outline:hover { border-color: var(--text-muted); }
 
   .btn-ghost {
     color: var(--text-2);
@@ -141,18 +182,21 @@
 
   /* ── Input ──────────────────────────────────────────── */
   .input {
-    background: var(--surface-2);
+    background: var(--surface-1);
     border: 1px solid var(--border);
     color: var(--text);
     border-radius: var(--radius-sm);
     padding: 0.4rem 0.75rem;
     font-size: 13px;
-    transition: border-color 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s;
     outline: none;
     font-family: var(--font-sans);
   }
   .input::placeholder { color: var(--text-muted); }
-  .input:focus { border-color: var(--accent); }
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+  }
 
   /* ── Pill group ─────────────────────────────────────── */
   .pill-group {
@@ -173,21 +217,19 @@
     background: transparent;
     border: 0;
     transition: background 0.12s, color 0.12s;
-    font-weight: 400;
   }
   .pill:hover { color: var(--text); }
   .pill.active {
     background: var(--surface-1);
     color: var(--text);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.08);
   }
 
   /* ── Badges / tags ──────────────────────────────────── */
   .s-tag {
     display: inline-flex; align-items: center; gap: 4px;
     font-family: var(--font-sans);
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 11px; font-weight: 500;
     padding: 2px 8px;
     border-radius: var(--radius-pill);
     background: var(--surface-2);
@@ -247,7 +289,6 @@
     font-family: var(--font-sans);
     font-size: 12px;
     color: var(--text-muted);
-    font-weight: 400;
   }
   .stat-value {
     font-family: var(--font-sans);
@@ -278,7 +319,6 @@
     font-family: var(--font-sans);
     font-size: 11px;
     color: var(--text-muted);
-    font-weight: 400;
   }
 
   /* ── Expand caret ───────────────────────────────────── */
@@ -317,7 +357,6 @@
     font-size: 11px;
     color: var(--text-muted);
     margin-bottom: 8px;
-    font-weight: 400;
   }
 
   /* ── Heatmap ────────────────────────────────────────── */
@@ -327,7 +366,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 10px;
     font-family: var(--font-mono);
-    color: rgba(255,255,255,0.75);
+    color: rgba(255,255,255,0.85);
     transition: transform 0.1s;
     cursor: default;
   }
@@ -348,11 +387,10 @@
   }
   .table-row-hover:hover { background: var(--surface-2); }
 
-  /* ── Aura action (legacy — used by HubPage RESET btn) ─ */
+  /* ── Aura action (used by HubPage RESET, scoped dark) ─ */
   .aura-action {
     font-family: var(--font-sans);
     font-size: 11px;
-    font-weight: 400;
     padding: 4px 10px;
     border-radius: var(--radius-sm);
     background: transparent;
@@ -363,7 +401,7 @@
   }
   .aura-action:hover { color: var(--text); border-color: var(--text-muted); }
 
-  /* ── Former HUD classes — restyled to plain Inter ────── */
+  /* ── Former HUD classes — plain Inter ───────────────── */
   .hud-label {
     font-family: var(--font-sans);
     font-size: 11px;
@@ -379,7 +417,6 @@
     border: none; height: 1px;
     background: var(--border);
   }
-  /* arc-reactor removed — no replacement needed */
 
   /* ── Spinner ────────────────────────────────────────── */
   .spinner {
@@ -396,7 +433,7 @@
 .text-bear   { color: var(--loss); }
 .text-warn   { color: var(--warn); }
 .text-muted  { color: var(--text-muted); }
-.bg-accent   { background: rgba(59,130,246,0.1); }
+.bg-accent   { background: rgba(37,99,235,0.08); }
 .border-l-bull { border-left-color: var(--gain) !important; }
 .border-l-bear { border-left-color: var(--loss) !important; }
 
@@ -407,7 +444,14 @@
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* orbPulse: kept for HubPage.jsx center orb + App.jsx loading spinner */
+/* Loading hex fade — App.jsx spinner */
+@keyframes hexFade {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+/* orbPulse — HubPage center orb still uses this.
+   Cannot remove until HubPage's animation is updated.     */
 @keyframes orbPulse {
   0%, 100% { opacity: 1; }
   50%       { opacity: 0.5; }

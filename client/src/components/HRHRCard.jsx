@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useWatchlist } from '../hooks/useWatchlist.js';
 
 const RISK_COLORS = {
-  'Low':       { text: '#00e676', bg: 'rgba(0,230,118,0.1)',  border: 'rgba(0,230,118,0.3)'  },
-  'Medium':    { text: '#ffaa00', bg: 'rgba(255,170,0,0.1)', border: 'rgba(255,170,0,0.3)'  },
-  'High':      { text: '#ff8c00', bg: 'rgba(255,140,0,0.1)', border: 'rgba(255,140,0,0.3)'  },
-  'Very High': { text: '#ff3355', bg: 'rgba(255,51,85,0.1)',  border: 'rgba(255,51,85,0.3)'  },
+  'Low':       { text: 'var(--gain)', bg: 'rgba(22,163,74,0.1)',   border: 'rgba(22,163,74,0.3)'   },
+  'Medium':    { text: 'var(--warn)', bg: 'rgba(217,119,6,0.1)',   border: 'rgba(217,119,6,0.3)'   },
+  'High':      { text: '#ff8c00',     bg: 'rgba(255,140,0,0.1)',   border: 'rgba(255,140,0,0.3)'   },
+  'Very High': { text: 'var(--loss)', bg: 'rgba(220,38,38,0.1)',   border: 'rgba(220,38,38,0.3)'   },
 };
 
 export default function HRHRCard({ candidate }) {
@@ -53,17 +53,17 @@ export default function HRHRCard({ candidate }) {
             ? <img
                 src={logo_url}
                 alt=""
-                className="w-7 h-7 rounded object-contain bg-[rgba(0,212,255,0.05)] border border-[rgba(0,212,255,0.15)] shrink-0"
+                className="w-7 h-7 rounded object-contain bg-[var(--surface-2)] border border-[var(--border)] shrink-0"
                 onError={e => { e.target.style.display='none'; e.target.nextSibling.style.display='flex'; }}
               />
             : null}
           <span
-            className={`w-7 h-7 rounded text-[10px] font-bold flex items-center justify-center bg-[rgba(0,212,255,0.08)] text-[rgba(0,212,255,0.6)] border border-[rgba(0,212,255,0.15)] shrink-0 ${logo_url ? 'hidden' : 'flex'}`}
+            className={`w-7 h-7 rounded text-[10px] font-bold flex items-center justify-center bg-[var(--surface-2)] text-[var(--text-2)] border border-[var(--border)] shrink-0 ${logo_url ? 'hidden' : 'flex'}`}
           >
             {initials}
           </span>
           <div className="min-w-0">
-            <p className="font-mono font-bold text-[#00d4ff] leading-none tracking-widest">{ticker}</p>
+            <p className="font-mono font-bold text-[var(--accent)] leading-none tracking-widest">{ticker}</p>
             {(company_name || sector) && (
               <p className="text-xs text-muted truncate mt-0.5">
                 {company_name}{company_name && sector ? ' · ' : ''}{sector}
@@ -92,19 +92,19 @@ export default function HRHRCard({ candidate }) {
       {bull_case && (
         <div>
           <p className="hud-label mb-1">Bull Case</p>
-          <p className="text-sm text-[#a8d8ea] leading-relaxed">{bull_case}</p>
+          <p className="text-sm text-[var(--text-2)] leading-relaxed">{bull_case}</p>
         </div>
       )}
 
       {/* Entry + catalyst */}
       <div className="flex flex-wrap gap-2">
         {entry_zone && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[#ffaa00]/10 text-[#ffaa00] border border-[#ffaa00]/30">
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--warn-soft)] text-warn border border-[var(--border)]">
             <span className="opacity-60">Entry</span> {entry_zone}
           </span>
         )}
         {key_catalyst && (
-          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[rgba(0,212,255,0.08)] text-[#00d4ff] border border-[rgba(0,212,255,0.2)]">
+          <span className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full bg-[var(--surface-2)] text-[var(--accent)] border border-[var(--border-2)]">
             ⚡ {key_catalyst}
           </span>
         )}
@@ -117,12 +117,12 @@ export default function HRHRCard({ candidate }) {
         <div>
           <div className="flex justify-between text-xs text-muted mb-1.5">
             <span className="hud-label text-[9px]">Conviction</span>
-            <span className="font-mono text-[#a8d8ea]">{convictionPct}%</span>
+            <span className="font-mono text-[var(--text-2)]">{convictionPct}%</span>
           </div>
-          <div className="h-1.5 bg-[rgba(0,212,255,0.08)] rounded-full overflow-hidden">
+          <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all"
-              style={{ width: `${convictionPct}%`, background: 'linear-gradient(90deg, #00d4ff, #0066ff)', boxShadow: '0 0 8px rgba(0,212,255,0.4)' }}
+              style={{ width: `${convictionPct}%`, background: 'linear-gradient(90deg, var(--accent), #0066ff)' }}
             />
           </div>
         </div>
@@ -140,17 +140,17 @@ export default function HRHRCard({ candidate }) {
             )}
           </span>
         )}
-        {beta != null && <span>β <span className="font-mono text-[#a8d8ea]">{beta.toFixed(2)}</span></span>}
+        {beta != null && <span>β <span className="font-mono text-[var(--text-2)]">{beta.toFixed(2)}</span></span>}
         {target_mean != null && price != null && (
-          <span>Target <span className="font-mono text-[#a8d8ea]">${target_mean.toFixed(0)}</span></span>
+          <span>Target <span className="font-mono text-[var(--text-2)]">${target_mean.toFixed(0)}</span></span>
         )}
         <button
           onClick={toggleWatch}
           disabled={watchBusy}
           className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full border transition-all ${
             isWatched
-              ? 'bg-[rgba(0,212,255,0.1)] text-arc border-[rgba(0,212,255,0.4)]'
-              : 'border-[rgba(0,212,255,0.2)] text-muted hover:text-arc hover:border-[rgba(0,212,255,0.4)]'
+              ? 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
+              : 'border-[var(--border-2)] text-muted hover:text-arc hover:border-[var(--border-2)]'
           }`}
         >
           {isWatched ? '★ Watching' : '☆ Watch'}

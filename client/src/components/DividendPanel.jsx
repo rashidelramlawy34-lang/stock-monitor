@@ -25,7 +25,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
         <div className="flex gap-4 text-right">
           <div>
             <p className="text-[10px] text-muted">Annual Income</p>
-            <p className="text-sm font-bold text-[#00e676]">${totalIncome.toFixed(2)}</p>
+            <p className="text-sm font-bold text-[var(--gain)]">${totalIncome.toFixed(2)}</p>
           </div>
           <div>
             <p className="text-[10px] text-muted">Portfolio Yield</p>
@@ -36,7 +36,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="text-muted border-b border-[rgba(0,212,255,0.1)]">
+            <tr className="text-muted border-b border-[var(--border)]">
               <th className="text-left py-1.5 font-medium">Ticker</th>
               <th className="text-right py-1.5 font-medium">Annual Div</th>
               <th className="text-right py-1.5 font-medium">Yield</th>
@@ -50,7 +50,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
               <tr key={r.ticker} className="table-row-hover">
                 <td className="py-1.5 font-bold text-arc">{r.ticker}</td>
                 <td className="text-right py-1.5 text-white">${r.annualDiv.toFixed(2)}</td>
-                <td className="text-right py-1.5 text-[#00e676]">{r.yieldPct.toFixed(2)}%</td>
+                <td className="text-right py-1.5 text-[var(--gain)]">{r.yieldPct.toFixed(2)}%</td>
                 <td className="text-right py-1.5 text-muted">{r.yieldOnCost.toFixed(2)}%</td>
                 <td className="text-right py-1.5 text-white">${r.annualIncome.toFixed(2)}</td>
                 <td className="text-right py-1.5 text-muted">{r.nextExDate ?? '—'}</td>

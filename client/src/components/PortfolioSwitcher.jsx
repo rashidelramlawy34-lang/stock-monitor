@@ -37,7 +37,7 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[rgba(0,212,255,0.2)] bg-[rgba(0,212,255,0.04)] hover:border-[rgba(0,212,255,0.4)] transition-all text-sm text-arc"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[var(--border-2)] bg-[var(--surface-2)] hover:border-[var(--border-2)] transition-all text-sm text-arc"
       >
         <span className="font-semibold max-w-[140px] truncate">{activePortfolio?.name ?? 'Portfolio'}</span>
         <svg className="w-3 h-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path d="M19 9l-7 7-7-7" /></svg>
@@ -57,13 +57,13 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
                       className="input flex-1 text-xs px-2 py-0.5"
                       onBlur={() => setRenaming(null)}
                     />
-                    <button type="submit" className="text-[#00e676] text-xs">✓</button>
+                    <button type="submit" className="text-[var(--gain)] text-xs">✓</button>
                   </form>
                 ) : (
                   <>
                     <button
                       onClick={() => { setActive(p.id); setOpen(false); }}
-                      className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${p.id === activeId ? 'text-arc' : 'text-[rgba(0,212,255,0.6)] hover:text-arc'}`}
+                      className={`flex-1 flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors ${p.id === activeId ? 'text-arc' : 'text-[var(--text-2)] hover:text-arc'}`}
                     >
                       {p.id === activeId && <span className="text-[8px]">●</span>}
                       <span className="truncate">{p.name}</span>
@@ -89,7 +89,7 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
             ))}
           </div>
 
-          <div className="border-t border-[rgba(0,212,255,0.1)] py-1">
+          <div className="border-t border-[var(--border)] py-1">
             {creating ? (
               <form onSubmit={handleCreate} className="flex gap-1 px-2 py-1">
                 <input
@@ -99,7 +99,7 @@ export default function PortfolioSwitcher({ portfolios = [], activePortfolio, ac
                   onChange={e => setNewName(e.target.value)}
                   className="input flex-1 text-xs px-2 py-0.5"
                 />
-                <button type="submit" className="text-[#00e676] text-xs px-1">✓</button>
+                <button type="submit" className="text-[var(--gain)] text-xs px-1">✓</button>
                 <button type="button" onClick={() => setCreating(false)} className="text-muted text-xs px-1">✕</button>
               </form>
             ) : (
