@@ -5,20 +5,47 @@ export default function AlertBanner() {
   if (triggered.length === 0) return null;
 
   return (
-    <div className="bg-[#ffaa00]/10 border-b border-[#ffaa00]/30 px-4 py-2">
-      <div className="max-w-6xl mx-auto flex flex-wrap gap-2 items-center">
-        <span className="hud-label text-[#ffaa00] shrink-0">
-          ⚡ Alerts Triggered
+    <div style={{
+      background: 'var(--warn-soft)',
+      borderBottom: '1px solid var(--warn)',
+      padding: '8px 20px',
+    }}>
+      <div style={{
+        maxWidth: 1280, margin: '0 auto',
+        display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center',
+      }}>
+        <span style={{
+          fontSize: 12, fontWeight: 500, color: 'var(--warn)',
+          fontFamily: 'var(--font-sans)', flexShrink: 0,
+        }}>
+          Alerts triggered
         </span>
         {triggered.map(a => (
-          <div key={a.id} className="flex items-center gap-1.5 bg-[#ffaa00]/10 border border-[#ffaa00]/40 rounded-full px-2 py-1 text-xs text-[#ffaa00]">
-            <span className="font-mono font-bold">{a.ticker}</span>
-            <span>{a.type === 'above' ? '↑' : '↓'} ${a.target_price?.toFixed(2)}</span>
+          <div key={a.id} style={{
+            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(217,119,6,0.1)',
+            border: '1px solid rgba(217,119,6,0.3)',
+            borderRadius: 'var(--radius-pill)',
+            padding: '2px 10px 2px 8px',
+            fontSize: 12, color: 'var(--text)',
+          }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: 11 }}>{a.ticker}</span>
+            <span style={{ color: 'var(--text-2)' }}>
+              {a.type === 'above' ? '↑' : '↓'} ${a.target_price?.toFixed(2)}
+            </span>
             <button
               onClick={() => deleteAlert(a.id)}
-              className="ml-1 text-[#ffaa00]/60 hover:text-[#ffaa00] transition-colors"
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                color: 'var(--text-muted)', padding: 0, lineHeight: 1,
+                fontSize: 13, marginLeft: 2,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'var(--text)'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-muted)'; }}
               title="Dismiss"
-            >✕</button>
+            >
+              ×
+            </button>
           </div>
         ))}
       </div>
