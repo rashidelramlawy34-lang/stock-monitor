@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
+import { ToastProvider } from './contexts/ToastContext.jsx';
 import { useAuth } from './hooks/useAuth';
 import MarketBar from './components/MarketBar.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -64,43 +65,47 @@ export default function App() {
 
   if (page === 'hub') return (
     <MotionConfig reducedMotion="user">
-      <HubPage setPage={setPage} user={user} />
+      <ToastProvider>
+        <HubPage setPage={setPage} user={user} />
+      </ToastProvider>
     </MotionConfig>
   );
 
   return (
     <MotionConfig reducedMotion="user">
-      <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
-        <AlertBanner />
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={page}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.22, ease: 'easeOut' }}
-              style={{ flex: 1 }}
-            >
-              {page === 'portfolio'     && <Dashboard />}
-              {page === 'watchlist'     && <WatchlistPage />}
-              {page === 'news'          && <NewsPage />}
-              {page === 'advisor'       && <AdvisorPage />}
-              {page === 'coach'         && <CoachPage />}
-              {page === 'alerts'        && <AlertsPage />}
-              {page === 'discover'      && <DiscoverPage />}
-              {page === 'insiders'      && <InsidersPage />}
-              {page === 'institutional' && <InstitutionalPage />}
-              {page === 'calendar'      && <CalendarPage />}
-              {page === 'trades'        && <TradeLogPage />}
-              {page === 'settings'      && <SettingsPage />}
-              {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
-            </motion.div>
-          </AnimatePresence>
+      <ToastProvider>
+        <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
+          <AlertBanner />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={page}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ type: 'spring', stiffness: 100, damping: 18, mass: 0.8 }}
+                style={{ flex: 1 }}
+              >
+                {page === 'portfolio'     && <Dashboard />}
+                {page === 'watchlist'     && <WatchlistPage />}
+                {page === 'news'          && <NewsPage />}
+                {page === 'advisor'       && <AdvisorPage />}
+                {page === 'coach'         && <CoachPage />}
+                {page === 'alerts'        && <AlertsPage />}
+                {page === 'discover'      && <DiscoverPage />}
+                {page === 'insiders'      && <InsidersPage />}
+                {page === 'institutional' && <InstitutionalPage />}
+                {page === 'calendar'      && <CalendarPage />}
+                {page === 'trades'        && <TradeLogPage />}
+                {page === 'settings'      && <SettingsPage />}
+                {page === 'developer'     && user?.id === 'rashidelramlawy' && <DeveloperPage />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <AuraPanel />
         </div>
-        <AuraPanel />
-      </div>
+      </ToastProvider>
     </MotionConfig>
   );
 }

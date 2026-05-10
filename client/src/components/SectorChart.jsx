@@ -74,7 +74,7 @@ export default function SectorChart({ holdings, prices, fundamentals }) {
 
   return (
     <div className="card p-5">
-      <p className="hud-label mb-4">Sector Allocation</p>
+      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 16 }}>Sector allocation</p>
       <div className="flex items-center gap-5">
         <div style={{ width: 160, height: 160, flexShrink: 0 }}>
           <ResponsiveContainer width="100%" height="100%">

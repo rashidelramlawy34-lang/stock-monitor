@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip,
   ResponsiveContainer, CartesianGrid, ReferenceLine,
@@ -110,7 +111,27 @@ export default function PortfolioChart() {
         </div>
         <div className="pill-group" style={{ alignSelf: 'flex-start' }}>
           {RANGES.map(r => (
-            <button key={r} className={`pill${range === r ? ' active' : ''}`} onClick={() => setRange(r)}>{r}</button>
+            <button
+              key={r}
+              onClick={() => setRange(r)}
+              className="pill"
+              style={{ position: 'relative', color: range === r ? 'var(--text)' : undefined }}
+            >
+              {range === r && (
+                <motion.span
+                  layoutId="period-pill-bg"
+                  style={{
+                    position: 'absolute', inset: 0,
+                    borderRadius: 'inherit',
+                    background: 'var(--surface-1)',
+                    boxShadow: '0 1px 2px rgba(17,24,39,0.08)',
+                    zIndex: 0,
+                  }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+                />
+              )}
+              <span style={{ position: 'relative', zIndex: 1 }}>{r}</span>
+            </button>
           ))}
         </div>
       </div>

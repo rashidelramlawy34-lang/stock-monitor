@@ -31,12 +31,12 @@ export default function AdvisorPage() {
   const doneCount = holdings.filter(h => advice[h.ticker]).length;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="page">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="hud-title text-xl">AI Advisor</h1>
+          <h1 className="page-title">AI Advisor</h1>
           {holdings.length > 0 && (
-            <p className="text-xs text-muted mt-1 tracking-wide">
+            <p className="page-subtitle">
               {loadingCount > 0
                 ? `Analyzing ${loadingCount} stock${loadingCount > 1 ? 's' : ''}…`
                 : `${doneCount} of ${holdings.length} analyzed`}
@@ -76,7 +76,7 @@ export default function AdvisorPage() {
 
       {holdings.length > 0 && (
         <>
-          <h2 className="hud-label mb-3">Buy / Hold / Sell Analysis</h2>
+          <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)', marginBottom: 12 }}>Buy / hold / sell analysis</h2>
 
           {doneCount > 0 && (() => {
             const buys = holdings.filter(h => advice[h.ticker]?.recommendation === 'buy').length;
@@ -116,7 +116,7 @@ export default function AdvisorPage() {
             return (
               <div className="card mb-6 overflow-hidden">
                 <div className="p-4 border-b border-[var(--border)]">
-                  <h2 className="hud-label">Recent Analyst Actions</h2>
+                  <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Recent analyst actions</h2>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-xs">
@@ -135,7 +135,7 @@ export default function AdvisorPage() {
                         const isDowngrade = u.action?.toLowerCase().includes('downgrade');
                         return (
                           <tr key={i} className="table-row-hover">
-                            <td className="px-4 py-2 font-bold text-arc">{u.ticker}</td>
+                            <td className="px-4 py-2 font-mono font-bold" style={{ color: 'var(--text)' }}>{u.ticker}</td>
                             <td className="px-4 py-2 text-white truncate max-w-[120px]">{u.company ?? '—'}</td>
                             <td className={`px-4 py-2 font-semibold ${isUpgrade ? 'text-[var(--gain)]' : isDowngrade ? 'text-bear' : 'text-warn'}`}>
                               {u.action ?? '—'}

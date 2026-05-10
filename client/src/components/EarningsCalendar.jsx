@@ -20,7 +20,7 @@ export default function EarningsCalendar({ holdings, fundamentals }) {
 
   return (
     <div className="card p-4">
-      <p className="hud-label mb-3">Earnings Calendar</p>
+      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>Earnings calendar</p>
       <div className="flex flex-col gap-2">
         {upcoming.map(({ ticker, date, days, company }) => {
           const soon = days <= 14;

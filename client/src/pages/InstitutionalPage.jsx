@@ -30,15 +30,18 @@ export default function InstitutionalPage() {
     return { ticker: h.ticker, pct: +totalPct.toFixed(2) };
   });
 
-  if (loading) return <div className="p-6 text-muted text-sm">Loading institutional data...</div>;
+  if (loading) return <div className="page" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>Loading institutional data…</div>;
 
   return (
-    <div className="p-4 sm:p-6">
-      <h2 className="hud-title text-sm mb-4">Institutional Ownership</h2>
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="page-title">Institutional</h1>
+        <p className="page-subtitle">Top institutional holder concentration by ticker</p>
+      </div>
 
       {barData.some(d => d.pct > 0) && (
         <div className="card p-4 mb-4">
-          <p className="hud-label text-[10px] mb-3">Top-5 Holder Concentration by Ticker</p>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 12 }}>Top-5 holder concentration by ticker</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={barData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
               <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: '#6b7280' }} />
@@ -58,7 +61,7 @@ export default function InstitutionalPage() {
           const holders = data[h.ticker] ?? [];
           return (
             <div key={h.ticker} className="card p-4">
-              <p className="hud-label text-[10px] mb-2">{h.ticker} — Top Holders</p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8, fontFamily: 'var(--font-mono)' }}>{h.ticker} — top holders</p>
               {holders.length === 0 ? (
                 <p className="text-muted text-xs">No data</p>
               ) : (
@@ -70,7 +73,7 @@ export default function InstitutionalPage() {
                       <div key={i} className="text-xs">
                         <div className="flex justify-between mb-0.5">
                           <span className="text-white truncate max-w-[140px]">{holder.institutionName ?? holder.name ?? '—'}</span>
-                          <span className="text-arc ml-2 shrink-0">{pct.toFixed(2)}%</span>
+                          <span style={{ color: 'var(--accent)', marginLeft: 8, flexShrink: 0 }}>{pct.toFixed(2)}%</span>
                         </div>
                         <div className="h-1 bg-[var(--surface-2)] rounded-full overflow-hidden">
                           <div className="h-full bg-[#2563eb] rounded-full" style={{ width: `${Math.min(pct * 5, 100)}%` }} />

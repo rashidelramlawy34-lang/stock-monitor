@@ -52,7 +52,7 @@ function ScoreHistoryChart({ history }) {
 
   return (
     <div className="card p-4 mb-4">
-      <p className="hud-label mb-3 text-[9px]">Score History</p>
+      <p style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 8 }}>Score history</p>
       <ResponsiveContainer width="100%" height={70}>
         <LineChart data={data}>
           <ReferenceLine y={70} stroke="rgba(0,230,118,0.2)" strokeDasharray="3 3" />
@@ -77,7 +77,7 @@ function ScoreHistoryChart({ history }) {
   );
 }
 
-const healthColor = { Aggressive: 'text-warn', Balanced: 'text-arc', Defensive: 'text-bull', Speculative: 'text-bear' };
+const healthColor = { Aggressive: 'text-warn', Balanced: 'text-[var(--accent)]', Defensive: 'text-bull', Speculative: 'text-bear' };
 
 export default function CoachPage() {
   const { analysis, loading, error, fetchCached, refresh } = useCoach();
@@ -93,11 +93,11 @@ export default function CoachPage() {
   }, []);
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="page">
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="hud-title text-xl">AI Portfolio Coach</h1>
-          <p className="text-muted text-xs mt-1 tracking-wide">Holistic portfolio analysis powered by JARVIS</p>
+          <h1 className="page-title">AI Coach</h1>
+          <p className="page-subtitle">Holistic portfolio analysis and rebalancing suggestions</p>
         </div>
         <div className="flex items-center gap-3">
           {analysis?.generated_at && (
@@ -120,7 +120,7 @@ export default function CoachPage() {
           <div className="w-12 h-12 flex items-center justify-center">
             <div className="w-5 h-5 rounded-full bg-[var(--surface-2)] border border-[var(--accent)]" />
           </div>
-          <p className="text-arc text-sm">Analyzing your portfolio…</p>
+          <p style={{ color: 'var(--text-2)', fontSize: 'var(--text-sm)' }}>Analyzing your portfolio…</p>
           <p className="text-muted text-xs">This may take 10–20 seconds</p>
         </div>
       )}
@@ -141,7 +141,7 @@ export default function CoachPage() {
             <ScoreRing score={analysis.score ?? 50} />
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <span className={`text-lg font-bold ${healthColor[analysis.overall_health] ?? 'text-arc'}`}>
+                <span className={`text-lg font-bold ${healthColor[analysis.overall_health] ?? 'text-[var(--accent)]'}`}>
                   {analysis.overall_health}
                 </span>
                 <span className="text-xs text-muted font-mono border border-[var(--border-2)] px-2 py-0.5 rounded-full">
@@ -155,11 +155,11 @@ export default function CoachPage() {
           {/* Top opportunity + risk */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4 border-l-2 border-l-bull">
-              <p className="hud-label mb-2 text-[var(--gain)]">Top Opportunity</p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--gain)', fontWeight: 600, marginBottom: 8 }}>Top opportunity</p>
               <p className="text-sm text-white leading-relaxed">{clean(analysis.top_opportunity)}</p>
             </div>
             <div className="card p-4 border-l-2 border-l-bear">
-              <p className="hud-label mb-2 text-bear">Top Risk</p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--loss)', fontWeight: 600, marginBottom: 8 }}>Top risk</p>
               <p className="text-sm text-white leading-relaxed">{clean(analysis.top_risk)}</p>
             </div>
           </div>
@@ -167,11 +167,11 @@ export default function CoachPage() {
           {/* Macro + concentration */}
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4">
-              <p className="hud-label mb-2">Macro Outlook</p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8 }}>Macro outlook</p>
               <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.macro_outlook)}</p>
             </div>
             <div className="card p-4">
-              <p className="hud-label mb-2">Concentration Risk</p>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8 }}>Concentration risk</p>
               <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.concentration_risk)}</p>
             </div>
           </div>
@@ -180,18 +180,18 @@ export default function CoachPage() {
           {analysis.suggested_rebalance?.length > 0 && (
             <div className="card overflow-hidden">
               <div className="p-4 border-b border-[var(--border)]">
-                <h2 className="hud-label">Rebalance Suggestions</h2>
+                <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Rebalance suggestions</h2>
               </div>
               <div className="divide-y divide-[var(--border)]">
                 {analysis.suggested_rebalance.map((s, i) => (
                   <div key={i} className="flex items-start gap-4 p-4">
-                    <span className="font-mono font-bold text-arc tracking-widest w-14 shrink-0">{s.ticker}</span>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 tracking-widest uppercase ${
+                    <span className="font-mono font-bold w-14 shrink-0" style={{ color: 'var(--text)' }}>{s.ticker}</span>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${
                       s.action === 'reduce'
                         ? 'bg-[var(--loss-soft)] text-bear border-[var(--border)]'
                         : s.action === 'add'
                           ? 'bg-[var(--gain-soft)] text-bull border-[var(--border)]'
-                          : 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
+                          : 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--border-2)]'
                     }`}>
                       {s.action}
                     </span>

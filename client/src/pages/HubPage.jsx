@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
@@ -126,6 +126,7 @@ export default function HubPage({ setPage, user }) {
   const containerRef  = useRef(null);
   const [cSize, setCSize] = useState({ w: window.innerWidth, h: window.innerHeight - 40 });
   const [warpingId, setWarpingId] = useState(null);
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const prefersReducedMotion = useReducedMotion();
 
   // All RAF state in refs — no React re-renders per frame
@@ -217,17 +218,41 @@ export default function HubPage({ setPage, user }) {
     return () => cancelAnimationFrame(rafId);
   }, []);
 
+  // ── Parallax on mouse move ─────────────────────────────────
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+    const onMove = (e) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      setParallax({
+        x: ((e.clientX - cx) / cx) * 4,
+        y: ((e.clientY - cy) / cy) * 4,
+      });
+    };
+    window.addEventListener('mousemove', onMove);
+    return () => window.removeEventListener('mousemove', onMove);
+  }, [prefersReducedMotion]);
+
   // ── Warp navigation ───────────────────────────────────────
   const handleWarp = useCallback((id) => {
     if (prefersReducedMotion) {
       setPage(id);
       return;
     }
-    // Pulse the planet up
-    const el = planetRefs.current[id];
-    if (el) el.style.transform = 'scale(1.6)';
+    // Fade other planets, pulse clicked planet
+    for (const { id: pid } of PLANETS) {
+      const el = planetRefs.current[pid];
+      if (!el) continue;
+      if (pid === id) {
+        el.style.transform = 'scale(1.3)';
+        el.style.transition = 'transform 0.15s ease-out, opacity 0.2s';
+      } else {
+        el.style.opacity = '0.2';
+        el.style.transition = 'opacity 0.2s';
+      }
+    }
     setWarpingId(id);
-    setTimeout(() => setPage(id), 380);
+    setTimeout(() => setPage(id), 480);
   }, [setPage, prefersReducedMotion]);
 
   const handleWarpRef = useRef(handleWarp);
@@ -364,6 +389,8 @@ export default function HubPage({ setPage, user }) {
         color: '#d6e9f5',
         cursor: draggingId ? 'grabbing' : 'default',
         userSelect: 'none',
+        transform: warpingId ? 'scale(0.95)' : 'scale(1)',
+        transition: 'transform 0.28s ease-out',
       }}
     >
       {/* Controls */}
@@ -380,7 +407,7 @@ export default function HubPage({ setPage, user }) {
         </button>
       </div>
 
-      {/* Ambient nebula glow behind center */}
+      {/* Ambient nebula glow — moves with parallax */}
       <div style={{
         position: 'absolute',
         left: cx - 430, top: cy - 430,
@@ -388,6 +415,8 @@ export default function HubPage({ setPage, user }) {
         borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(0,212,255,0.055) 0%, rgba(0,212,255,0.02) 40%, transparent 72%)',
         pointerEvents: 'none', zIndex: 1,
+        transform: `translate(${parallax.x * 0.5}px, ${parallax.y * 0.5}px)`,
+        transition: 'transform 0.4s cubic-bezier(0.2, 0, 0.2, 1)',
       }} />
 
       {/* SVG ring layer */}
@@ -516,32 +545,39 @@ export default function HubPage({ setPage, user }) {
           pointerEvents: 'none',
         }} />
 
-        {/* Content */}
-        <span style={{ fontFamily: 'var(--font-brand)', fontSize: 7, letterSpacing: '0.26em', color: 'var(--muted)', marginBottom: 2 }}>
-          {getGreeting()}
-        </span>
-        {user?.id && (
-          <span style={{ fontFamily: 'var(--font-brand)', fontSize: 9, letterSpacing: '0.16em', color: 'var(--text)', textTransform: 'uppercase', marginBottom: 4 }}>
-            {user.id}
+        {/* Content — fades in 400ms after mount */}
+        <motion.div
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}
+          initial={{ opacity: prefersReducedMotion ? 1 : 0 }}
+          animate={{ opacity: 1 }}
+          transition={prefersReducedMotion ? {} : { delay: 0.4, duration: 0.4, ease: 'easeOut' }}
+        >
+          <span style={{ fontFamily: 'var(--font-brand)', fontSize: 7, letterSpacing: '0.26em', color: 'var(--muted)', marginBottom: 2 }}>
+            {getGreeting()}
           </span>
-        )}
-        <span style={{ fontFamily: 'var(--font-brand)', fontSize: 6.5, letterSpacing: '0.24em', color: 'var(--cyan)', opacity: 0.65, marginBottom: 10 }}>
-          AURA IS ANALYZING
-        </span>
-        {cost > 0 ? (
-          <span style={{
-            fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700, lineHeight: 1,
-            color: todayPos ? 'var(--bull)' : 'var(--bear)',
-            textShadow: todayPos ? '0 0 24px rgba(0,230,118,0.5)' : '0 0 24px rgba(255,51,85,0.5)',
-          }}>
-            {todayPos ? '+' : '−'}${Math.abs(today).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          {user?.id && (
+            <span style={{ fontFamily: 'var(--font-brand)', fontSize: 9, letterSpacing: '0.16em', color: 'var(--text)', textTransform: 'uppercase', marginBottom: 4 }}>
+              {user.id}
+            </span>
+          )}
+          <span style={{ fontFamily: 'var(--font-brand)', fontSize: 6.5, letterSpacing: '0.24em', color: 'var(--cyan)', opacity: 0.65, marginBottom: 10 }}>
+            AURA IS ANALYZING
           </span>
-        ) : (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 20, color: 'var(--dim)' }}>—</span>
-        )}
-        <p style={{ fontSize: 8, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 160, marginTop: 8, opacity: 0.8 }}>
-          {insight}
-        </p>
+          {cost > 0 ? (
+            <span style={{
+              fontFamily: 'var(--font-mono)', fontSize: 28, fontWeight: 700, lineHeight: 1,
+              color: todayPos ? 'var(--bull)' : 'var(--bear)',
+              textShadow: todayPos ? '0 0 24px rgba(0,230,118,0.5)' : '0 0 24px rgba(255,51,85,0.5)',
+            }}>
+              {todayPos ? '+' : '−'}${Math.abs(today).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </span>
+          ) : (
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 20, color: 'var(--dim)' }}>—</span>
+          )}
+          <p style={{ fontSize: 8, color: 'var(--text-2)', lineHeight: 1.5, maxWidth: 160, marginTop: 8, opacity: 0.8 }}>
+            {insight}
+          </p>
+        </motion.div>
       </div>
 
       {/* Planet nodes */}

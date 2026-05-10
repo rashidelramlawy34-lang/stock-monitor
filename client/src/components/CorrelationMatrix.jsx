@@ -45,21 +45,21 @@ export default function CorrelationMatrix({ holdings, candles }) {
 
   return (
     <div className="card p-4 mb-6">
-      <h2 className="hud-label mb-3">Correlation Matrix (14-day)</h2>
+      <h2 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>Correlation matrix (14-day)</h2>
       <div className="overflow-x-auto">
         <table className="text-xs font-mono">
           <thead>
             <tr>
               <th className="w-12" />
               {tickers.map(t => (
-                <th key={t} className="hud-label text-center px-2 py-1 font-normal">{t}</th>
+                <th key={t} className="text-center px-2 py-1 font-mono font-normal" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{t}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {tickers.map((rowT, ri) => (
               <tr key={rowT}>
-                <td className="hud-label pr-2 py-1">{rowT}</td>
+                <td className="pr-2 py-1 font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{rowT}</td>
                 {tickers.map((colT, ci) => {
                   const r = matrix[ri][ci];
                   return (

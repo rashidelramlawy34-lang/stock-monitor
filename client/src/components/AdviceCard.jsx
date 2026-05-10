@@ -33,7 +33,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <span className="font-mono font-bold text-[var(--accent)] text-lg tracking-widest">{ticker}</span>
+          <span className="font-mono font-bold text-[var(--accent)] text-lg">{ticker}</span>
           {(companyName || sector) && (
             <p className="text-xs text-muted mt-0.5 truncate">
               {companyName}{companyName && sector ? ' · ' : ''}{sector}
@@ -73,7 +73,8 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
       {!loading && !error && !advice && (
         <button
           onClick={() => onRefresh(ticker)}
-          className="text-xs text-arc hover:underline text-left"
+          className="text-xs text-left hover:underline"
+          style={{ color: 'var(--accent)' }}
         >
           Generate AI analysis →
         </button>
@@ -84,7 +85,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           {/* Confidence bar */}
           <div>
             <div className="flex justify-between text-xs text-muted mb-1.5">
-              <span className="hud-label text-[9px]">Confidence</span>
+              <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>Confidence</span>
               <span className="font-mono text-[var(--text-2)]">{confidence}%</span>
             </div>
             <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">

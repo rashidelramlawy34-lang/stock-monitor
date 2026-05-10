@@ -40,7 +40,7 @@ export default function RebalancePanel({ holdings = [], prices = {} }) {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between p-4 text-left"
       >
-        <h3 className="hud-label text-xs">Rebalancing Calculator</h3>
+        <h3 style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--text)' }}>Rebalancing calculator</h3>
         <span className="text-muted text-xs">{open ? '▲' : '▼'}</span>
       </button>
 
@@ -67,7 +67,7 @@ export default function RebalancePanel({ holdings = [], prices = {} }) {
               <tbody>
                 {rows.map(r => (
                   <tr key={r.ticker} className="table-row-hover">
-                    <td className="py-1.5 font-bold text-arc">{r.ticker}</td>
+                    <td className="py-1.5 font-mono font-bold" style={{ color: 'var(--text)' }}>{r.ticker}</td>
                     <td className="text-right py-1.5 text-muted">{r.currentPct.toFixed(1)}%</td>
                     <td className="text-right py-1.5">
                       <input

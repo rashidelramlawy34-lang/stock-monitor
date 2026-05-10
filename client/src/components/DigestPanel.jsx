@@ -23,7 +23,7 @@ export default function DigestPanel() {
   return (
     <div className="card p-5 mb-6">
       <div className="flex items-center justify-between mb-3">
-        <h2 className="hud-label">Portfolio Digest</h2>
+        <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Portfolio digest</h2>
         <button onClick={generate} disabled={loading} className="btn-primary text-xs">
           {loading ? 'Generating…' : summary ? 'Regenerate' : 'Generate Digest'}
         </button>

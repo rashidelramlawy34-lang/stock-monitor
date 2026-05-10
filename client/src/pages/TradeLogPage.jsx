@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { motion } from 'framer-motion';
 import { useTrades } from '../hooks/useTrades.js';
 
 function fmt(n, d = 2) {
@@ -131,7 +132,7 @@ function TaxOptimizer({ trades }) {
               const isWash = washSaleIds.has(r.tradeId);
               return (
                 <tr key={i} className={`table-row-hover ${isWash ? 'bg-[var(--warn-soft)]' : ''}`}>
-                  <td className="px-4 py-2 font-bold text-arc">{r.ticker}</td>
+                  <td className="px-4 py-2 font-mono font-bold" style={{ color: 'var(--text)' }}>{r.ticker}</td>
                   <td className="px-4 py-2 text-right text-white">{fmt(r.shares, 4)}</td>
                   <td className="px-4 py-2 text-right text-muted">${fmt(r.costPerShare)}</td>
                   <td className="px-4 py-2 text-right text-muted">{r.currentPrice ? `$${fmt(r.currentPrice)}` : '—'}</td>
@@ -148,7 +149,7 @@ function TaxOptimizer({ trades }) {
                     {isWash
                       ? <span className="text-warn text-[10px] font-bold" title="Potential wash sale — repurchase within 30 days of a loss sale">⚠ WASH</span>
                       : r.unrealized !== null && r.unrealized < 0
-                        ? <span className="text-arc text-[10px] font-bold">HARVEST</span>
+                        ? <span style={{ color: 'var(--accent)', fontSize: 10, fontWeight: 700 }}>Harvest</span>
                         : '—'}
                   </td>
                 </tr>
@@ -257,11 +258,11 @@ export default function TradeLogPage() {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-6 flex items-start justify-between gap-3">
+    <div className="page">
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
         <div>
-          <h1 className="hud-title text-xl">Trade Log</h1>
-          <p className="text-muted text-xs mt-1 tracking-wide">Record buy/sell transactions and track realized P&L</p>
+          <h1 className="page-title">Trade log</h1>
+          <p className="page-subtitle">Record buy/sell transactions and track realized P&L</p>
         </div>
         <div className="flex items-center gap-2">
           <input ref={fileRef} type="file" accept=".csv" className="hidden" onChange={handleCSV} />
@@ -283,11 +284,11 @@ export default function TradeLogPage() {
 
       {/* Log trade form */}
       <form onSubmit={handleSubmit} className="card p-5 mb-6">
-        <h2 className="hud-label mb-4">Log Trade</h2>
+        <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>Log trade</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
           <input
             name="ticker" value={form.ticker} onChange={handleChange}
-            placeholder="Ticker" className="input font-mono tracking-widest uppercase" maxLength={10}
+            placeholder="Ticker" className="input font-mono uppercase" maxLength={10}
           />
           <select name="action" value={form.action} onChange={handleChange} className="input">
             <option value="buy">Buy</option>
@@ -326,7 +327,8 @@ export default function TradeLogPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-all ${activeTab === tab ? 'border-[var(--border-2)] text-arc bg-[var(--surface-2)]' : 'border-[var(--border)] text-muted hover:text-arc'}`}
+            className={activeTab === tab ? 'btn-outline' : 'btn-ghost'}
+            style={{ fontSize: 'var(--text-sm)', ...(activeTab === tab ? { color: 'var(--accent)', borderColor: 'var(--accent)' } : {}) }}
           >
             {tab === 'history' ? 'Trade History' : 'Tax Optimizer'}
           </button>
@@ -336,8 +338,8 @@ export default function TradeLogPage() {
       {activeTab === 'tax' && (
         <div className="card overflow-hidden mb-6">
           <div className="p-4 border-b border-[var(--border)]">
-            <h2 className="hud-label">Tax Lot Optimizer</h2>
-            <p className="text-xs text-muted mt-1">Open lots from buy trades, sorted by unrealized P&L</p>
+            <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)', marginBottom: 4 }}>Tax lot optimizer</h2>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>Open lots from buy trades, sorted by unrealized P&L</p>
           </div>
           <TaxOptimizer trades={trades} />
         </div>
@@ -348,22 +350,22 @@ export default function TradeLogPage() {
           {summary.length > 0 && (
             <div className="card mb-6 overflow-hidden">
               <div className="p-4 border-b border-[var(--border)]">
-                <h2 className="hud-label">Realized P&L Summary</h2>
+                <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Realized P&L summary</h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)]">
-                      <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Realized P&L</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total Bought</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total Sold</th>
+                      <th style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: 'left' }}>Ticker</th>
+                      <th style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: 'right' }}>Realized P&L</th>
+                      <th style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: 'right' }}>Total bought</th>
+                      <th style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: 'right' }}>Total sold</th>
                     </tr>
                   </thead>
                   <tbody>
                     {summary.map(s => (
                       <tr key={s.ticker} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
-                        <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{s.ticker}</td>
+                        <td className="py-2.5 px-4 font-mono font-bold" style={{ color: 'var(--text)' }}>{s.ticker}</td>
                         <td className={`py-2.5 px-4 text-right font-mono font-bold ${s.realized_pgl >= 0 ? 'text-bull' : 'text-bear'}`}>
                           {s.realized_pgl >= 0 ? '+' : ''}${fmt(s.realized_pgl)}
                         </td>
@@ -379,7 +381,7 @@ export default function TradeLogPage() {
 
           <div className="card overflow-hidden">
             <div className="p-4 border-b border-[var(--border)]">
-              <h2 className="hud-label">Transaction History ({trades.length})</h2>
+              <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Transaction history ({trades.length})</h2>
             </div>
 
             {loading && <div className="p-6 text-muted text-sm">Loading…</div>}
@@ -394,29 +396,28 @@ export default function TradeLogPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)]">
-                      <th className="hud-label text-left py-2.5 px-4 font-normal">Date</th>
-                      <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                      <th className="hud-label text-left py-2.5 px-4 font-normal">Action</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Shares</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Price</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Fees</th>
-                      <th className="hud-label text-right py-2.5 px-4 font-normal">Total</th>
-                      <th className="py-2.5 px-4" />
+                      {['Date', 'Ticker', 'Action', 'Shares', 'Price', 'Fees', 'Total', ''].map((h, i) => (
+                        <th key={h + i} style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: i < 3 ? 'left' : 'right' }}>{h}</th>
+                      ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {trades.map(t => {
+                    {trades.map((t, i) => {
                       const total = t.action === 'buy'
                         ? t.shares * t.price + t.fees
                         : t.shares * t.price - t.fees;
                       return (
-                        <tr key={t.id} className="border-b border-[var(--border)] hover:bg-[var(--surface-2)]">
+                        <motion.tr key={t.id}
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ type: 'spring', stiffness: 120, damping: 18, delay: i * 0.03 }}
+                          className="border-b border-[var(--border)] table-row-hover">
                           <td className="py-2.5 px-4 font-mono text-muted text-xs">
                             {new Date(t.traded_at * 1000).toLocaleDateString()}
                           </td>
-                          <td className="py-2.5 px-4 font-mono font-bold text-arc tracking-widest">{t.ticker}</td>
+                          <td className="py-2.5 px-4 font-mono font-bold" style={{ color: 'var(--text)' }}>{t.ticker}</td>
                           <td className="py-2.5 px-4">
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full border ${
                               t.action === 'buy'
                                 ? 'bg-[var(--gain-soft)] text-bull border-[var(--border)]'
                                 : 'bg-[var(--loss-soft)] text-bear border-[var(--border)]'
@@ -439,7 +440,7 @@ export default function TradeLogPage() {
                               ✕
                             </button>
                           </td>
-                        </tr>
+                        </motion.tr>
                       );
                     })}
                   </tbody>

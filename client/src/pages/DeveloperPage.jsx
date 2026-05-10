@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 
 function timeAgo(ts) {
@@ -10,12 +11,22 @@ function timeAgo(ts) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function StatBox({ label, value, color }) {
+const TH = ({ children, right }) => (
+  <th style={{ padding: '10px 16px', fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 400, textAlign: right ? 'right' : 'left' }}>{children}</th>
+);
+
+function StatBox({ label, value, color, index }) {
   return (
-    <div className="card p-4 text-center">
-      <p className="hud-label mb-2">{label}</p>
-      <p className={`text-3xl font-bold font-mono ${color || 'text-arc'}`}>{value}</p>
-    </div>
+    <motion.div
+      className="card"
+      style={{ padding: 16, textAlign: 'center' }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ type: 'spring', stiffness: 120, damping: 18, delay: index * 0.05 }}
+    >
+      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 6 }}>{label}</p>
+      <p style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, fontFamily: 'var(--font-mono)', color: color ?? 'var(--text)' }}>{value}</p>
+    </motion.div>
   );
 }
 
@@ -33,94 +44,94 @@ export default function DeveloperPage() {
   }, []);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+    <div className="page">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
-          <h1 className="hud-title text-xl">Developer Console</h1>
-          <p className="text-muted text-xs mt-1 tracking-wide">System telemetry and account management</p>
+          <h1 className="page-title">Developer console</h1>
+          <p className="page-subtitle">System telemetry and account management</p>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted font-mono">
-            Logged in as <span className="text-arc">{user?.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
+            Logged in as <span style={{ color: 'var(--accent)' }}>{user?.name}</span>
           </span>
-          <button onClick={logout} className="btn-outline text-xs">Sign Out</button>
+          <button onClick={logout} className="btn-outline">Sign out</button>
         </div>
       </div>
 
       {loading && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {[1,2,3,4].map(i => <div key={i} className="card p-4 h-20 animate-pulse" />)}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 24 }}>
+          {[1,2,3,4].map(i => <div key={i} className="card skeleton" style={{ height: 80 }} />)}
         </div>
       )}
 
-      {error && <div className="card p-4 text-bear text-sm mb-6">Error: {error}</div>}
+      {error && <div className="card" style={{ padding: 16, color: 'var(--loss)', fontSize: 'var(--text-sm)', marginBottom: 24 }}>Error: {error}</div>}
 
       {data && (
         <>
-          {/* System stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-            <StatBox label="Total Users"    value={data.totals.total_users}    color="text-arc" />
-            <StatBox label="Total Holdings" value={data.totals.total_holdings} color="text-bull" />
-            <StatBox label="Total Alerts"   value={data.totals.total_alerts}   color="text-warn" />
-            <StatBox label="AI Analyses"    value={data.totals.total_advice}   color="text-[#8b5cf6]" />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 16 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <StatBox index={0} label="Total users"    value={data.totals.total_users}    color="var(--accent)" />
+              <StatBox index={1} label="Total holdings" value={data.totals.total_holdings} color="var(--gain)" />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+              <StatBox index={2} label="Total alerts"   value={data.totals.total_alerts}   color="var(--warn)" />
+              <StatBox index={3} label="AI analyses"    value={data.totals.total_advice}   color="#8b5cf6" />
+            </div>
           </div>
 
-          <div className="grid sm:grid-cols-2 gap-4 mb-6">
-            <StatBox label="Cached Prices" value={data.totals.cached_prices} />
-            <StatBox label="Cached News"   value={data.totals.cached_news} />
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16, marginBottom: 24 }}>
+            <StatBox index={4} label="Cached prices" value={data.totals.cached_prices} />
+            <StatBox index={5} label="Cached news"   value={data.totals.cached_news} />
           </div>
 
           {/* Your account */}
-          <div className="card p-5 mb-6">
-            <h2 className="hud-label mb-4">Your Account</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
-              <div>
-                <p className="text-muted text-xs mb-0.5">User ID</p>
-                <p className="font-mono text-[var(--accent)]">{user?.id}</p>
-              </div>
-              <div>
-                <p className="text-muted text-xs mb-0.5">Display Name</p>
-                <p className="font-mono text-[var(--text-2)]">{user?.name}</p>
-              </div>
-              <div>
-                <p className="text-muted text-xs mb-0.5">Session</p>
-                <p className="font-mono text-bull text-xs">Active</p>
-              </div>
+          <div className="card" style={{ padding: 20, marginBottom: 16 }}>
+            <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)', marginBottom: 16 }}>Your account</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, fontSize: 'var(--text-sm)' }}>
+              {[
+                { label: 'User ID', value: user?.id, mono: true, color: 'var(--accent)' },
+                { label: 'Display name', value: user?.name, mono: true },
+                { label: 'Session', value: 'Active', mono: true, color: 'var(--gain)' },
+              ].map(f => (
+                <div key={f.label}>
+                  <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 4 }}>{f.label}</p>
+                  <p style={{ fontFamily: f.mono ? 'var(--font-mono)' : undefined, color: f.color ?? 'var(--text-2)', fontSize: 'var(--text-xs)' }}>{f.value}</p>
+                </div>
+              ))}
             </div>
           </div>
 
           {/* All accounts */}
-          <div className="card mb-6 overflow-hidden">
-            <div className="p-4 border-b border-[var(--border)]">
-              <h2 className="hud-label">All Accounts ({data.users.length})</h2>
+          <div className="card" style={{ marginBottom: 16, overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>All accounts ({data.users.length})</h2>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>
                 <thead>
-                  <tr className="border-b border-[var(--border)]">
-                    <th className="hud-label text-left py-2.5 px-4 font-normal">Username</th>
-                    <th className="hud-label text-left py-2.5 px-4 font-normal">ID</th>
-                    <th className="hud-label text-right py-2.5 px-4 font-normal">Holdings</th>
-                    <th className="hud-label text-right py-2.5 px-4 font-normal">Alerts</th>
-                    <th className="hud-label text-right py-2.5 px-4 font-normal">Analyses</th>
-                    <th className="hud-label text-right py-2.5 px-4 font-normal">Created</th>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <TH>Username</TH>
+                    <TH>ID</TH>
+                    <TH right>Holdings</TH>
+                    <TH right>Alerts</TH>
+                    <TH right>Analyses</TH>
+                    <TH right>Created</TH>
                   </tr>
                 </thead>
                 <tbody>
                   {data.users.map(u => (
-                    <tr key={u.id} className={`table-row-hover ${u.id === user?.id ? 'bg-[var(--surface-2)]' : ''}`}>
-                      <td className="py-3 px-4">
-                        <span className="font-mono font-semibold text-[var(--text-2)]">{u.name}</span>
+                    <tr key={u.id} className="table-row-hover" style={{ background: u.id === user?.id ? 'var(--surface-2)' : undefined }}>
+                      <td style={{ padding: '10px 16px' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--text-2)' }}>{u.name}</span>
                         {u.id === user?.id && (
-                          <span className="ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--surface-2)] text-[var(--accent)] border border-[var(--border-2)] tracking-widest">YOU</span>
+                          <span style={{ marginLeft: 8, fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 99, background: 'var(--surface-2)', color: 'var(--accent)', border: '1px solid var(--border-2)' }}>you</span>
                         )}
                       </td>
-                      <td className="py-3 px-4 font-mono text-muted text-xs">{u.id}</td>
-                      <td className="py-3 px-4 text-right font-mono text-bull">{u.holding_count}</td>
-                      <td className="py-3 px-4 text-right font-mono text-warn">{u.alert_count}</td>
-                      <td className="py-3 px-4 text-right font-mono text-[#8b5cf6]">{u.advice_count}</td>
-                      <td className="py-3 px-4 text-right font-mono text-muted text-xs">{timeAgo(u.created_at)}</td>
+                      <td style={{ padding: '10px 16px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{u.id}</td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--gain)' }}>{u.holding_count}</td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--warn)' }}>{u.alert_count}</td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: '#8b5cf6' }}>{u.advice_count}</td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{timeAgo(u.created_at)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -129,47 +140,48 @@ export default function DeveloperPage() {
           </div>
 
           {/* Recent activity */}
-          <div className="card overflow-hidden">
-            <div className="p-4 border-b border-[var(--border)]">
-              <h2 className="hud-label">Recent Activity (last 20)</h2>
+          <div className="card" style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border)' }}>
+              <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Recent activity (last 20)</h2>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 'var(--text-sm)' }}>
                 <thead>
-                  <tr className="border-b border-[var(--border)]">
-                    <th className="hud-label text-left py-2.5 px-4 font-normal">Type</th>
-                    <th className="hud-label text-left py-2.5 px-4 font-normal">Ticker</th>
-                    <th className="hud-label text-left py-2.5 px-4 font-normal">User</th>
-                    <th className="hud-label text-right py-2.5 px-4 font-normal">When</th>
+                  <tr style={{ borderBottom: '1px solid var(--border)' }}>
+                    <TH>Type</TH>
+                    <TH>Ticker</TH>
+                    <TH>User</TH>
+                    <TH right>When</TH>
                   </tr>
                 </thead>
                 <tbody>
                   {data.recentActivity.map((a, i) => (
                     <tr key={i} className="table-row-hover">
-                      <td className="py-2.5 px-4">
-                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full border tracking-widest uppercase ${
-                          a.type === 'holding'
-                            ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--border-2)]'
-                            : 'bg-[var(--warn-soft)] text-warn border-[var(--border)]'
-                        }`}>
+                      <td style={{ padding: '10px 16px' }}>
+                        <span style={{
+                          fontSize: 'var(--text-xs)', fontWeight: 600, padding: '2px 8px',
+                          borderRadius: 99, border: '1px solid var(--border)',
+                          background: a.type === 'holding' ? 'var(--surface-2)' : 'var(--warn-soft)',
+                          color: a.type === 'holding' ? 'var(--accent)' : 'var(--warn)',
+                        }}>
                           {a.type}
                         </span>
                       </td>
-                      <td className="py-2.5 px-4 font-mono font-bold text-[var(--accent)] tracking-widest">{a.detail}</td>
-                      <td className="py-2.5 px-4 font-mono text-muted text-xs">{a.user_id}</td>
-                      <td className="py-2.5 px-4 text-right font-mono text-muted text-xs">{timeAgo(a.ts)}</td>
+                      <td style={{ padding: '10px 16px', fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent)' }}>{a.detail}</td>
+                      <td style={{ padding: '10px 16px', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{a.user_id}</td>
+                      <td style={{ padding: '10px 16px', textAlign: 'right', fontFamily: 'var(--font-mono)', color: 'var(--text-muted)', fontSize: 'var(--text-xs)' }}>{timeAgo(a.ts)}</td>
                     </tr>
                   ))}
                   {data.recentActivity.length === 0 && (
-                    <tr><td colSpan={4} className="py-6 text-center text-muted text-sm">No activity yet</td></tr>
+                    <tr><td colSpan={4} style={{ padding: '24px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>No activity yet</td></tr>
                   )}
                 </tbody>
               </table>
             </div>
           </div>
 
-          <p className="text-muted text-xs text-center mt-4">
-            Server time: <span className="font-mono">{new Date(data.serverTime * 1000).toISOString()}</span>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', textAlign: 'center', marginTop: 16 }}>
+            Server time: <span style={{ fontFamily: 'var(--font-mono)' }}>{new Date(data.serverTime * 1000).toISOString()}</span>
           </p>
         </>
       )}

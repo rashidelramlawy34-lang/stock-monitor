@@ -83,7 +83,7 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
     <div className="space-y-3">
       {/* Price + MAs */}
       <div>
-        <p className="hud-label text-[10px] mb-2 px-1">{ticker} · Price + Moving Averages</p>
+        <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8, paddingLeft: 4 }}>{ticker} · Price + moving averages</p>
         <ResponsiveContainer width="100%" height={200}>
           <ComposedChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} syncId="technicals">
             <CartesianGrid {...GRID_PROPS} />
@@ -114,7 +114,7 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
 
       {/* RSI */}
       <div>
-        <p className="hud-label text-[10px] mb-2 px-1">
+        <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8, paddingLeft: 4 }}>
           RSI(14) · <span style={{ color: rsiColor }}>{lastRsi?.toFixed(1) ?? '--'}</span>
           {lastRsi !== null && (
             <span className="ml-2 normal-case font-normal text-muted" style={{ fontFamily: 'Inter', letterSpacing: 0 }}>
@@ -138,7 +138,7 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
 
       {/* MACD */}
       <div>
-        <p className="hud-label text-[10px] mb-2 px-1">MACD (12, 26, 9)</p>
+        <p style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8, paddingLeft: 4 }}>MACD (12, 26, 9)</p>
         <ResponsiveContainer width="100%" height={100}>
           <ComposedChart data={data} margin={{ top: 4, right: 4, bottom: 0, left: 0 }} syncId="technicals">
             <CartesianGrid {...GRID_PROPS} />

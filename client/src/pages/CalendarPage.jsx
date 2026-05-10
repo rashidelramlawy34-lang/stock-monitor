@@ -64,8 +64,11 @@ export default function CalendarPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6">
-      <h2 className="hud-title text-sm mb-4">Economic Calendar</h2>
+    <div className="page">
+      <div style={{ marginBottom: 24 }}>
+        <h1 className="page-title">Calendar</h1>
+        <p className="page-subtitle">Upcoming earnings and economic events</p>
+      </div>
 
       {loading && <p className="text-muted text-sm">Loading events...</p>}
 
@@ -76,7 +79,7 @@ export default function CalendarPage() {
       <div className="space-y-4">
         {Object.entries(grouped).map(([week, events]) => (
           <div key={week} className="card p-4">
-            <p className="hud-label text-[10px] mb-3">Week of {week}</p>
+            <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>Week of {week}</p>
             <div className="space-y-1.5">
               {events.map((e, i) => {
                 const soon = isWithin7Days(e.date);
@@ -86,8 +89,8 @@ export default function CalendarPage() {
                     className={`flex items-start gap-3 px-2 py-1.5 rounded-full text-xs ${soon ? 'bg-[var(--warn-soft)] border border-[var(--border)]' : ''}`}
                   >
                     <span className="text-muted w-[60px] shrink-0">{e.date.slice(0, 10)}</span>
-                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${e.type === 'earnings' ? 'bg-[var(--surface-2)] text-arc' : 'bg-[var(--gain-soft)] text-[var(--gain)]'}`}>
-                      {e.type === 'earnings' ? 'EARN' : 'ECON'}
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${e.type === 'earnings' ? 'bg-[var(--surface-2)] text-[var(--accent)]' : 'bg-[var(--gain-soft)] text-[var(--gain)]'}`}>
+                      {e.type === 'earnings' ? 'Earn' : 'Econ'}
                     </span>
                     <span className={`flex-1 ${soon ? 'text-warn' : 'text-white'}`}>{e.name}</span>
                     {e.estimate != null && (

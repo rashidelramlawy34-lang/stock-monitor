@@ -63,7 +63,7 @@ export default function HRHRCard({ candidate }) {
             {initials}
           </span>
           <div className="min-w-0">
-            <p className="font-mono font-bold text-[var(--accent)] leading-none tracking-widest">{ticker}</p>
+            <p className="font-mono font-bold text-[var(--accent)] leading-none">{ticker}</p>
             {(company_name || sector) && (
               <p className="text-xs text-muted truncate mt-0.5">
                 {company_name}{company_name && sector ? ' · ' : ''}{sector}
@@ -86,12 +86,12 @@ export default function HRHRCard({ candidate }) {
         </div>
       </div>
 
-      <hr className="hud-divider" />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '2px 0' }} />
 
       {/* Bull case */}
       {bull_case && (
         <div>
-          <p className="hud-label mb-1">Bull Case</p>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>Bull case</p>
           <p className="text-sm text-[var(--text-2)] leading-relaxed">{bull_case}</p>
         </div>
       )}
@@ -110,13 +110,13 @@ export default function HRHRCard({ candidate }) {
         )}
       </div>
 
-      <hr className="hud-divider" />
+      <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '2px 0' }} />
 
       {/* Conviction bar */}
       {convictionPct != null && (
         <div>
           <div className="flex justify-between text-xs text-muted mb-1.5">
-            <span className="hud-label text-[9px]">Conviction</span>
+            <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>Conviction</span>
             <span className="font-mono text-[var(--text-2)]">{convictionPct}%</span>
           </div>
           <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">
@@ -149,9 +149,10 @@ export default function HRHRCard({ candidate }) {
           disabled={watchBusy}
           className={`ml-auto text-xs font-bold px-2 py-0.5 rounded-full border transition-all ${
             isWatched
-              ? 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
-              : 'border-[var(--border-2)] text-muted hover:text-arc hover:border-[var(--border-2)]'
+              ? 'bg-[var(--surface-2)] border-[var(--border-2)]'
+              : 'border-[var(--border-2)] text-muted hover:text-[var(--accent)] hover:border-[var(--border-2)]'
           }`}
+          style={isWatched ? { color: 'var(--accent)' } : undefined}
         >
           {isWatched ? '★ Watching' : '☆ Watch'}
         </button>

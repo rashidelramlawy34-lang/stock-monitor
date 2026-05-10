@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { usePortfolio } from '../hooks/usePortfolio';
 
 export default function InsidersPage() {
@@ -32,18 +33,22 @@ export default function InsidersPage() {
 
   const filtered = filter === 'ALL' ? all : all.filter(t => t.ticker === filter);
 
-  if (loading) return <div className="p-6 text-muted text-sm">Loading insider data...</div>;
+  if (loading) return <div className="page" style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}>Loading insider data…</div>;
 
   return (
-    <div className="p-4 sm:p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="hud-title text-sm">Insider Transactions</h2>
-        <div className="flex gap-1 flex-wrap">
+    <div className="page">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
+        <div>
+          <h1 className="page-title">Insiders</h1>
+          <p className="page-subtitle">Recent insider buy and sell transactions</p>
+        </div>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {['ALL', ...tickers].map(t => (
             <button
               key={t}
               onClick={() => setFilter(t)}
-              className={`text-xs px-2 py-0.5 rounded-full border transition-all ${filter === t ? 'border-[var(--accent)] text-[var(--accent)] bg-[var(--surface-2)]' : 'border-[var(--border)] text-muted hover:text-[var(--text)]'}`}
+              className={filter === t ? 'btn-outline' : 'btn-ghost'}
+              style={{ fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', ...(filter === t ? { color: 'var(--accent)', borderColor: 'var(--accent)' } : {}) }}
             >{t}</button>
           ))}
         </div>
@@ -74,9 +79,13 @@ export default function InsidersPage() {
                   const value = shares * price;
                   const date = tx.transactionDate ?? tx.date ?? '';
                   return (
-                    <tr key={i} className="table-row-hover">
+                    <motion.tr key={i}
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ type: 'spring', stiffness: 120, damping: 18, delay: i * 0.025 }}
+                      className="table-row-hover">
                       <td className="px-4 py-2 text-white truncate max-w-[160px]">{tx.name ?? '—'}</td>
-                      <td className="px-4 py-2 font-bold text-arc">{tx.ticker}</td>
+                      <td className="px-4 py-2 font-mono font-bold" style={{ color: 'var(--text)' }}>{tx.ticker}</td>
                       <td className={`px-4 py-2 font-semibold ${isBuy ? 'text-gain' : 'text-bear'}`}>
                         {isBuy ? '▲ Buy' : '▼ Sell'}
                       </td>
@@ -84,7 +93,7 @@ export default function InsidersPage() {
                       <td className="px-4 py-2 text-right text-muted">{price ? `$${price.toFixed(2)}` : '—'}</td>
                       <td className="px-4 py-2 text-right text-white">{value > 0 ? `$${(value / 1000).toFixed(0)}K` : '—'}</td>
                       <td className="px-4 py-2 text-right text-muted">{date ? date.slice(0, 10) : '—'}</td>
-                    </tr>
+                    </motion.tr>
                   );
                 })}
               </tbody>

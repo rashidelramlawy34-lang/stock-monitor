@@ -45,6 +45,7 @@
   --text-xl:   22px;
   --text-2xl:  28px;
   --text-3xl:  36px;
+  --text-4xl:  48px;
 
   /* Legacy shims — keep old names pointing at new tokens so
      unrefactored components don't break between tickets     */
@@ -441,6 +442,36 @@
   }
 }
 
+  /* ── Skeleton shimmer ───────────────────────────────── */
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: var(--radius-sm);
+  }
+
+  /* ── Page wrapper ───────────────────────────────────── */
+  .page {
+    padding: 32px 24px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  @media (min-width: 768px) {
+    .page { padding: 32px 40px; }
+  }
+  .page-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .page-subtitle {
+    font-size: var(--text-sm);
+    color: var(--text-muted);
+  }
+  .section-gap { margin-bottom: 40px; }
+  .card-gap { gap: 16px; }
+
 /* ── Color helpers ────────────────────────────────────── */
 .text-arc    { color: var(--accent); }
 .text-bull   { color: var(--gain); }
@@ -456,6 +487,10 @@
   from { opacity: 0; transform: translateY(-4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
 /* Loading hex fade — App.jsx spinner */
@@ -464,9 +499,8 @@
   50%       { opacity: 0.5; }
 }
 
-/* orbPulse — HubPage center orb still uses this.
-   Cannot remove until HubPage's animation is updated.     */
+/* orbPulse — HubPage center orb breathing scale */
 @keyframes orbPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.5; }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.04); opacity: 0.92; }
 }

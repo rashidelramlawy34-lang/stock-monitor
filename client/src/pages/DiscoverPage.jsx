@@ -48,14 +48,12 @@ export default function DiscoverPage() {
     });
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="page">
       {/* Header */}
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h1 className="hud-title text-xl">Discover — HRHR</h1>
-          <p className="text-muted text-xs mt-1 tracking-wide">
-            High-risk, high-reward picks from your portfolio's peer universe
-          </p>
+          <h1 className="page-title">Discover</h1>
+          <p className="page-subtitle">High-risk, high-reward picks from your portfolio's peer universe</p>
         </div>
         <button
           onClick={refresh}
@@ -101,7 +99,7 @@ export default function DiscoverPage() {
           <button
             key={r}
             onClick={() => setRiskFilter(r)}
-            className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
+            className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
               riskFilter === r
                 ? RISK_STYLES[r]?.active ?? RISK_STYLES.All.active
                 : 'bg-transparent border-[var(--border)] text-muted hover:border-[var(--border-2)] hover:text-[var(--text-2)]'
@@ -121,8 +119,8 @@ export default function DiscoverPage() {
               onClick={() => setSectorFilter(s)}
               className={`text-xs px-2.5 py-1 rounded-full border transition-all ${
                 sectorFilter === s
-                  ? 'bg-[var(--surface-2)] text-arc border-[var(--border-2)]'
-                  : 'border-[var(--border)] text-muted hover:text-arc hover:border-[var(--border-2)]'
+                  ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--border-2)]'
+                  : 'border-[var(--border)] text-muted hover:text-[var(--text-2)] hover:border-[var(--border-2)]'
               }`}
             >
               {s}

@@ -66,7 +66,7 @@ export default function NewsCard({ article, showTicker }) {
       </div>
       <div className="mt-2 flex items-center gap-2 text-xs text-muted">
         {showTicker && article._sourceTicker && (
-          <span className="font-mono font-bold text-arc tracking-widest">{article._sourceTicker}</span>
+          <span className="font-mono font-bold" style={{ color: 'var(--accent)' }}>{article._sourceTicker}</span>
         )}
         {showTicker && article._sourceTicker && (article.source || date) && <span>·</span>}
         {article.source && <span>{article.source}</span>}

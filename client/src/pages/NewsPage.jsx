@@ -27,7 +27,7 @@ function SentimentTrend({ articles }) {
 
   return (
     <div className="card p-4 mb-5">
-      <p className="hud-label mb-3 text-[9px]">Sentiment Trend (14 days)</p>
+      <p style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 8 }}>Sentiment trend (14 days)</p>
       <ResponsiveContainer width="100%" height={60}>
         <BarChart data={data} barSize={8} barGap={2}>
           <Tooltip
@@ -114,12 +114,12 @@ export default function NewsPage() {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="page">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="hud-title text-xl">Intel Feed</h1>
+          <h1 className="page-title">News</h1>
           {allArticles.length > 0 && (
-            <p className="text-xs text-muted mt-1 tracking-wide">
+            <p className="text-xs text-muted mt-1">
               {allArticles.length} articles
               {counts.Bullish > 0 && <span className="text-bull ml-2">↑ {counts.Bullish} bullish</span>}
               {counts.Bearish > 0 && <span className="text-bear ml-2">↓ {counts.Bearish} bearish</span>}
@@ -142,23 +142,17 @@ export default function NewsPage() {
         <div className="flex flex-wrap gap-2 mb-4">
           <button
             onClick={() => { setActiveTicker(ALL_TAB); setSentimentFilter('All'); }}
-            className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
-              activeTicker === ALL_TAB
-                ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--accent)]'
-                : 'border-[var(--border)] text-muted hover:text-[var(--text)] hover:border-[var(--border-2)]'
-            }`}
+            className={activeTicker === ALL_TAB ? 'btn-outline' : 'btn-ghost'}
+            style={{ fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)', fontWeight: 600, ...(activeTicker === ALL_TAB ? { color: 'var(--accent)', borderColor: 'var(--accent)' } : {}) }}
           >
-            ALL
+            All
           </button>
           {holdings.map(h => (
             <button
               key={h.ticker}
               onClick={() => { setActiveTicker(h.ticker); setSentimentFilter('All'); }}
-              className={`px-3 py-1.5 rounded-full text-sm font-mono font-bold transition-all border tracking-widest ${
-                activeTicker === h.ticker
-                  ? 'bg-[var(--surface-2)] text-[var(--accent)] border-[var(--accent)]'
-                  : 'border-[var(--border)] text-muted hover:text-[var(--text)] hover:border-[var(--border-2)]'
-              }`}
+              className={activeTicker === h.ticker ? 'btn-outline' : 'btn-ghost'}
+              style={{ fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)', fontWeight: 600, ...(activeTicker === h.ticker ? { color: 'var(--accent)', borderColor: 'var(--accent)' } : {}) }}
             >
               {h.ticker}
             </button>
@@ -173,7 +167,7 @@ export default function NewsPage() {
             <button
               key={s}
               onClick={() => setSentimentFilter(s)}
-              className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all tracking-wider uppercase ${
+              className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
                 sentimentFilter === s
                   ? SENTIMENT_STYLE[s].active
                   : 'bg-transparent border-[var(--border)] text-muted hover:border-[var(--border-2)] hover:text-[var(--text)]'
@@ -213,13 +207,13 @@ export default function NewsPage() {
       {/* Pinned articles */}
       {!isLoading && pinnedArticles.length > 0 && (
         <div className="mb-5">
-          <p className="hud-label mb-2 text-[var(--warn)]">★ Pinned</p>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--warn)', fontWeight: 600, marginBottom: 8 }}>★ Pinned</p>
           <div className="flex flex-col gap-3">
             {pinnedArticles.map((a, i) => (
               <NewsCard key={`pin-${a.id ?? i}`} article={a} showTicker={activeTicker === ALL_TAB} />
             ))}
           </div>
-          <hr className="hud-divider mt-4" />
+          <hr style={{ marginTop: 16, border: 'none', borderTop: '1px solid var(--border)' }} />
         </div>
       )}
 

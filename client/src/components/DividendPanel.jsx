@@ -21,7 +21,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
   return (
     <div className="card p-4 mt-4">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="hud-label text-xs">Dividend Income</h3>
+        <h3 style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--text)' }}>Dividend income</h3>
         <div className="flex gap-4 text-right">
           <div>
             <p className="text-[10px] text-muted">Annual Income</p>
@@ -29,7 +29,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
           </div>
           <div>
             <p className="text-[10px] text-muted">Portfolio Yield</p>
-            <p className="text-sm font-bold text-arc">{weightedYield.toFixed(2)}%</p>
+            <p className="text-sm font-bold" style={{ color: 'var(--accent)' }}>{weightedYield.toFixed(2)}%</p>
           </div>
         </div>
       </div>
@@ -48,7 +48,7 @@ export default function DividendPanel({ dividends = {}, holdings = [], prices = 
           <tbody>
             {rows.map(r => (
               <tr key={r.ticker} className="table-row-hover">
-                <td className="py-1.5 font-bold text-arc">{r.ticker}</td>
+                <td className="py-1.5 font-mono font-bold" style={{ color: 'var(--text)' }}>{r.ticker}</td>
                 <td className="text-right py-1.5 text-white">${r.annualDiv.toFixed(2)}</td>
                 <td className="text-right py-1.5 text-[var(--gain)]">{r.yieldPct.toFixed(2)}%</td>
                 <td className="text-right py-1.5 text-muted">{r.yieldOnCost.toFixed(2)}%</td>
