@@ -96,7 +96,10 @@ export default function App() {
   if (page === 'hub') return (
     <MotionConfig reducedMotion="user">
       <ToastProvider>
-        <HubPage setPage={setPage} user={user} onLogout={handleLogout} />
+        <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <MarketBar page={page} setPage={setPage} pageLabel="Hub" user={user} onLogout={handleLogout} />
+          <HubPage setPage={setPage} user={user} />
+        </div>
         {logoutOverlay.visible && (
           <div style={{
             position: 'fixed', inset: 0, zIndex: 9999,

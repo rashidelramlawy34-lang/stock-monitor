@@ -1,5 +1,8 @@
 /* Orbitron kept in import — HubPage.jsx uses it via .hub-scope */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&family=Orbitron:wght@400;500;600;700;900&display=swap');
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -74,6 +77,10 @@
   --bg-1:        var(--surface-1);
   --warn-old:    var(--warn);
 
+  /* MagicCard inline template variables */
+  --color-background: rgba(15, 22, 50, 0.55);
+  --color-border:     rgba(160, 180, 255, 0.10);
+
   /* Hub legacy — so .hub-scope inner text still resolves */
   --cyan:        var(--accent-2);
   --cyan-dim:    rgba(56, 178, 255, 0.55);
@@ -132,10 +139,16 @@
 }
 
 @layer base {
-  html { font-family: var(--font-sans); }
+  html { font-family: var(--font-sans);
+    @apply font-sans; }
   body {
-    background: linear-gradient(180deg, #06081a 0%, #0a0e2a 100%) fixed;
-    background-color: #06081a;
+    background:
+      radial-gradient(ellipse at 15% 50%, rgba(88,28,220,0.22) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 50%, rgba(30,64,175,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 5%,  rgba(67,56,202,0.14) 0%, transparent 45%),
+      linear-gradient(180deg, #04051a 0%, #080c2a 100%);
+    background-attachment: fixed;
+    background-color: #04051a;
     color: var(--text);
     font-size: 14px;
     line-height: 1.45;
@@ -164,6 +177,83 @@
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  .theme {
+    --font-heading:          var(--font-sans);
+    --font-sans:          'Geist Variable', sans-serif;
+    --animate-aurora:          aurora 8s ease-in-out infinite alternate;
+    --animate-meteor:          meteor 5s linear infinite;
+    --animate-background-position-spin:          background-position-spin 3000ms infinite alternate;
+    --animate-shimmer-slide:          shimmer-slide var(--speed) ease-in-out infinite alternate;
+    --animate-spin-around:          spin-around calc(var(--speed) * 2) infinite linear;
+    --animate-gradient:          gradient 8s linear infinite;
+  }
+  :root {
+    --background:          oklch(1 0 0);
+    --foreground:          oklch(0.145 0 0);
+    --card:          oklch(1 0 0);
+    --card-foreground:          oklch(0.145 0 0);
+    --popover:          oklch(1 0 0);
+    --popover-foreground:          oklch(0.145 0 0);
+    --primary:          oklch(0.205 0 0);
+    --primary-foreground:          oklch(0.985 0 0);
+    --secondary:          oklch(0.97 0 0);
+    --secondary-foreground:          oklch(0.205 0 0);
+    --muted:          oklch(0.97 0 0);
+    --muted-foreground:          oklch(0.556 0 0);
+    --accent:          oklch(0.97 0 0);
+    --accent-foreground:          oklch(0.205 0 0);
+    --destructive:          oklch(0.577 0.245 27.325);
+    --border:          oklch(0.922 0 0);
+    --input:          oklch(0.922 0 0);
+    --ring:          oklch(0.708 0 0);
+    --chart-1:          oklch(0.87 0 0);
+    --chart-2:          oklch(0.556 0 0);
+    --chart-3:          oklch(0.439 0 0);
+    --chart-4:          oklch(0.371 0 0);
+    --chart-5:          oklch(0.269 0 0);
+    --radius:          0.625rem;
+    --sidebar:          oklch(0.985 0 0);
+    --sidebar-foreground:          oklch(0.145 0 0);
+    --sidebar-primary:          oklch(0.205 0 0);
+    --sidebar-primary-foreground:          oklch(0.985 0 0);
+    --sidebar-accent:          oklch(0.97 0 0);
+    --sidebar-accent-foreground:          oklch(0.205 0 0);
+    --sidebar-border:          oklch(0.922 0 0);
+    --sidebar-ring:          oklch(0.708 0 0);
+  }
+  .dark {
+    --background:          oklch(0.145 0 0);
+    --foreground:          oklch(0.985 0 0);
+    --card:          oklch(0.205 0 0);
+    --card-foreground:          oklch(0.985 0 0);
+    --popover:          oklch(0.205 0 0);
+    --popover-foreground:          oklch(0.985 0 0);
+    --primary:          oklch(0.922 0 0);
+    --primary-foreground:          oklch(0.205 0 0);
+    --secondary:          oklch(0.269 0 0);
+    --secondary-foreground:          oklch(0.985 0 0);
+    --muted:          oklch(0.269 0 0);
+    --muted-foreground:          oklch(0.708 0 0);
+    --accent:          oklch(0.269 0 0);
+    --accent-foreground:          oklch(0.985 0 0);
+    --destructive:          oklch(0.704 0.191 22.216);
+    --border:          oklch(1 0 0 / 10%);
+    --input:          oklch(1 0 0 / 15%);
+    --ring:          oklch(0.556 0 0);
+    --chart-1:          oklch(0.87 0 0);
+    --chart-2:          oklch(0.556 0 0);
+    --chart-3:          oklch(0.439 0 0);
+    --chart-4:          oklch(0.371 0 0);
+    --chart-5:          oklch(0.269 0 0);
+    --sidebar:          oklch(0.205 0 0);
+    --sidebar-foreground:          oklch(0.985 0 0);
+    --sidebar-primary:          oklch(0.488 0.243 264.376);
+    --sidebar-primary-foreground:          oklch(0.985 0 0);
+    --sidebar-accent:          oklch(0.269 0 0);
+    --sidebar-accent-foreground:          oklch(0.985 0 0);
+    --sidebar-border:          oklch(1 0 0 / 10%);
+    --sidebar-ring:          oklch(0.556 0 0);
+  }
 }
 
 @layer components {
@@ -193,6 +283,12 @@
     border-color: var(--border-2);
     transform: translateY(-2px);
     box-shadow: 0 0 32px var(--glow);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover { transform: none; }
+    .card { transition: border-color 0.15s, box-shadow 0.15s; }
+    .btn-primary:hover:not(:disabled) { transform: none; }
+    .btn-outline:hover { transform: none; }
   }
   /* Fallback for browsers without backdrop-filter */
   @supports not (backdrop-filter: blur(1px)) {
@@ -386,7 +482,10 @@
     cursor: pointer;
     transition: background 0.1s;
   }
-  .h-row:hover { background: var(--surface-2); }
+  .h-row:hover {
+    background: var(--surface-2);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
 
   .h-row-head {
     display: grid;
@@ -422,7 +521,9 @@
     animation: slideIn 0.2s ease-out;
   }
   .h-detail-panel {
-    background: var(--surface-1);
+    background: rgba(15, 22, 50, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     padding: 12px;
@@ -460,9 +561,12 @@
   /* ── Table row ──────────────────────────────────────── */
   .table-row-hover {
     border-top: 1px solid var(--border);
-    transition: background 0.1s;
+    transition: background 0.1s, box-shadow 0.1s;
   }
-  .table-row-hover:hover { background: var(--surface-2); }
+  .table-row-hover:hover {
+    background: var(--surface-2);
+    box-shadow: inset 2px 0 0 rgba(124,92,255,0.5);
+  }
 
   /* ── Aura action (used by HubPage RESET, scoped dark) ─ */
   .aura-action {
@@ -789,4 +893,74 @@
   .aura-login__hero { display: none; }
   .aura-login__card { margin-left: 0; max-width: 100%; }
   .aura-login__tagline { font-size: 22px; }
+}
+
+@theme inline {
+  @keyframes aurora {
+  0% {
+    background-position:          0% 50%;
+    transform:          rotate(-5deg) scale(0.9);
+    }
+  25% {
+    background-position:          50% 100%;
+    transform:          rotate(5deg) scale(1.1);
+    }
+  50% {
+    background-position:          100% 50%;
+    transform:          rotate(-3deg) scale(0.95);
+    }
+  75% {
+    background-position:          50% 0%;
+    transform:          rotate(3deg) scale(1.05);
+    }
+  100% {
+    background-position:          0% 50%;
+    transform:          rotate(-5deg) scale(0.9);
+    }
+  }
+  @keyframes meteor {
+  0% {
+    transform:          rotate(var(--angle)) translateX(0);
+    opacity:          1;
+    }
+  70% {
+    opacity:          1;
+    }
+  100% {
+    transform:          rotate(var(--angle)) translateX(-500px);
+    opacity:          0;
+    }
+  }
+  @keyframes background-position-spin {
+  0% {
+    background-position:          top center;
+    }
+  100% {
+    background-position:          bottom center;
+    }
+  }
+  @keyframes shimmer-slide {
+  to {
+    transform:          translate(calc(100cqw - 100%), 0);
+    }
+  }
+  @keyframes spin-around {
+  0% {
+    transform:          translateZ(0) rotate(0);
+    }
+  15%, 35% {
+    transform:          translateZ(0) rotate(90deg);
+    }
+  65%, 85% {
+    transform:          translateZ(0) rotate(270deg);
+    }
+  100% {
+    transform:          translateZ(0) rotate(360deg);
+    }
+  }
+  @keyframes gradient {
+  to {
+    background-position:          var(--bg-size, 300%) 0;
+    }
+  }
 }

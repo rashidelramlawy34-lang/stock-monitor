@@ -5,14 +5,46 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Semantic — maps to CSS vars at runtime
-        gain:   '#16a34a',
-        loss:   '#dc2626',
-        warn:   '#d97706',
-        accent: { DEFAULT: '#2563eb', hover: '#1d4ed8' },
-        // Legacy aliases — old components use text-bull / text-bear Tailwind classes
-        bull:   '#16a34a',
-        bear:   '#dc2626',
+        // Aura semantic tokens
+        gain:   '#4ade80',
+        loss:   '#f87171',
+        warn:   '#fbbf24',
+        // Legacy aliases for existing components
+        bull:   '#4ade80',
+        bear:   '#f87171',
+
+        // ShadCN token names mapped to Aura values so ShadCN components compile
+        background: '#06081a',
+        foreground:  '#eaecff',
+        card: {
+          DEFAULT:    'rgba(15,22,50,0.55)',
+          foreground: '#eaecff',
+        },
+        popover: {
+          DEFAULT:    'rgba(15,22,50,0.85)',
+          foreground: '#eaecff',
+        },
+        primary: {
+          DEFAULT:    '#7c5cff',
+          foreground: '#eaecff',
+        },
+        secondary: {
+          DEFAULT:    'rgba(28,36,70,0.65)',
+          foreground: '#eaecff',
+        },
+        muted: {
+          DEFAULT:    'rgba(28,36,70,0.65)',
+          foreground: '#7e85b8',
+        },
+        accent: {
+          DEFAULT:    '#7c5cff',
+          foreground: '#eaecff',
+          hover:      '#6a47ff',
+        },
+        destructive: '#f87171',
+        border:      'rgba(160,180,255,0.10)',
+        input:       'rgba(28,36,70,0.65)',
+        ring:        '#7c5cff',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
