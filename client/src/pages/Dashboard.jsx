@@ -102,8 +102,8 @@ const cardVariants = {
 function StatCard({ label, value, sub, pnl, sparkData, sparkType, countUp, formatter }) {
   const hasPnl = pnl !== undefined && pnl !== null;
   const positive = pnl >= 0;
-  const valueColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : 'var(--text)';
-  const strokeColor = hasPnl ? (positive ? '#16a34a' : '#dc2626') : '#2563eb';
+  const valueColor = hasPnl ? (positive ? 'var(--gain)' : 'var(--loss)') : 'var(--text)';
+  const strokeColor = hasPnl ? (positive ? 'var(--gain)' : 'var(--loss)') : 'var(--accent)';
   const gradId = `sg-${label.replace(/\s+/g, '')}`;
   const animated = useCountUp(countUp ?? 0);
   const displayValue = (countUp != null && isFinite(countUp))

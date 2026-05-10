@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Sector } from 'recharts';
 
 const COLORS = [
-  '#3b82f6', '#16a34a', '#d97706', '#dc2626', '#0066ff',
-  '#ff6b35', '#ffa800', '#00b8e6', '#8b5cf6', '#06b6d4',
+  '#7c5cff', '#4ade80', '#fbbf24', '#f87171', '#38b2ff',
+  '#fb923c', '#a78bfa', '#34d399', '#e879f9', '#22d3ee',
 ];
 
 const LABEL = {

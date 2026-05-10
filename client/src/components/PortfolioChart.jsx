@@ -88,7 +88,7 @@ export default function PortfolioChart() {
   const change = last - first;
   const changePct = first > 0 ? (change / first) * 100 : 0;
   const positive = change >= 0;
-  const strokeColor = positive ? '#16a34a' : '#dc2626';
+  const strokeColor = positive ? '#4ade80' : '#f87171';
   const gradientId = 'pcg';
 
   const minVal = Math.min(...filtered.map(d => d.value));
@@ -140,26 +140,26 @@ export default function PortfolioChart() {
         <AreaChart data={filtered} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.2} />
-              <stop offset="60%" stopColor={strokeColor} stopOpacity={0.04} />
+              <stop offset="0%" stopColor={strokeColor} stopOpacity={0.35} />
+              <stop offset="55%" stopColor={strokeColor} stopOpacity={0.08} />
               <stop offset="100%" stopColor={strokeColor} stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
             strokeDasharray="3 3"
             horizontal={true} vertical={false}
-            stroke="rgba(17,24,39,0.06)"
+            stroke="rgba(160,180,255,0.08)"
           />
           <XAxis
             dataKey="dateOnly"
-            tick={{ fill: '#6b7280', fontSize: 11, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             interval="preserveStartEnd"
           />
           <YAxis
             domain={[minVal - padding, maxVal + padding]}
-            tick={{ fill: '#6b7280', fontSize: 11, fontFamily: 'Inter' }}
+            tick={{ fill: 'var(--text-muted)', fontSize: 11, fontFamily: 'Inter' }}
             axisLine={false}
             tickLine={false}
             tickFormatter={v => `$${(v / 1000).toFixed(0)}k`}
@@ -167,12 +167,12 @@ export default function PortfolioChart() {
           />
           <ReferenceLine
             y={first}
-            stroke="#e4e7eb"
+            stroke="rgba(160,180,255,0.18)"
             strokeDasharray="4 4"
           />
           <Tooltip
             content={<CustomTooltip />}
-            cursor={{ stroke: '#d1d5db', strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: 'rgba(160,180,255,0.25)', strokeWidth: 1, strokeDasharray: '4 4' }}
           />
           <Area
             type="monotone"
@@ -181,7 +181,7 @@ export default function PortfolioChart() {
             strokeWidth={2}
             fill={`url(#${gradientId})`}
             dot={false}
-            activeDot={{ r: 5, fill: strokeColor, stroke: '#ffffff', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: strokeColor, stroke: '#06081a', strokeWidth: 2 }}
             isAnimationActive={true}
             animationDuration={600}
             animationEasing="ease-out"

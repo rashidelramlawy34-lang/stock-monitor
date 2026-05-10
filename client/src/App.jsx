@@ -113,8 +113,8 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <ToastProvider>
-        <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} />
+        <div className="app-orbital-rings" style={{ background: 'transparent', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} user={user} onLogout={handleLogout} />
           <AlertBanner />
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <AnimatePresence mode="wait">

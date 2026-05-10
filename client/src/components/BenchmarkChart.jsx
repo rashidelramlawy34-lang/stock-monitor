@@ -111,7 +111,7 @@ export default function BenchmarkChart({ holdings, candles }) {
   if (chartData.length < 2) return null;
 
   const lastPortfolio = chartData[chartData.length - 1]?.Portfolio ?? 0;
-  const portfolioColor = lastPortfolio >= 0 ? '#16a34a' : '#dc2626';
+  const portfolioColor = lastPortfolio >= 0 ? '#4ade80' : '#f87171';
   const lastBench = chartData[chartData.length - 1]?.[bench] ?? 0;
   const outperforming = lastPortfolio > lastBench;
 
@@ -170,7 +170,7 @@ export default function BenchmarkChart({ holdings, candles }) {
             stroke={portfolioColor}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 5, fill: portfolioColor, stroke: '#010409', strokeWidth: 2 }}
+            activeDot={{ r: 5, fill: portfolioColor, stroke: '#06081a', strokeWidth: 2 }}
             isAnimationActive={true}
             animationDuration={700}
             animationEasing="ease-out"
@@ -178,11 +178,11 @@ export default function BenchmarkChart({ holdings, candles }) {
           <Line
             type="monotone"
             dataKey={bench}
-            stroke="#3b82f6"
+            stroke="#38b2ff"
             strokeWidth={1.5}
             dot={false}
             strokeDasharray="5 3"
-            activeDot={{ r: 4, fill: '#3b82f6', stroke: '#010409', strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: '#38b2ff', stroke: '#06081a', strokeWidth: 2 }}
             isAnimationActive={true}
             animationDuration={700}
             animationEasing="ease-out"

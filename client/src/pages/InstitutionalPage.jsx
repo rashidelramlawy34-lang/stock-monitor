@@ -44,8 +44,8 @@ export default function InstitutionalPage() {
           <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 12 }}>Top-5 holder concentration by ticker</p>
           <ResponsiveContainer width="100%" height={140}>
             <BarChart data={barData} margin={{ top: 4, right: 8, bottom: 4, left: 0 }}>
-              <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: '#6b7280' }} />
-              <YAxis tick={{ fontSize: 9, fill: '#6b7280' }} width={35} unit="%" />
+              <XAxis dataKey="ticker" tick={{ fontSize: 10, fill: 'var(--text-muted)' }} />
+              <YAxis tick={{ fontSize: 9, fill: 'var(--text-muted)' }} width={35} unit="%" />
               <Tooltip
                 contentStyle={{ background: 'var(--surface-1)', border: '1px solid var(--border-2)', fontSize: 11 }}
                 formatter={v => [`${v}%`, 'Ownership']}

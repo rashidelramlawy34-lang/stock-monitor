@@ -24,7 +24,7 @@ function timeAgo(ts) {
 function ScoreRing({ score }) {
   const r = 30, circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color = score >= 70 ? '#16a34a' : score >= 45 ? '#d97706' : '#dc2626';
+  const color = score >= 70 ? '#4ade80' : score >= 45 ? '#fbbf24' : '#f87171';
 
   return (
     <svg width="80" height="80" className="shrink-0">
@@ -64,8 +64,8 @@ function ScoreHistoryChart({ history }) {
           />
           <Line
             type="monotone" dataKey="score"
-            stroke="#3b82f6" strokeWidth={2} dot={false}
-            activeDot={{ r: 3, fill: '#3b82f6' }}
+            stroke="#38b2ff" strokeWidth={2} dot={false}
+            activeDot={{ r: 3, fill: '#38b2ff' }}
           />
         </LineChart>
       </ResponsiveContainer>

@@ -27,7 +27,7 @@ function PriceTooltip({ active, payload, label }) {
 function RsiTooltip({ active, payload, label }) {
   if (!active || !payload?.length) return null;
   const val = payload[0]?.value;
-  const color = val > 70 ? '#dc2626' : val < 30 ? '#16a34a' : '#3b82f6';
+  const color = val > 70 ? '#f87171' : val < 30 ? '#4ade80' : '#38b2ff';
   return (
     <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border-2)', borderRadius: 8 }}
       className="px-3 py-2.5 text-xs shadow-xl">
@@ -50,9 +50,9 @@ function MacdTooltip({ active, payload, label }) {
   );
 }
 
-const AXIS_STYLE = { fill: '#6b7280', fontSize: 10, fontFamily: 'Inter' };
-const GRID_PROPS = { strokeDasharray: '0', horizontal: true, vertical: false, stroke: 'rgba(17,24,39,0.06)' };
-const CURSOR_PROPS = { stroke: '#d1d5db', strokeWidth: 1, strokeDasharray: '4 4' };
+const AXIS_STYLE = { fill: 'var(--text-muted)', fontSize: 10, fontFamily: 'Inter' };
+const GRID_PROPS = { strokeDasharray: '0', horizontal: true, vertical: false, stroke: 'rgba(160,180,255,0.07)' };
+const CURSOR_PROPS = { stroke: 'rgba(160,180,255,0.25)', strokeWidth: 1, strokeDasharray: '4 4' };
 
 export default function TechnicalsChart({ closes = [], timestamps = [], ticker = '' }) {
   const data = useMemo(() => {
@@ -77,7 +77,7 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
   if (!data) return <p className="text-muted text-xs p-4">Not enough data (need 30+ candles)</p>;
 
   const lastRsi = [...data].reverse().find(d => d.rsi !== null)?.rsi ?? null;
-  const rsiColor = lastRsi === null ? '#3b82f6' : lastRsi > 70 ? '#dc2626' : lastRsi < 30 ? '#16a34a' : '#3b82f6';
+  const rsiColor = lastRsi === null ? '#38b2ff' : lastRsi > 70 ? '#f87171' : lastRsi < 30 ? '#4ade80' : '#38b2ff';
 
   return (
     <div className="space-y-3">
@@ -92,11 +92,11 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
               tickFormatter={v => `$${v.toFixed(0)}`} />
             <Tooltip content={<PriceTooltip />} cursor={CURSOR_PROPS} />
             <Line type="monotone" dataKey="price" stroke="#3b82f6" dot={false} strokeWidth={2} name="Price"
-              activeDot={{ r: 5, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }} />
+              activeDot={{ r: 5, fill: '#38b2ff', stroke: '#06081a', strokeWidth: 2 }} />
             <Line type="monotone" dataKey="sma20" stroke="#d97706" dot={false} strokeWidth={1.5} strokeDasharray="5 3" name="SMA20" connectNulls
-              activeDot={{ r: 4, fill: '#d97706', stroke: '#ffffff', strokeWidth: 2 }} />
+              activeDot={{ r: 4, fill: '#fbbf24', stroke: '#06081a', strokeWidth: 2 }} />
             <Line type="monotone" dataKey="sma50" stroke="#dc2626" dot={false} strokeWidth={1.5} strokeDasharray="5 3" name="SMA50" connectNulls
-              activeDot={{ r: 4, fill: '#dc2626', stroke: '#ffffff', strokeWidth: 2 }} />
+              activeDot={{ r: 4, fill: '#f87171', stroke: '#06081a', strokeWidth: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
         <div className="flex items-center gap-4 mt-1.5 px-1">
@@ -127,11 +127,11 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="ts" tickFormatter={fmt} tick={AXIS_STYLE} axisLine={false} tickLine={false} interval="preserveStartEnd" />
             <YAxis domain={[0, 100]} tick={AXIS_STYLE} axisLine={false} tickLine={false} width={30} ticks={[0, 30, 50, 70, 100]} />
-            <ReferenceLine y={70} stroke="rgba(220,38,38,0.35)" strokeDasharray="4 3" />
-            <ReferenceLine y={30} stroke="rgba(22,163,74,0.35)" strokeDasharray="4 3" />
+            <ReferenceLine y={70} stroke="rgba(248,113,113,0.35)" strokeDasharray="4 3" />
+            <ReferenceLine y={30} stroke="rgba(74,222,128,0.35)" strokeDasharray="4 3" />
             <Tooltip content={<RsiTooltip />} cursor={CURSOR_PROPS} />
             <Line type="monotone" dataKey="rsi" stroke={rsiColor} dot={false} strokeWidth={2} name="RSI" connectNulls
-              activeDot={{ r: 4, fill: rsiColor, stroke: '#ffffff', strokeWidth: 2 }} />
+              activeDot={{ r: 4, fill: rsiColor, stroke: '#06081a', strokeWidth: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>
@@ -144,13 +144,13 @@ export default function TechnicalsChart({ closes = [], timestamps = [], ticker =
             <CartesianGrid {...GRID_PROPS} />
             <XAxis dataKey="ts" tickFormatter={fmt} tick={AXIS_STYLE} axisLine={false} tickLine={false} interval="preserveStartEnd" />
             <YAxis tick={AXIS_STYLE} axisLine={false} tickLine={false} width={44} />
-            <ReferenceLine y={0} stroke="#d1d5db" />
+            <ReferenceLine y={0} stroke="rgba(160,180,255,0.25)" />
             <Tooltip content={<MacdTooltip />} cursor={CURSOR_PROPS} />
-            <Bar dataKey="hist" name="Hist" fill="rgba(59,130,246,0.2)" activeBar={{ fill: 'rgba(59,130,246,0.45)' }} />
-            <Line type="monotone" dataKey="macd" stroke="#3b82f6" dot={false} strokeWidth={1.5} name="MACD" connectNulls
-              activeDot={{ r: 4, fill: '#3b82f6', stroke: '#ffffff', strokeWidth: 2 }} />
+            <Bar dataKey="hist" name="Hist" fill="rgba(124,92,255,0.18)" activeBar={{ fill: 'rgba(124,92,255,0.45)' }} />
+            <Line type="monotone" dataKey="macd" stroke="#38b2ff" dot={false} strokeWidth={1.5} name="MACD" connectNulls
+              activeDot={{ r: 4, fill: '#38b2ff', stroke: '#06081a', strokeWidth: 2 }} />
             <Line type="monotone" dataKey="signal" stroke="#d97706" dot={false} strokeWidth={1.5} strokeDasharray="4 2" name="Signal" connectNulls
-              activeDot={{ r: 4, fill: '#d97706', stroke: '#ffffff', strokeWidth: 2 }} />
+              activeDot={{ r: 4, fill: '#fbbf24', stroke: '#06081a', strokeWidth: 2 }} />
           </ComposedChart>
         </ResponsiveContainer>
       </div>

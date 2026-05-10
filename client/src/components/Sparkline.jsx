@@ -6,7 +6,7 @@ const Sparkline = React.memo(function Sparkline({ closes, positive, ticker }) {
     return <span className="text-muted text-xs">—</span>;
   }
   const data = closes.map(v => ({ v }));
-  const color = positive ? '#16a34a' : '#dc2626';
+  const color = positive ? '#4ade80' : '#f87171';
   const gradId = `sg-${ticker ?? (positive ? 'pos' : 'neg')}`;
 
   return (
