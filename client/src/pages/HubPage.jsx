@@ -117,7 +117,7 @@ function toXY(angle, ringIdx, cx, cy) {
   };
 }
 
-export default function HubPage({ setPage, user }) {
+export default function HubPage({ setPage, user, onLogout }) {
   const { holdings }     = usePortfolio();
   const tickers          = useMemo(() => holdings.map(h => h.ticker), [holdings]);
   const { prices }       = usePrices(tickers);
@@ -127,7 +127,15 @@ export default function HubPage({ setPage, user }) {
   const [cSize, setCSize] = useState({ w: window.innerWidth, h: window.innerHeight - 40 });
   const [warpingId, setWarpingId] = useState(null);
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const [entered, setEntered] = useState(false);
   const prefersReducedMotion = useReducedMotion();
+
+  // Mount reveal: fade in container, then planets stagger in
+  useEffect(() => {
+    if (prefersReducedMotion) { setEntered(true); return; }
+    const t = setTimeout(() => setEntered(true), 50);
+    return () => clearTimeout(t);
+  }, []); // eslint-disable-line
 
   // All RAF state in refs — no React re-renders per frame
   const anglesRef    = useRef({});
@@ -385,12 +393,13 @@ export default function HubPage({ setPage, user }) {
         position: 'relative', flex: 1,
         width: '100%', height: 'calc(100vh - 40px)',
         overflow: 'hidden',
-        background: '#010409',
-        color: '#d6e9f5',
+        background: '#06081a',
+        color: '#eaecff',
         cursor: draggingId ? 'grabbing' : 'default',
         userSelect: 'none',
         transform: warpingId ? 'scale(0.95)' : 'scale(1)',
-        transition: 'transform 0.28s ease-out',
+        opacity: entered ? 1 : 0,
+        transition: 'transform 0.28s ease-out, opacity 0.55s ease',
       }}
     >
       {/* Controls */}
@@ -405,6 +414,15 @@ export default function HubPage({ setPage, user }) {
         >
           RESET
         </button>
+        {onLogout && (
+          <button
+            className="aura-action"
+            onClick={onLogout}
+            style={{ fontSize: 8.5, padding: '4px 12px', letterSpacing: '0.18em', opacity: 0.7 }}
+          >
+            SIGN OUT
+          </button>
+        )}
       </div>
 
       {/* Ambient nebula glow — moves with parallax */}
@@ -481,21 +499,20 @@ export default function HubPage({ setPage, user }) {
         left: cx - ORB_SIZE / 2, top: cy - ORB_SIZE / 2,
         width: ORB_SIZE, height: ORB_SIZE,
         borderRadius: '50%',
-        // Sphere lighting: specular top-left, deep shadow bottom-right
         background: [
           'radial-gradient(circle at 30% 24%, rgba(255,255,255,0.09) 0%, transparent 22%)',
-          'radial-gradient(circle at 28% 26%, rgba(0,212,255,0.46) 0%, rgba(0,212,255,0.12) 38%, transparent 62%)',
+          'radial-gradient(circle at 28% 26%, rgba(124,92,255,0.46) 0%, rgba(56,178,255,0.14) 38%, transparent 62%)',
           'radial-gradient(circle at 72% 76%, rgba(0,2,14,0.92) 0%, transparent 50%)',
-          'radial-gradient(circle at 50% 50%, #020d20 0%, #010609 100%)',
+          'radial-gradient(circle at 50% 50%, #0a0620 0%, #04020e 100%)',
         ].join(', '),
-        border: '1px solid rgba(0,212,255,0.22)',
+        border: '1px solid rgba(124,92,255,0.28)',
         boxShadow: [
-          '0 0 0 2px rgba(0,212,255,0.05)',
-          '0 0 50px rgba(0,212,255,0.28)',
-          '0 0 120px rgba(0,212,255,0.12)',
-          '0 0 240px rgba(0,212,255,0.06)',
+          '0 0 0 2px rgba(124,92,255,0.06)',
+          '0 0 50px rgba(124,92,255,0.32)',
+          '0 0 120px rgba(56,178,255,0.12)',
+          '0 0 240px rgba(124,92,255,0.06)',
           'inset -28px -28px 70px rgba(0,0,0,0.78)',
-          'inset 16px 16px 45px rgba(0,212,255,0.07)',
+          'inset 16px 16px 45px rgba(124,92,255,0.08)',
         ].join(', '),
         animation: 'orbPulse 2.8s ease-in-out infinite',
         display: 'flex', flexDirection: 'column', alignItems: 'center',
@@ -506,24 +523,24 @@ export default function HubPage({ setPage, user }) {
         <div style={{
           position: 'absolute', top: '8%', left: '12%',
           width: '48%', height: '36%', borderRadius: '50%',
-          background: 'radial-gradient(ellipse at 40% 38%, rgba(255,255,255,0.16) 0%, rgba(0,212,255,0.07) 55%, transparent 100%)',
+          background: 'radial-gradient(ellipse at 40% 38%, rgba(255,255,255,0.16) 0%, rgba(124,92,255,0.08) 55%, transparent 100%)',
           filter: 'blur(10px)', pointerEvents: 'none',
         }} />
 
         {/* Latitude lines — scaleY flattened circles to mimic globe perspective */}
         <div style={{
           position: 'absolute', inset: '30%', borderRadius: '50%',
-          border: '1px solid rgba(0,212,255,0.14)',
+          border: '1px solid rgba(124,92,255,0.16)',
           transform: 'scaleY(0.25)', pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', inset: '18%', borderRadius: '50%',
-          border: '1px solid rgba(0,212,255,0.09)',
+          border: '1px solid rgba(56,178,255,0.10)',
           transform: 'scaleY(0.18)', pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', inset: '8%', borderRadius: '50%',
-          border: '1px solid rgba(0,212,255,0.12)',
+          border: '1px solid rgba(124,92,255,0.12)',
           transform: 'scaleY(0.08)', pointerEvents: 'none',
         }} />
 
@@ -531,16 +548,16 @@ export default function HubPage({ setPage, user }) {
         <div style={{
           position: 'absolute', inset: -5, borderRadius: '50%',
           border: '1px solid transparent',
-          borderTopColor: 'rgba(0,212,255,0.5)',
-          borderRightColor: 'rgba(0,212,255,0.18)',
+          borderTopColor: 'rgba(124,92,255,0.55)',
+          borderRightColor: 'rgba(56,178,255,0.20)',
           animation: 'spin 9s linear infinite',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', inset: -10, borderRadius: '50%',
           border: '1px solid transparent',
-          borderBottomColor: 'rgba(0,212,255,0.26)',
-          borderLeftColor: 'rgba(0,212,255,0.1)',
+          borderBottomColor: 'rgba(56,178,255,0.28)',
+          borderLeftColor: 'rgba(124,92,255,0.12)',
           animation: 'spin 15s linear infinite reverse',
           pointerEvents: 'none',
         }} />
@@ -560,7 +577,7 @@ export default function HubPage({ setPage, user }) {
               {user.id}
             </span>
           )}
-          <span style={{ fontFamily: 'var(--font-brand)', fontSize: 6.5, letterSpacing: '0.24em', color: 'var(--cyan)', opacity: 0.65, marginBottom: 10 }}>
+          <span style={{ fontFamily: 'var(--font-brand)', fontSize: 6.5, letterSpacing: '0.24em', color: 'rgba(124,92,255,0.8)', marginBottom: 10 }}>
             AURA IS ANALYZING
           </span>
           {cost > 0 ? (
@@ -581,7 +598,7 @@ export default function HubPage({ setPage, user }) {
       </div>
 
       {/* Planet nodes */}
-      {PLANETS.map(({ id, label, Icon }) => {
+      {PLANETS.map(({ id, label, Icon }, pIdx) => {
         const { angle, ringIdx } = initOrbits[id];
         const { left, top } = toXY(angle, ringIdx, cx, cy);
         const isDragging = draggingId === id;
@@ -605,7 +622,10 @@ export default function HubPage({ setPage, user }) {
               zIndex: isDragging ? 20 : 6,
               cursor: isDragging ? 'grabbing' : 'grab',
               transform: isDragging ? 'scale(1.2)' : 'scale(1)',
-              transition: isDragging ? 'none' : 'transform 0.18s ease',
+              opacity: entered ? 1 : 0,
+              transition: isDragging
+                ? 'none'
+                : `transform 0.18s ease, opacity 0.32s ease ${0.28 + pIdx * 0.055}s`,
             }}
           >
             {/* Planet circle */}

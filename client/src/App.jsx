@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 import { ToastProvider } from './contexts/ToastContext.jsx';
 import { useAuth } from './hooks/useAuth';
@@ -35,7 +35,37 @@ export default function App() {
     const hash = window.location.hash.replace('#', '');
     return ALL_PAGES.includes(hash) ? hash : 'hub';
   });
-  const { user, loading, setUser } = useAuth();
+  const { user, loading, setUser, logout } = useAuth();
+
+  // Logout transition overlay (fades to black, calls logout, fades back revealing Login)
+  const [logoutOverlay, setLogoutOverlay] = useState({ visible: false, opacity: 0 });
+  const logoutOverlayTimersRef = useRef([]);
+
+  const handleLogout = useCallback(() => {
+    // Cancel any pending timers
+    logoutOverlayTimersRef.current.forEach(clearTimeout);
+    logoutOverlayTimersRef.current = [];
+
+    // Mount overlay at opacity 0, then fade in
+    setLogoutOverlay({ visible: true, opacity: 0 });
+    // Two rAFs to allow mount before transition starts
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      setLogoutOverlay({ visible: true, opacity: 1 });
+    }));
+
+    // After fade-in completes, call server logout
+    const t1 = setTimeout(async () => {
+      await logout();
+      // Logout sets user→null, LoginPage mounts; fade overlay out
+      const t2 = setTimeout(() => {
+        setLogoutOverlay({ visible: true, opacity: 0 });
+        const t3 = setTimeout(() => setLogoutOverlay({ visible: false, opacity: 0 }), 520);
+        logoutOverlayTimersRef.current.push(t3);
+      }, 80);
+      logoutOverlayTimersRef.current.push(t2);
+    }, 440);
+    logoutOverlayTimersRef.current.push(t1);
+  }, [logout]);
 
   useEffect(() => { window.location.hash = page; }, [page]);
 
@@ -66,7 +96,16 @@ export default function App() {
   if (page === 'hub') return (
     <MotionConfig reducedMotion="user">
       <ToastProvider>
-        <HubPage setPage={setPage} user={user} />
+        <HubPage setPage={setPage} user={user} onLogout={handleLogout} />
+        {logoutOverlay.visible && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: '#020714',
+            opacity: logoutOverlay.opacity,
+            transition: 'opacity 0.42s ease',
+            pointerEvents: logoutOverlay.opacity > 0.5 ? 'all' : 'none',
+          }} />
+        )}
       </ToastProvider>
     </MotionConfig>
   );
@@ -105,6 +144,15 @@ export default function App() {
           </div>
           <AuraPanel />
         </div>
+        {logoutOverlay.visible && (
+          <div style={{
+            position: 'fixed', inset: 0, zIndex: 9999,
+            background: '#020714',
+            opacity: logoutOverlay.opacity,
+            transition: 'opacity 0.42s ease',
+            pointerEvents: logoutOverlay.opacity > 0.5 ? 'all' : 'none',
+          }} />
+        )}
       </ToastProvider>
     </MotionConfig>
   );
