@@ -82,16 +82,26 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
 
       {!loading && advice && (
         <>
-          {/* Confidence bar */}
+          {/* Confidence bar — gradient fill with leading glow */}
           <div>
             <div className="flex justify-between text-xs text-muted mb-1.5">
               <span style={{ fontSize: 9, color: 'var(--text-muted)', fontWeight: 600 }}>Confidence</span>
               <span className="font-mono text-[var(--text-2)]">{confidence}%</span>
             </div>
-            <div className="h-1.5 bg-[var(--surface-2)] rounded-full overflow-hidden">
+            <div style={{ height: 6, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden', border: '1px solid var(--border)' }}>
               <div
-                className="h-full rounded-full transition-all"
-                style={{ width: `${confidence}%`, backgroundColor: barColor }}
+                style={{
+                  width: `${confidence}%`,
+                  height: '100%',
+                  background: advice?.recommendation === 'buy'
+                    ? 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)'
+                    : advice?.recommendation === 'sell'
+                    ? 'linear-gradient(90deg, #f87171 0%, #ef4444 100%)'
+                    : 'var(--accent-grad)',
+                  borderRadius: 99,
+                  boxShadow: `2px 0 8px ${barColor}`,
+                  transition: 'width 0.6s ease',
+                }}
               />
             </div>
           </div>

@@ -110,10 +110,16 @@ function StatCard({ label, value, sub, pnl, sparkData, sparkType, countUp, forma
     ? (formatter ? formatter(animated) : `${Math.round(animated)}`)
     : value;
 
+  // Gradient text for neutral (no P&L context) hero numbers
+  const heroNumStyle = hasPnl
+    ? { fontSize: 'var(--text-2xl)', fontWeight: 600, color: valueColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)' }
+    : { fontSize: 'var(--text-2xl)', fontWeight: 600, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)',
+        background: 'var(--accent-grad)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' };
+
   return (
     <motion.div variants={cardVariants} className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
       <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginBottom: 8 }}>{label}</p>
-      <p style={{ fontSize: 'var(--text-2xl)', fontWeight: 600, color: valueColor, fontVariantNumeric: 'tabular-nums', lineHeight: 1.1, fontFamily: 'var(--font-mono)' }}>
+      <p style={heroNumStyle}>
         {displayValue}
       </p>
       {sub && (
@@ -126,7 +132,7 @@ function StatCard({ label, value, sub, pnl, sparkData, sparkType, countUp, forma
               <BarChart data={sparkData} margin={{ top: 0, right: 4, bottom: 0, left: 4 }} barCategoryGap="18%">
                 <Bar dataKey="v" radius={[2, 2, 0, 0]} isAnimationActive={false}>
                   {sparkData.map((d, i) => (
-                    <Cell key={i} fill={d.v >= 0 ? 'rgba(22,163,74,0.55)' : 'rgba(220,38,38,0.55)'} />
+                    <Cell key={i} fill={d.v >= 0 ? 'rgba(74,222,128,0.55)' : 'rgba(248,113,113,0.55)'} />
                   ))}
                 </Bar>
               </BarChart>
