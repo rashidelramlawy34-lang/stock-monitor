@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
-import { getPortfolioCoach } from '../services/aiService.js';
+import { getPortfolioCoach, parseJsonObject } from '../services/aiService.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -23,8 +23,14 @@ router.get('/', (req, res) => {
     return res.json(null);
   }
   try {
-    res.json({ ...JSON.parse(row.analysis), generated_at: row.generated_at });
+    const analysis = parseJsonObject(row.analysis);
+    if (typeof analysis.summary === 'string' && analysis.summary.trim().startsWith('{')) {
+      db.prepare('DELETE FROM coach_cache WHERE user_id = ?').run(req.user.id);
+      return res.json(null);
+    }
+    res.json({ ...analysis, generated_at: row.generated_at });
   } catch {
+    db.prepare('DELETE FROM coach_cache WHERE user_id = ?').run(req.user.id);
     res.json(null);
   }
 });

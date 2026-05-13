@@ -32,6 +32,34 @@ function marketCapLabel(cap) {
   return 'Micro-cap (<$300M)';
 }
 
+export function parseJsonObject(raw) {
+  const text = String(raw ?? '')
+    .trim()
+    .replace(/^```json\s*/i, '')
+    .replace(/^```\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  const parseOnce = (value) => {
+    const parsed = JSON.parse(value);
+    return typeof parsed === 'string' ? JSON.parse(parsed) : parsed;
+  };
+
+  try {
+    const parsed = parseOnce(text);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+  } catch {}
+
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  if (start >= 0 && end > start) {
+    const parsed = parseOnce(text.slice(start, end + 1));
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+  }
+
+  throw new Error('AI returned malformed JSON. Please run the analysis again.');
+}
+
 export async function completeJson({ prompt, instructions, maxOutputTokens = 1024, deep = false }) {
   const response = await getClient().responses.create({
     model: deep ? DEEP_AI_MODEL : DEFAULT_AI_MODEL,
@@ -167,11 +195,11 @@ export async function getPortfolioCoach(holdings, allAdvice, allFundamentals, al
 
   const raw = await completeJson({
     prompt,
-    maxOutputTokens: 2048,
+    maxOutputTokens: 4096,
     deep: true,
     instructions: 'You are a senior portfolio manager. Respond only with valid JSON. This is analytical support, not personalized financial advice.',
   });
-  try { return JSON.parse(raw); } catch { return { summary: raw, score: 50, overall_health: 'Balanced' }; }
+  return parseJsonObject(raw);
 }
 
 export async function discoverStocks(holdings) {

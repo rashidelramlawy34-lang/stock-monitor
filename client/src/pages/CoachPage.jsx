@@ -82,7 +82,8 @@ const healthColor = { Aggressive: 'text-warn', Balanced: 'text-[var(--accent)]',
 export default function CoachPage() {
   const { analysis, loading, error, fetchCached, refresh } = useCoach();
   const [history, setHistory] = useState([]);
-  const displayAnalysis = analysis ?? null;
+  const displayAnalysis = analysis?.summary?.trim?.().startsWith('{') ? null : (analysis ?? null);
+  const malformedAnalysis = analysis?.summary?.trim?.().startsWith('{');
 
   useEffect(() => { fetchCached(); }, [fetchCached]);
 
@@ -135,7 +136,14 @@ export default function CoachPage() {
         </div>
       )}
 
-      {!loading && !displayAnalysis && !error && (
+      {!loading && malformedAnalysis && !error && (
+        <div className="card p-8 text-center">
+          <p className="text-sm text-[var(--text-2)] font-semibold">Coach analysis needs to be regenerated.</p>
+          <p className="text-muted text-xs mt-1">The previous response was malformed. Click "Analyze Portfolio" to create a clean report.</p>
+        </div>
+      )}
+
+      {!loading && !displayAnalysis && !error && !malformedAnalysis && (
         <div className="card p-8 text-center">
           <p className="text-muted text-sm">No analysis yet.</p>
           <p className="text-muted text-xs mt-1">Click "Analyze Portfolio" to get a holistic assessment.</p>
