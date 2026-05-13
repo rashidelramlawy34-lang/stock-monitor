@@ -6,28 +6,9 @@ const REC = {
   sell: { label: 'SELL', borderColor: 'var(--loss)', badge: 'badge-bear' },
 };
 
-function localAdviceFor(ticker, fundamentals = {}) {
-  const pe = fundamentals?.pe_ratio ?? 30;
-  const beta = fundamentals?.beta ?? 1.1;
-  const recommendation = beta > 1.8 || pe > 45 ? 'hold' : pe < 24 ? 'buy' : 'hold';
-  const confidence = beta > 1.8 ? 0.58 : 0.66;
-  const company = fundamentals?.company_name || ticker;
-  return {
-    recommendation,
-    confidence,
-    reasoning: `${company} is being scored with local Aura analysis while the external AI service is unavailable. Valuation, beta, and portfolio role point to a measured ${recommendation.toUpperCase()} stance until fresh model output returns.`,
-    bull_case: `Upside improves if earnings momentum confirms the current valuation and the position continues adding diversification to the portfolio.`,
-    bear_case: `Risk comes from multiple compression, elevated beta, or a weaker market tape that could pressure growth-heavy holdings first.`,
-    key_catalysts: JSON.stringify(['earnings', 'sector momentum', 'analyst revisions']),
-    key_risks: JSON.stringify(beta > 1.5 ? ['high beta', 'valuation sensitivity'] : ['macro sensitivity', 'execution risk']),
-    generated_at: Math.floor(Date.now() / 1000),
-    local: true,
-  };
-}
-
 export default function AdviceCard({ ticker, advice, loading, error, onRefresh, fundamentals }) {
   const [tab, setTab] = useState('reasoning');
-  const displayAdvice = advice || (error ? localAdviceFor(ticker, fundamentals) : null);
+  const displayAdvice = advice ?? null;
   const rec = displayAdvice ? (REC[displayAdvice.recommendation] ?? REC.hold) : null;
   const confidence = displayAdvice ? Math.round((displayAdvice.confidence ?? 0) * 100) : 0;
   const age = displayAdvice?.generated_at
@@ -61,7 +42,6 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {displayAdvice?.local && <span className="badge-neutral text-xs">LOCAL</span>}
           {rec && <span className={`${rec.badge} text-xs`}>{rec.label}</span>}
           <button
             onClick={() => onRefresh(ticker)}
@@ -90,9 +70,12 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
       )}
 
       {error && (
-        <p className="text-xs text-muted">
-          Live AI is unavailable, so Aura is showing local demo analysis for this card.
-        </p>
+        <div className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3">
+          <p className="text-xs text-[var(--text-2)] font-semibold">GPT-5.5 analysis unavailable</p>
+          <p className="text-xs text-muted mt-1">
+            Add or fix your OpenAI API key in Settings, then refresh this analysis.
+          </p>
+        </div>
       )}
 
       {!loading && !error && !displayAdvice && (

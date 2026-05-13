@@ -3,7 +3,12 @@ import { getDb } from '../db/schema.js';
 
 const router = Router();
 
-const ALLOWED_KEYS = ['ANTHROPIC_API_KEY', 'FINNHUB_API_KEY'];
+const ALLOWED_KEYS = [
+  'OPENAI_API_KEY',
+  'FINNHUB_API_KEY',
+  'SENDGRID_API_KEY',
+  'ALERT_FROM_EMAIL',
+];
 
 router.get('/', (req, res) => {
   const db = getDb();
@@ -18,7 +23,7 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const db = getDb();
-  const updates = req.body; // { ANTHROPIC_API_KEY: '...', FINNHUB_API_KEY: '...' }
+  const updates = req.body; // { OPENAI_API_KEY: '...', FINNHUB_API_KEY: '...' }
   const stmt = db.prepare('INSERT OR REPLACE INTO app_settings (key, value) VALUES (?, ?)');
   const del = db.prepare('DELETE FROM app_settings WHERE key = ?');
 

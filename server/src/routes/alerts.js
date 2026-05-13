@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { backfillDefaultPortfolioItems } from '../utils/defaultPortfolio.js';
 
 const router = Router();
 
@@ -25,10 +26,11 @@ router.post('/', (req, res) => {
 
   const db = getDb();
   const userId = req.user.id;
+  const resolvedPortfolioId = portfolio_id ?? backfillDefaultPortfolioItems(db, userId).id;
   const result = db.prepare(`
     INSERT INTO alerts (ticker, type, target_price, trigger_pct, user_id, portfolio_id)
     VALUES (@ticker, @type, @target_price, @trigger_pct, @user_id, @portfolio_id)
-  `).run({ ticker: ticker.toUpperCase(), type, target_price: target_price ?? null, trigger_pct: trigger_pct ?? null, user_id: userId, portfolio_id: portfolio_id ?? null });
+  `).run({ ticker: ticker.toUpperCase(), type, target_price: target_price ?? null, trigger_pct: trigger_pct ?? null, user_id: userId, portfolio_id: resolvedPortfolioId });
 
   res.status(201).json(db.prepare('SELECT * FROM alerts WHERE id = ?').get(result.lastInsertRowid));
 });

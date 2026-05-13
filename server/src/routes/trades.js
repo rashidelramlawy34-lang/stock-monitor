@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { backfillDefaultPortfolioItems } from '../utils/defaultPortfolio.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -23,11 +24,12 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'action must be buy or sell' });
   }
   const db = getDb();
+  const resolvedPortfolioId = portfolio_id ?? backfillDefaultPortfolioItems(db, req.user.id).id;
   const ts = traded_at ? Math.floor(new Date(traded_at).getTime() / 1000) : Math.floor(Date.now() / 1000);
   const result = db.prepare(`
     INSERT INTO trades (user_id, ticker, action, shares, price, fees, traded_at, note, portfolio_id)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `).run(req.user.id, ticker.toUpperCase(), action, Number(shares), Number(price), Number(fees ?? 0), ts, note ?? null, portfolio_id ?? null);
+  `).run(req.user.id, ticker.toUpperCase(), action, Number(shares), Number(price), Number(fees ?? 0), ts, note ?? null, resolvedPortfolioId);
   res.status(201).json(db.prepare('SELECT * FROM trades WHERE id = ?').get(result.lastInsertRowid));
 });
 

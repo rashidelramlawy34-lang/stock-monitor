@@ -1,18 +1,17 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDb } from '../db/schema.js';
+import { completeJson } from './aiService.js';
+import { getSetting } from './settingsService.js';
 
 const BASE = 'https://finnhub.io/api/v1';
 const NEWS_CACHE_TTL = 15 * 60;
 const PROMPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../prompts');
 
-const client = new Anthropic();
-
 function apiKey() {
-  const key = process.env.FINNHUB_API_KEY;
-  if (!key) throw new Error('FINNHUB_API_KEY is not set in .env');
+  const key = getSetting('FINNHUB_API_KEY');
+  if (!key) throw new Error('Finnhub API key not set. Add it in Settings.');
   return key;
 }
 
@@ -23,14 +22,11 @@ async function tagSentiment(ticker, articles) {
     const headlines = articles.map((a, i) => `${i}. ${a.headline}`).join('\n');
     const prompt = template.replace('{{TICKER}}', ticker).replace('{{HEADLINES}}', headlines);
 
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 256,
-      system: 'You are a financial analyst. Respond only with valid JSON.',
-      messages: [{ role: 'user', content: prompt }],
+    const raw = await completeJson({
+      prompt,
+      maxOutputTokens: 256,
+      instructions: 'You are a financial analyst. Respond only with valid JSON.',
     });
-
-    const raw = msg.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
     const tags = JSON.parse(raw);
     return tags;
   } catch {
@@ -62,7 +58,7 @@ export async function fetchNews(ticker) {
     sentiment: 'neutral',
   }));
 
-  // Tag sentiments with a single Claude call
+  // Tag sentiments with a single OpenAI call
   const tags = await tagSentiment(ticker.toUpperCase(), articles);
   for (const tag of tags) {
     if (articles[tag.index] && ['bullish', 'bearish', 'neutral'].includes(tag.sentiment)) {

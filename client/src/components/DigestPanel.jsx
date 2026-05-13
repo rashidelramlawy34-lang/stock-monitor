@@ -32,7 +32,7 @@ export default function DigestPanel() {
       {error && <p className="text-bear text-xs">{error}</p>}
 
       {!summary && !loading && (
-        <p className="text-sm text-muted">Generate a full portfolio health summary powered by Claude AI.</p>
+        <p className="text-sm text-muted">Generate a full portfolio health summary powered by GPT-5.5.</p>
       )}
 
       {loading && (

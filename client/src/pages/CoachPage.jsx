@@ -79,28 +79,10 @@ function ScoreHistoryChart({ history }) {
 
 const healthColor = { Aggressive: 'text-warn', Balanced: 'text-[var(--accent)]', Defensive: 'text-bull', Speculative: 'text-bear' };
 
-const LOCAL_COACH_ANALYSIS = {
-  score: 72,
-  overall_health: 'Balanced',
-  diversification_score: 68,
-  generated_at: Math.floor(Date.now() / 1000),
-  summary: 'Aura local analysis sees a growth-tilted portfolio with strong upside participation and manageable concentration risk. The account is suitable for an active investor, but position sizing should stay disciplined around high-beta names.',
-  top_opportunity: 'AI infrastructure and mega-cap software remain the cleanest momentum lane. NVDA and MSFT can continue driving returns if earnings revisions stay positive.',
-  top_risk: 'The portfolio is sensitive to broad technology multiple compression. A sudden rate move or weak guidance cycle could pressure several holdings at the same time.',
-  macro_outlook: 'Markets are rewarding quality growth, cash flow durability, and AI-linked revenue visibility. Keep some balance through financials or broad ETFs while the portfolio leans into momentum.',
-  concentration_risk: 'Single-theme exposure is the main issue. Keep the largest positions below target caps and add non-correlated exposure before increasing speculative names.',
-  suggested_rebalance: [
-    { ticker: 'NVDA', action: 'hold', reason: 'Keep core exposure, but avoid adding after sharp upside days.' },
-    { ticker: 'VTI', action: 'add', reason: 'Broadens market exposure and reduces single-theme drawdown risk.' },
-    { ticker: 'TSLA', action: 'reduce', reason: 'High beta makes this position the first trim candidate if volatility rises.' },
-  ],
-  local: true,
-};
-
 export default function CoachPage() {
   const { analysis, loading, error, fetchCached, refresh } = useCoach();
   const [history, setHistory] = useState([]);
-  const displayAnalysis = analysis || (error ? LOCAL_COACH_ANALYSIS : null);
+  const displayAnalysis = analysis ?? null;
 
   useEffect(() => { fetchCached(); }, [fetchCached]);
 
@@ -146,7 +128,10 @@ export default function CoachPage() {
 
       {error && (
         <div className="card p-4 text-sm text-[var(--text-2)] mb-4">
-          Live AI is unavailable, so Aura is showing local demo coaching instead of the raw provider error.
+          <p className="font-semibold">GPT-5.5 analysis unavailable</p>
+          <p className="text-muted text-xs mt-1">
+            Add or fix your OpenAI API key in Settings, then analyze the portfolio again.
+          </p>
         </div>
       )}
 
@@ -164,7 +149,6 @@ export default function CoachPage() {
             <ScoreRing score={displayAnalysis.score ?? 50} />
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                {displayAnalysis.local && <span className="badge-neutral text-xs">LOCAL DEMO</span>}
                 <span className={`text-lg font-bold ${healthColor[displayAnalysis.overall_health] ?? 'text-[var(--accent)]'}`}>
                   {displayAnalysis.overall_health}
                 </span>

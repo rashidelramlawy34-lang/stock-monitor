@@ -10,7 +10,7 @@ cd stock-monitor
 
 # 2. Copy and fill in env vars
 cp .env.example .env
-# Edit .env — at minimum set ANTHROPIC_API_KEY
+# Edit .env — at minimum set OPENAI_API_KEY
 
 # 3. Install dependencies
 cd server && npm install
@@ -36,7 +36,7 @@ stock-monitor/
 │   │   ├── services/        # Business logic
 │   │   │   ├── priceService.js   # yahoo-finance2 wrapper
 │   │   │   ├── newsService.js    # News fetching & caching
-│   │   │   └── aiService.js      # Anthropic API calls
+│   │   │   └── aiService.js      # OpenAI API calls
 │   │   └── db/
 │   │       └── schema.js    # SQLite schema + migrations
 │   └── tests/
@@ -108,7 +108,7 @@ Get a free key at https://brave.com/search/api/
 | Backend | Node.js, Express |
 | Database | SQLite (better-sqlite3) |
 | Price Data | yahoo-finance2 (unofficial Yahoo Finance) |
-| AI Layer | Anthropic API (claude-sonnet-4-6) |
+| AI Layer | OpenAI API (GPT-5.5 by default) |
 | Real-time | Server-Sent Events (price polling) |
 
 ## API Endpoints
@@ -132,7 +132,9 @@ Get a free key at https://brave.com/search/api/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `ANTHROPIC_API_KEY` | Yes | For AI Advisor feature |
+| `OPENAI_API_KEY` | Yes | For AI Advisor, Coach, Digest, and Discover features |
+| `OPENAI_MODEL` | No | AI model override (default: `gpt-5.5`) |
+| `OPENAI_DEEP_MODEL` | No | Deep analysis model override (default: `gpt-5.5`) |
 | `PORT` | No | API server port (default: 3001) |
 | `DB_PATH` | No | Path to SQLite file |
 | `PRICE_REFRESH_INTERVAL` | No | Poll interval in ms (default: 30000) |

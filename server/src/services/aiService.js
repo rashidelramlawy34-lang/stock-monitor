@@ -1,14 +1,17 @@
-import Anthropic from '@anthropic-ai/sdk';
+import OpenAI from 'openai';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDb } from '../db/schema.js';
 import { getSetting } from './settingsService.js';
 
+const DEFAULT_AI_MODEL = process.env.OPENAI_MODEL || 'gpt-5.5';
+const DEEP_AI_MODEL = process.env.OPENAI_DEEP_MODEL || 'gpt-5.5';
+
 function getClient() {
-  const key = getSetting('ANTHROPIC_API_KEY');
-  if (!key) throw new Error('Anthropic API key not set. Add it in Settings.');
-  return new Anthropic({ apiKey: key });
+  const key = getSetting('OPENAI_API_KEY');
+  if (!key) throw new Error('OpenAI API key not set. Add it in Settings.');
+  return new OpenAI({ apiKey: key });
 }
 const PROMPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../prompts');
 
@@ -27,6 +30,29 @@ function marketCapLabel(cap) {
   if (cap > 2e9)   return 'Mid-cap ($2B–$10B)';
   if (cap > 300e6) return 'Small-cap ($300M–$2B)';
   return 'Micro-cap (<$300M)';
+}
+
+export async function completeJson({ prompt, instructions, maxOutputTokens = 1024, deep = false }) {
+  const response = await getClient().responses.create({
+    model: deep ? DEEP_AI_MODEL : DEFAULT_AI_MODEL,
+    instructions,
+    input: prompt,
+    max_output_tokens: maxOutputTokens,
+    text: { format: { type: 'json_object' } },
+    reasoning: { effort: deep ? 'medium' : 'low' },
+  });
+  return response.output_text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
+}
+
+export async function completeText({ prompt, instructions, maxOutputTokens = 512, deep = false }) {
+  const response = await getClient().responses.create({
+    model: deep ? DEEP_AI_MODEL : DEFAULT_AI_MODEL,
+    instructions,
+    input: prompt,
+    max_output_tokens: maxOutputTokens,
+    reasoning: { effort: deep ? 'medium' : 'low' },
+  });
+  return response.output_text.trim();
 }
 
 export async function getAdvice(ticker, priceData, newsItems, fundamentals = {}) {
@@ -80,14 +106,11 @@ export async function getAdvice(ticker, priceData, newsItems, fundamentals = {})
     .replace('{{UPSIDE_PCT}}',      upsidePct)
     .replace('{{NEWS}}',            newsText || 'No recent news available.');
 
-  const message = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: 'You are a senior equity analyst. Respond only with valid JSON.',
-    messages: [{ role: 'user', content: prompt }],
+  const raw = await completeJson({
+    prompt,
+    maxOutputTokens: 1024,
+    instructions: 'You are a senior equity analyst. Respond only with valid JSON. This is analytical support, not personalized financial advice.',
   });
-
-  const raw = message.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
   let parsed;
   try {
     parsed = JSON.parse(raw);
@@ -142,14 +165,12 @@ export async function getPortfolioCoach(holdings, allAdvice, allFundamentals, al
   const template = loadPrompt('coach');
   const prompt = template.replace('{{HOLDINGS_JSON}}', JSON.stringify(holdingsData, null, 2));
 
-  const message = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 2048,
-    system: 'You are a senior portfolio manager. Respond only with valid JSON.',
-    messages: [{ role: 'user', content: prompt }],
+  const raw = await completeJson({
+    prompt,
+    maxOutputTokens: 2048,
+    deep: true,
+    instructions: 'You are a senior portfolio manager. Respond only with valid JSON. This is analytical support, not personalized financial advice.',
   });
-
-  const raw = message.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
   try { return JSON.parse(raw); } catch { return { summary: raw, score: 50, overall_health: 'Balanced' }; }
 }
 
@@ -158,13 +179,10 @@ export async function discoverStocks(holdings) {
   const holdingsList = holdings.map(h => h.ticker).join(', ');
   const prompt = template.replace('{{HOLDINGS}}', holdingsList);
 
-  const message = await getClient().messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 1024,
-    system: 'You are a financial analyst. Respond only with valid JSON.',
-    messages: [{ role: 'user', content: prompt }],
+  const raw = await completeJson({
+    prompt,
+    maxOutputTokens: 1024,
+    instructions: 'You are a financial analyst. Respond only with valid JSON. This is analytical support, not personalized financial advice.',
   });
-
-  const raw = message.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
   try { return JSON.parse(raw); } catch { return { suggestions: [], reasoning: raw }; }
 }

@@ -27,24 +27,6 @@ const PERIOD_META = {
   '1Y': { count: 96, label: '12 month', drift: 0.24 },
 };
 
-const DEMO_HOLDINGS = [
-  { ticker: 'BTC', shares: 1.2, cost_basis: 56000 },
-  { ticker: 'NVDA', shares: 12, cost_basis: 820 },
-  { ticker: 'AAPL', shares: 30, cost_basis: 188 },
-  { ticker: 'TSLA', shares: 9, cost_basis: 220 },
-  { ticker: 'MSFT', shares: 14, cost_basis: 410 },
-  { ticker: 'SPY', shares: 22, cost_basis: 515 },
-];
-
-const DEMO_PRICES = {
-  BTC: { price: 60850.16, change_pct: 2.41 },
-  NVDA: { price: 936.42, change_pct: 4.08 },
-  AAPL: { price: 193.39, change_pct: -0.36 },
-  TSLA: { price: 219.2, change_pct: -2.61 },
-  MSFT: { price: 433.78, change_pct: 1.27 },
-  SPY: { price: 529.57, change_pct: 0.93 },
-};
-
 function fmt$(n) {
   if (n == null) return '—';
   return n.toLocaleString('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
@@ -85,6 +67,12 @@ function PortfolioMiniList({ holdings, prices, portfolioValue, totalGainPct, isP
         </div>
 
         <div className="aura-hub-portfolio__rows">
+          {holdings.length === 0 && (
+            <div className="aura-hub-portfolio__empty">
+              <strong>No holdings yet</strong>
+              <span>Add your first position to start tracking this portfolio.</span>
+            </div>
+          )}
           {holdings.slice(0, 6).map(h => {
             const p = prices[h.ticker];
             const pct = p?.change_pct ?? 0;
@@ -138,11 +126,10 @@ function CardTitle({ children }) {
 }
 
 export default function DashboardPage({ setPage, user }) {
-  const { holdings: liveHoldings } = usePortfolio();
-  const holdings = liveHoldings.length > 0 ? liveHoldings : DEMO_HOLDINGS;
+  const { holdings } = usePortfolio();
+  const hasHoldings = holdings.length > 0;
   const tickers = useMemo(() => holdings.map(h => h.ticker), [holdings]);
-  const { prices: livePrices } = usePrices(tickers);
-  const prices = useMemo(() => ({ ...DEMO_PRICES, ...livePrices }), [livePrices]);
+  const { prices } = usePrices(tickers);
   const { indices } = useMarket();
   const [period, setPeriod] = useState('1M');
 
@@ -167,12 +154,11 @@ export default function DashboardPage({ setPage, user }) {
   const totalGain = portfolioValue - portfolioCost;
   const totalGainPct = portfolioCost > 0 ? (totalGain / portfolioCost) * 100 : 0;
 
-  const chartSeed = portfolioValue > 0 ? portfolioValue : 98743;
-  const chartEnd = portfolioValue > 0 ? portfolioValue : 98743;
   const chartData = useMemo(() => {
+    if (!hasHoldings || portfolioValue <= 0) return [];
     const meta = PERIOD_META[period] ?? PERIOD_META['1M'];
-    return seededChart(chartSeed + period.length * 777, meta.count, chartEnd, period);
-  }, [chartSeed, chartEnd, period]);
+    return seededChart(portfolioValue + period.length * 777, meta.count, portfolioValue, period);
+  }, [hasHoldings, portfolioValue, period]);
   const periodMeta = PERIOD_META[period] ?? PERIOD_META['1M'];
   const periodStart = chartData[0]?.value ?? portfolioValue;
   const periodChange = portfolioValue - periodStart;
@@ -232,8 +218,8 @@ export default function DashboardPage({ setPage, user }) {
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
               {[
                 { label: 'S&P 500', val: spy ? fmtPct(spy.change_pct) : '—', pos: spy?.change_pct >= 0 },
-                { label: 'Portfolio', val: fmtPct(totalGainPct), pos: totalGainPct >= 0 },
-                { label: 'Today', val: fmt$(dailyPnl), pos: dailyPos },
+                { label: 'Portfolio', val: hasHoldings ? fmtPct(totalGainPct) : '—', pos: totalGainPct >= 0 },
+                { label: 'Today', val: hasHoldings ? fmt$(dailyPnl) : '—', pos: dailyPos },
               ].map(({ label, val, pos }) => (
                 <div key={label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-sans)' }}>{label}</span>
@@ -250,7 +236,9 @@ export default function DashboardPage({ setPage, user }) {
             <CardTitle>Top Gainers / Losers</CardTitle>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 0 }}>
               {topGainers.length === 0 && (
-                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Loading…</span>
+                <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                  {hasHoldings ? 'Loading…' : 'No holdings yet'}
+                </span>
               )}
               {topGainers.map(h => {
                 const p = prices[h.ticker];
@@ -344,7 +332,9 @@ export default function DashboardPage({ setPage, user }) {
             <div className="aura-hub-chart-context">
               <div>
                 <span>Range return</span>
-                <strong className={periodPos ? 'is-gain' : 'is-loss'}>{fmt$(periodChange)} ({fmtPct(periodChangePct)})</strong>
+                <strong className={periodPos ? 'is-gain' : 'is-loss'}>
+                  {hasHoldings ? `${fmt$(periodChange)} (${fmtPct(periodChangePct)})` : '—'}
+                </strong>
               </div>
               <div>
                 <span>Cost basis</span>
@@ -357,44 +347,51 @@ export default function DashboardPage({ setPage, user }) {
             </div>
           </div>
           <div className="aura-hub-chart-body">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 18, right: 22, bottom: 12, left: 4 }}>
-                <defs>
-                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor={isPos ? '#9070ff' : '#f87171'} stopOpacity={0.65} />
-                    <stop offset="60%" stopColor={isPos ? '#7c5cff' : '#f87171'} stopOpacity={0.20} />
-                    <stop offset="100%" stopColor={isPos ? '#7c5cff' : '#f87171'} stopOpacity={0.04} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid vertical={false} stroke="rgba(219,244,255,0.07)" />
-                <XAxis
-                  dataKey="label"
-                  axisLine={false}
-                  tickLine={false}
-                  interval="preserveStartEnd"
-                  tick={{ fill: 'rgba(200,211,238,0.58)', fontSize: 10 }}
-                />
-                <YAxis
-                  orientation="right"
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={v => `$${Math.round(v / 1000)}k`}
-                  tick={{ fill: 'rgba(200,211,238,0.58)', fontSize: 10 }}
-                  width={46}
-                />
-                <Area
-                  type="monotone" dataKey="value"
-                  stroke={isPos ? '#a080ff' : '#f87171'} strokeWidth={3}
-                  fill="url(#chartGrad)" dot={false}
-                  activeDot={{ r: 4, fill: '#a080ff', strokeWidth: 0 }}
-                />
-                <Tooltip
-                  formatter={(v) => [fmt$(v), 'Portfolio value']}
-                  contentStyle={{ background: 'rgba(15,22,50,0.9)', border: '1px solid rgba(124,92,255,0.25)', borderRadius: 8, fontSize: 11 }}
-                  labelFormatter={(label) => `${period} • ${label}`}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+            {hasHoldings ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 18, right: 22, bottom: 12, left: 4 }}>
+                  <defs>
+                    <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor={isPos ? '#9070ff' : '#f87171'} stopOpacity={0.65} />
+                      <stop offset="60%" stopColor={isPos ? '#7c5cff' : '#f87171'} stopOpacity={0.20} />
+                      <stop offset="100%" stopColor={isPos ? '#7c5cff' : '#f87171'} stopOpacity={0.04} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid vertical={false} stroke="rgba(219,244,255,0.07)" />
+                  <XAxis
+                    dataKey="label"
+                    axisLine={false}
+                    tickLine={false}
+                    interval="preserveStartEnd"
+                    tick={{ fill: 'rgba(200,211,238,0.58)', fontSize: 10 }}
+                  />
+                  <YAxis
+                    orientation="right"
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={v => `$${Math.round(v / 1000)}k`}
+                    tick={{ fill: 'rgba(200,211,238,0.58)', fontSize: 10 }}
+                    width={46}
+                  />
+                  <Area
+                    type="monotone" dataKey="value"
+                    stroke={isPos ? '#a080ff' : '#f87171'} strokeWidth={3}
+                    fill="url(#chartGrad)" dot={false}
+                    activeDot={{ r: 4, fill: '#a080ff', strokeWidth: 0 }}
+                  />
+                  <Tooltip
+                    formatter={(v) => [fmt$(v), 'Portfolio value']}
+                    contentStyle={{ background: 'rgba(15,22,50,0.9)', border: '1px solid rgba(124,92,255,0.25)', borderRadius: 8, fontSize: 11 }}
+                    labelFormatter={(label) => `${period} • ${label}`}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="aura-hub-chart-empty">
+                <strong>No portfolio history yet</strong>
+                <span>Add holdings to populate this chart.</span>
+              </div>
+            )}
           </div>
         </GlassCard>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { MAX_TICKER_LENGTH, normalizeTicker } from '../utils/ticker.js';
 
 export default function AddHoldingForm({ onAdd, open, onClose }) {
   const [form, setForm] = useState({ ticker: '', shares: '', cost_basis: '' });
@@ -91,8 +92,8 @@ export default function AddHoldingForm({ onAdd, open, onClose }) {
                       className="input uppercase font-mono"
                       placeholder="AAPL"
                       value={form.ticker}
-                      onChange={e => setForm(f => ({ ...f, ticker: e.target.value.toUpperCase() }))}
-                      maxLength={10}
+                      onChange={e => setForm(f => ({ ...f, ticker: normalizeTicker(e.target.value) }))}
+                      maxLength={MAX_TICKER_LENGTH}
                       autoFocus
                     />
                   </div>

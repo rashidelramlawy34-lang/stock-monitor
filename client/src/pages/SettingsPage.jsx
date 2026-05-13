@@ -193,10 +193,10 @@ export default function SettingsPage() {
             className="card" style={{ padding: 20, display: 'flex', flexDirection: 'column', gap: 20 }}>
             <SectionHeader title="AI analysis" description="Powers the AI Advisor, Portfolio Digest, and Discover scan." />
             <KeyField
-              label="Anthropic API key"
-              keyName="ANTHROPIC_API_KEY"
-              description="Get your key at console.anthropic.com → API Keys"
-              current={saved['ANTHROPIC_API_KEY'] ?? ''}
+              label="OpenAI API key"
+              keyName="OPENAI_API_KEY"
+              description="Uses GPT-5.5 for Advisor, Coach, Digest, and Discover analysis."
+              current={saved['OPENAI_API_KEY'] ?? ''}
               onChange={handleChange}
             />
           </motion.div>
@@ -280,8 +280,9 @@ export default function SettingsPage() {
           <p style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--text-muted)', marginBottom: 12 }}>How keys are used</p>
           <ul style={{ display: 'flex', flexDirection: 'column', gap: 6, paddingLeft: 16 }}>
             {[
-              ['Anthropic', 'AI Advisor analysis, Portfolio Digest, and Discover deep analysis'],
+              ['OpenAI GPT-5.5', 'AI Advisor analysis, Portfolio Digest, Coach, and Discover deep analysis'],
               ['Finnhub', 'Real-time prices, fundamentals, analyst ratings, earnings calendar, and news'],
+              ['SendGrid', 'Optional email delivery for price alerts'],
               [null, 'Keys set via environment variables take precedence over keys saved here'],
               [null, 'Keys are only used server-side — never sent to the browser'],
             ].map(([key, desc], i) => (

@@ -1,4 +1,3 @@
-import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -6,15 +5,10 @@ import { getDb } from '../db/schema.js';
 import { fetchFundamentals } from './fundamentalsService.js';
 import { fetchPrice } from './priceService.js';
 import { getSetting } from './settingsService.js';
+import { completeJson } from './aiService.js';
 
 const BASE = 'https://finnhub.io/api/v1';
 const PROMPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../prompts');
-
-function getAnthropicClient() {
-  const key = getSetting('ANTHROPIC_API_KEY');
-  if (!key) throw new Error('Anthropic API key not set. Add it in Settings.');
-  return new Anthropic({ apiKey: key });
-}
 
 function apiKey() { return getSetting('FINNHUB_API_KEY') ?? ''; }
 
@@ -91,7 +85,7 @@ export async function runHRHRScan() {
     return [];
   }
 
-  // 4. Build candidates JSON for Claude
+  // 4. Build candidates JSON for AI analysis
   const candidatesData = finalScored.map(c => ({
     ticker: c.ticker,
     company_name: c.fund.company_name,
@@ -110,31 +104,29 @@ export async function runHRHRScan() {
     revenue_growth: c.fund.revenue_growth,
   }));
 
-  // 5. Claude analysis
-  console.log('[HRHR] Calling Claude for', finalScored.length, 'candidates…');
+  // 5. OpenAI analysis
+  console.log('[HRHR] Calling OpenAI for', finalScored.length, 'candidates…');
   const template = readFileSync(path.join(PROMPTS_DIR, 'hrhr.txt'), 'utf8');
   const prompt = template
     .replace('{{CANDIDATES_JSON}}', JSON.stringify(candidatesData, null, 2))
     .replace('{{COUNT}}', String(finalScored.length));
 
-  let claudeAnalysis = [];
+  let aiAnalysis = [];
   try {
-    const client = getAnthropicClient();
-    const msg = await client.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 4096,
-      system: 'You are an aggressive-growth equity analyst. Respond only with valid JSON. Keep bull_case and key_catalyst concise (1-2 sentences max) to stay within token limits.',
-      messages: [{ role: 'user', content: prompt }],
+    const raw = await completeJson({
+      prompt,
+      deep: true,
+      maxOutputTokens: 4096,
+      instructions: 'You are an aggressive-growth equity analyst. Respond only with valid JSON. Keep bull_case and key_catalyst concise (1-2 sentences max) to stay within token limits. This is analytical support, not personalized financial advice.',
     });
-    const raw = msg.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
-    claudeAnalysis = JSON.parse(raw);
+    aiAnalysis = JSON.parse(raw);
   } catch (err) {
-    console.error('[HRHR] Claude parse error:', err.message);
-    claudeAnalysis = finalScored.map(c => ({ ticker: c.ticker, risk_label: 'High', bull_case: '', entry_zone: '', key_catalyst: '', conviction: 0.5 }));
+    console.error('[HRHR] OpenAI parse error:', err.message);
+    throw err;
   }
 
-  // 6. Merge numeric data with Claude analysis
-  const analysisMap = Object.fromEntries((claudeAnalysis ?? []).map(a => [a.ticker, a]));
+  // 6. Merge numeric data with AI analysis
+  const analysisMap = Object.fromEntries((aiAnalysis ?? []).map(a => [a.ticker, a]));
   const merged = finalScored.map(c => ({
     ticker: c.ticker,
     company_name: c.fund.company_name,

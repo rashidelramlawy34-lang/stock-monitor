@@ -75,7 +75,7 @@ export default function DiscoverPage() {
         )}
         <span
           className="text-xs text-muted underline decoration-dotted cursor-help"
-          title="Scores peers of your holdings by analyst buy-ratio (30%), beta (30%), and composite score (40%). Top 12 are sent to Claude for deep analysis."
+          title="Scores peers of your holdings by analyst buy-ratio (30%), beta (30%), and composite score (40%). Top 12 are sent to GPT-5.5 for deep analysis."
         >
           How it works ℹ
         </span>

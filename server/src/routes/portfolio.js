@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { normalizeTicker } from '../utils/ticker.js';
+import { backfillDefaultPortfolioItems } from '../utils/defaultPortfolio.js';
 
 const router = Router();
 
@@ -63,19 +65,25 @@ router.get('/history', (req, res) => {
 
 router.post('/', (req, res) => {
   const { ticker, shares, cost_basis, name } = req.body;
-  if (!ticker || typeof shares !== 'number' || typeof cost_basis !== 'number') {
+  const upperTicker = normalizeTicker(ticker);
+  if (!upperTicker || typeof shares !== 'number' || typeof cost_basis !== 'number') {
     return res.status(400).json({ error: 'ticker, shares (number), and cost_basis (number) are required' });
   }
 
   const db = getDb();
   const userId = req.user.id;
-  const upperTicker = ticker.toUpperCase();
 
   const { portfolio_id } = req.body;
+  const resolvedPortfolioId = portfolio_id ?? backfillDefaultPortfolioItems(db, userId).id;
   db.prepare(`
-    INSERT OR REPLACE INTO holdings (ticker, name, shares, cost_basis, user_id, portfolio_id)
+    INSERT INTO holdings (ticker, name, shares, cost_basis, user_id, portfolio_id)
     VALUES (@ticker, @name, @shares, @cost_basis, @user_id, @portfolio_id)
-  `).run({ ticker: upperTicker, name: name ?? null, shares, cost_basis, user_id: userId, portfolio_id: portfolio_id ?? null });
+    ON CONFLICT(user_id, ticker) DO UPDATE SET
+      name = excluded.name,
+      shares = excluded.shares,
+      cost_basis = excluded.cost_basis,
+      portfolio_id = excluded.portfolio_id
+  `).run({ ticker: upperTicker, name: name ?? null, shares, cost_basis, user_id: userId, portfolio_id: resolvedPortfolioId });
 
   res.status(201).json(
     db.prepare('SELECT * FROM holdings WHERE ticker = ? AND user_id = ?').get(upperTicker, userId)
@@ -83,7 +91,7 @@ router.post('/', (req, res) => {
 });
 
 router.patch('/:ticker', (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = normalizeTicker(req.params.ticker);
   const { shares, cost_basis, name } = req.body;
   const userId = req.user.id;
 
@@ -107,7 +115,7 @@ router.patch('/:ticker', (req, res) => {
 });
 
 router.delete('/:ticker', (req, res) => {
-  const ticker = req.params.ticker.toUpperCase();
+  const ticker = normalizeTicker(req.params.ticker);
   const userId = req.user.id;
   const result = getDb()
     .prepare('DELETE FROM holdings WHERE ticker = ? AND user_id = ?')

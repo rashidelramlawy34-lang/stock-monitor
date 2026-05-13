@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useWatchlist } from '../hooks/useWatchlist.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { SkeletonPage } from '../components/Skeleton.jsx';
+import { MAX_TICKER_LENGTH, normalizeTicker } from '../utils/ticker.js';
 
 const rowVariants = {
   hidden: { opacity: 0, x: -8 },
@@ -71,7 +72,7 @@ export default function WatchlistPage() {
     setAdding(true);
     setAddError(null);
     try {
-      await addTicker(ticker.trim().toUpperCase(), note.trim());
+      await addTicker(normalizeTicker(ticker), note.trim());
       setTicker('');
       setNote('');
       setShowForm(false);
@@ -142,10 +143,10 @@ export default function WatchlistPage() {
                 <input
                   type="text" placeholder="AAPL"
                   value={ticker}
-                  onChange={e => setTicker(e.target.value.toUpperCase())}
+                  onChange={e => setTicker(normalizeTicker(e.target.value))}
                   className="input font-mono"
-                  style={{ width: 100 }}
-                  maxLength={10} autoFocus
+                  style={{ width: 180, maxWidth: '100%' }}
+                  maxLength={MAX_TICKER_LENGTH} autoFocus
                 />
               </div>
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>

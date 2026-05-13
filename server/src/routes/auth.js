@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 import { getDb } from '../db/schema.js';
 import { ensureDemoAccount } from '../db/demoData.js';
+import { backfillDefaultPortfolioItems, ensureDefaultPortfolio } from '../utils/defaultPortfolio.js';
 
 const router = Router();
 
@@ -40,6 +41,7 @@ router.post('/signup', (req, res) => {
   db.prepare(
     `INSERT INTO users (id, name, email, avatar, password_hash) VALUES (@id, @name, @email, @avatar, @password_hash)`
   ).run(user);
+  ensureDefaultPortfolio(db, userId);
 
   const safeUser = { id: userId, name: username.trim() };
   req.session.user = safeUser;
@@ -68,6 +70,7 @@ router.post('/login', (req, res) => {
   } else if (!verifyPassword(password, row.password_hash)) {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
+  backfillDefaultPortfolioItems(db, userId);
 
   const safeUser = { id: row.id, name: row.name };
   req.session.user = safeUser;

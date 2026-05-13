@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { fetchPrice, fetchAllPrices } from '../services/priceService.js';
 import { getDb } from '../db/schema.js';
+import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -13,8 +14,12 @@ router.get('/market', async (req, res) => {
   }
 });
 
+router.use(requireAuth);
+
 router.get('/', async (req, res) => {
-  const holdings = getDb().prepare('SELECT ticker FROM holdings').all();
+  const holdings = getDb()
+    .prepare('SELECT ticker FROM holdings WHERE user_id = ?')
+    .all(req.user.id);
   if (holdings.length === 0) return res.json([]);
 
   const prices = await fetchAllPrices(holdings.map(h => h.ticker));

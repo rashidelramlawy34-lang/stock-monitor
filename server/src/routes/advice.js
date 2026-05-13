@@ -1,23 +1,16 @@
 import { Router } from 'express';
-import Anthropic from '@anthropic-ai/sdk';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { discoverStocks } from '../services/aiService.js';
+import { completeJson, completeText, discoverStocks } from '../services/aiService.js';
 import { fetchPrice } from '../services/priceService.js';
 import { fetchNews } from '../services/newsService.js';
 import { fetchFundamentals } from '../services/fundamentalsService.js';
 import { getDb } from '../db/schema.js';
-import { getSetting } from '../services/settingsService.js';
 import { requireAuth } from '../middleware/auth.js';
 
 const router = Router();
 
-function getClient() {
-  const key = getSetting('ANTHROPIC_API_KEY');
-  if (!key) throw new Error('Anthropic API key not set. Add it in Settings.');
-  return new Anthropic({ apiKey: key });
-}
 const PROMPTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../../prompts');
 
 function fmt(v, decimals = 2) {
@@ -75,14 +68,13 @@ router.get('/digest', async (req, res) => {
     const template = readFileSync(path.join(PROMPTS_DIR, 'digest.txt'), 'utf8');
     const prompt = template.replace('{{HOLDINGS_JSON}}', JSON.stringify(enriched, null, 2));
 
-    const message = await getClient().messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 512,
-      system: 'You are a concise portfolio analyst. Write in plain prose.',
-      messages: [{ role: 'user', content: prompt }],
+    const summary = await completeText({
+      prompt,
+      maxOutputTokens: 512,
+      instructions: 'You are a concise portfolio analyst. Write in plain prose. This is analytical support, not personalized financial advice.',
     });
 
-    res.json({ summary: message.content[0].text.trim() });
+    res.json({ summary });
   } catch (err) {
     res.status(502).json({ error: err.message });
   }
@@ -150,14 +142,12 @@ router.get('/:ticker', async (req, res) => {
       .replace('{{UPSIDE_PCT}}',       upsidePct)
       .replace('{{NEWS}}',             newsText || 'No recent news available.');
 
-    const message = await getClient().messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: 'You are a senior equity analyst. Respond only with valid JSON.',
-      messages: [{ role: 'user', content: prompt }],
+    const raw = await completeJson({
+      prompt,
+      maxOutputTokens: 1024,
+      instructions: 'You are a senior equity analyst. Respond only with valid JSON. This is analytical support, not personalized financial advice.',
     });
 
-    const raw = message.content[0].text.trim().replace(/^```json\s*/i, '').replace(/```$/, '');
     let parsed;
     try { parsed = JSON.parse(raw); } catch { parsed = { recommendation: 'hold', reasoning: raw, confidence: 0.5 }; }
 

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { normalizeTicker } from '../utils/ticker.js';
 
 const router = Router();
 router.use(requireAuth);
@@ -14,12 +15,13 @@ router.get('/', (req, res) => {
 
 router.post('/', (req, res) => {
   const { ticker, note } = req.body;
-  if (!ticker) return res.status(400).json({ error: 'ticker is required' });
+  const symbol = normalizeTicker(ticker);
+  if (!symbol) return res.status(400).json({ error: 'ticker is required' });
   const db = getDb();
   try {
     const result = db.prepare(
       'INSERT INTO watchlist (user_id, ticker, note) VALUES (?, ?, ?)'
-    ).run(req.user.id, ticker.toUpperCase(), note ?? null);
+    ).run(req.user.id, symbol, note ?? null);
     res.status(201).json(db.prepare('SELECT * FROM watchlist WHERE id = ?').get(result.lastInsertRowid));
   } catch (e) {
     if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Already on watchlist' });
@@ -28,11 +30,12 @@ router.post('/', (req, res) => {
 });
 
 router.delete('/:ticker', (req, res) => {
+  const symbol = normalizeTicker(req.params.ticker);
   const result = getDb()
     .prepare('DELETE FROM watchlist WHERE user_id = ? AND ticker = ?')
-    .run(req.user.id, req.params.ticker.toUpperCase());
+    .run(req.user.id, symbol);
   if (result.changes === 0) return res.status(404).json({ error: 'Not found' });
-  res.json({ deleted: req.params.ticker.toUpperCase() });
+  res.json({ deleted: symbol });
 });
 
 export default router;

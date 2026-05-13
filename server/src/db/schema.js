@@ -205,23 +205,6 @@ function applySchema(db) {
     );
   `);
 
-  // Portfolio migration: create Default portfolio for existing users
-  try {
-    const usersWithHoldings = db.prepare(
-      `SELECT DISTINCT user_id FROM holdings WHERE portfolio_id IS NULL`
-    ).all();
-    for (const { user_id } of usersWithHoldings) {
-      const existing = db.prepare(`SELECT id FROM portfolios WHERE user_id = ?`).get(user_id);
-      if (!existing) {
-        const id = randomUUID();
-        db.prepare(`INSERT OR IGNORE INTO portfolios (id, user_id, name, is_default) VALUES (?, ?, 'Default', 1)`).run(id, user_id);
-        db.prepare(`UPDATE holdings SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
-        db.prepare(`UPDATE alerts   SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
-        db.prepare(`UPDATE trades   SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(id, user_id);
-      }
-    }
-  } catch {}
-
   db.exec(`
     CREATE TABLE IF NOT EXISTS coach_score_history (
       id           INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -259,4 +242,69 @@ function applySchema(db) {
     'ALTER TABLE users ADD COLUMN mobile_token TEXT',
   ];
   for (const sql of newCols) { try { db.exec(sql); } catch {} }
+
+  // Earlier local builds keyed holdings by ticker only. Re-key by user+ticker so
+  // accounts can save the same symbol without replacing each other's holdings.
+  try {
+    const columns = db.prepare('PRAGMA table_info(holdings)').all();
+    const primaryColumns = columns.filter(col => col.pk > 0).sort((a, b) => a.pk - b.pk).map(col => col.name);
+    const needsScopedHoldings = primaryColumns.length === 1 && primaryColumns[0] === 'ticker';
+    if (needsScopedHoldings) {
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS holdings_next (
+          ticker       TEXT    NOT NULL,
+          name         TEXT,
+          shares       REAL    NOT NULL DEFAULT 0,
+          cost_basis   REAL    NOT NULL DEFAULT 0,
+          added_at     INTEGER NOT NULL DEFAULT (unixepoch()),
+          user_id      TEXT    NOT NULL DEFAULT 'default',
+          portfolio_id TEXT,
+          PRIMARY KEY (user_id, ticker)
+        );
+      `);
+      db.exec(`
+        INSERT OR REPLACE INTO holdings_next (ticker, name, shares, cost_basis, added_at, user_id, portfolio_id)
+        SELECT ticker, name, shares, cost_basis, added_at, user_id, portfolio_id FROM holdings;
+        DROP TABLE holdings;
+        ALTER TABLE holdings_next RENAME TO holdings;
+      `);
+    }
+  } catch {}
+
+  // Portfolio migration: every account gets a Default portfolio, and old rows
+  // with null portfolio_id are attached to it.
+  try {
+    const users = db.prepare('SELECT id FROM users').all();
+    const usersWithRows = db.prepare(`
+      SELECT DISTINCT user_id AS id FROM holdings
+      UNION
+      SELECT DISTINCT user_id AS id FROM alerts
+      UNION
+      SELECT DISTINCT user_id AS id FROM trades
+    `).all();
+    const userIds = [...new Set([...users, ...usersWithRows].map(row => row.id).filter(Boolean))];
+
+    for (const userId of userIds) {
+      let portfolio = db
+        .prepare('SELECT * FROM portfolios WHERE user_id = ? AND is_default = 1 ORDER BY created_at ASC LIMIT 1')
+        .get(userId);
+      if (!portfolio) {
+        portfolio = db
+          .prepare('SELECT * FROM portfolios WHERE user_id = ? ORDER BY created_at ASC LIMIT 1')
+          .get(userId);
+        if (portfolio) {
+          db.prepare('UPDATE portfolios SET is_default = 0 WHERE user_id = ?').run(userId);
+          db.prepare('UPDATE portfolios SET is_default = 1 WHERE id = ?').run(portfolio.id);
+        } else {
+          const id = randomUUID();
+          db.prepare(`INSERT OR IGNORE INTO portfolios (id, user_id, name, is_default) VALUES (?, ?, 'Default', 1)`).run(id, userId);
+          portfolio = { id };
+        }
+      }
+
+      db.prepare(`UPDATE holdings SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(portfolio.id, userId);
+      db.prepare(`UPDATE alerts SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(portfolio.id, userId);
+      db.prepare(`UPDATE trades SET portfolio_id = ? WHERE user_id = ? AND portfolio_id IS NULL`).run(portfolio.id, userId);
+    }
+  } catch {}
 }

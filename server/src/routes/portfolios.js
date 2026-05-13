@@ -2,12 +2,15 @@ import { Router } from 'express';
 import { randomUUID } from 'crypto';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { backfillDefaultPortfolioItems } from '../utils/defaultPortfolio.js';
 
 const router = Router();
 router.use(requireAuth);
 
 router.get('/', (req, res) => {
-  const portfolios = getDb()
+  const db = getDb();
+  backfillDefaultPortfolioItems(db, req.user.id);
+  const portfolios = db
     .prepare('SELECT * FROM portfolios WHERE user_id = ? ORDER BY created_at ASC')
     .all(req.user.id);
   res.json(portfolios);
