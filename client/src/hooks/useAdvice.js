@@ -8,8 +8,15 @@ export function useAdvice() {
   const fetchAdvice = useCallback(async (ticker) => {
     setLoading(l => ({ ...l, [ticker]: true }));
     try {
-      const res = await fetch(`/api/advice/${ticker}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const res = await fetch(`/api/advice/${encodeURIComponent(ticker)}`);
+      if (!res.ok) {
+        let message = `HTTP ${res.status}`;
+        try {
+          const body = await res.json();
+          message = body.error ?? message;
+        } catch {}
+        throw new Error(message);
+      }
       const data = await res.json();
       setAdvice(a => ({ ...a, [ticker]: data }));
       setErrors(e => ({ ...e, [ticker]: null }));

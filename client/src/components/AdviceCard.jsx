@@ -73,7 +73,9 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
         <div className="rounded-md border border-[var(--border)] bg-[var(--surface-2)] p-3">
           <p className="text-xs text-[var(--text-2)] font-semibold">GPT-5.5 analysis unavailable</p>
           <p className="text-xs text-muted mt-1">
-            Add or fix your OpenAI API key in Settings, then refresh this analysis.
+            {error.includes('OpenAI API key')
+              ? 'Add or fix your OpenAI API key in Settings, then refresh this analysis.'
+              : error}
           </p>
         </div>
       )}

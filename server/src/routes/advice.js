@@ -8,6 +8,7 @@ import { fetchNews } from '../services/newsService.js';
 import { fetchFundamentals } from '../services/fundamentalsService.js';
 import { getDb } from '../db/schema.js';
 import { requireAuth } from '../middleware/auth.js';
+import { normalizeTicker } from '../utils/ticker.js';
 
 const router = Router();
 
@@ -24,6 +25,15 @@ function marketCapLabel(cap) {
   if (cap > 2e9)   return 'Mid-cap ($2B–$10B)';
   if (cap > 300e6) return 'Small-cap ($300M–$2B)';
   return 'Micro-cap (<$300M)';
+}
+
+async function optionalData(label, task, fallback) {
+  try {
+    return await task();
+  } catch (err) {
+    console.warn(`AI Advisor optional ${label} unavailable: ${err.message}`);
+    return fallback;
+  }
 }
 
 router.use(requireAuth);
@@ -82,7 +92,8 @@ router.get('/digest', async (req, res) => {
 
 router.get('/:ticker', async (req, res) => {
   try {
-    const ticker = req.params.ticker.toUpperCase();
+    const ticker = normalizeTicker(req.params.ticker);
+    if (!ticker) return res.status(400).json({ error: 'Ticker is required' });
     const userId = req.user.id;
     const db = getDb();
 
@@ -93,9 +104,16 @@ router.get('/:ticker', async (req, res) => {
     if (cached) return res.json(cached);
 
     const [priceData, newsItems, fundamentals] = await Promise.all([
-      fetchPrice(ticker),
-      fetchNews(ticker),
-      fetchFundamentals(ticker),
+      optionalData('price', () => fetchPrice(ticker), {
+        ticker,
+        price: null,
+        change_pct: null,
+        week_52_high: null,
+        week_52_low: null,
+        market_cap: null,
+      }),
+      optionalData('news', () => fetchNews(ticker), []),
+      optionalData('fundamentals', () => fetchFundamentals(ticker), { ticker }),
     ]);
 
     // Build advice inline with user_id scoping
