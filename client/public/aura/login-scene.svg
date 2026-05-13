@@ -1,0 +1,81 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" fill="#020512"/>
+  <defs>
+    <radialGradient id="spaceLeft" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(376 456) rotate(42) scale(540 410)">
+      <stop stop-color="#17224A"/>
+      <stop offset=".48" stop-color="#071125"/>
+      <stop offset="1" stop-color="#020512"/>
+    </radialGradient>
+    <radialGradient id="cardGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1188 420) rotate(117) scale(620 500)">
+      <stop stop-color="#BDEBFF" stop-opacity=".34"/>
+      <stop offset=".28" stop-color="#8A7DFF" stop-opacity=".22"/>
+      <stop offset=".63" stop-color="#1D2A5A" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#020512" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbGlass" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(394 420) rotate(41) scale(292)">
+      <stop stop-color="#E8FBFF" stop-opacity=".82"/>
+      <stop offset=".23" stop-color="#9ADFFF" stop-opacity=".22"/>
+      <stop offset=".57" stop-color="#695BFF" stop-opacity=".18"/>
+      <stop offset=".82" stop-color="#D9F9FF" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#F4FDFF" stop-opacity=".45"/>
+    </radialGradient>
+    <linearGradient id="arcA" x1="144" y1="501" x2="640" y2="274" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8D6FF" stop-opacity=".04"/>
+      <stop offset=".31" stop-color="#A9EFFF" stop-opacity=".86"/>
+      <stop offset=".66" stop-color="#B799FF" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#D8F7FF" stop-opacity=".08"/>
+    </linearGradient>
+    <linearGradient id="arcB" x1="220" y1="565" x2="620" y2="330" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7FDBFF" stop-opacity="0"/>
+      <stop offset=".45" stop-color="#E6F9FF"/>
+      <stop offset=".72" stop-color="#FFBFEF"/>
+      <stop offset="1" stop-color="#7FDBFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <filter id="fineGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="stars" width="180" height="180" patternUnits="userSpaceOnUse">
+      <circle cx="18" cy="26" r="1" fill="#DCEBFF" opacity=".55"/>
+      <circle cx="92" cy="58" r=".7" fill="#BFD7FF" opacity=".38"/>
+      <circle cx="151" cy="122" r="1.1" fill="#fff" opacity=".34"/>
+      <circle cx="44" cy="151" r=".8" fill="#A9EFFF" opacity=".42"/>
+      <circle cx="133" cy="20" r=".55" fill="#fff" opacity=".28"/>
+    </pattern>
+  </defs>
+  <rect width="820" height="900" fill="url(#spaceLeft)"/>
+  <rect width="1600" height="900" fill="url(#stars)" opacity=".8"/>
+  <rect x="800" width="800" height="900" fill="#040817"/>
+  <rect x="800" width="800" height="900" fill="url(#cardGlow)"/>
+  <g opacity=".46" filter="url(#softBlur)">
+    <path d="M850 744C1052 554 1032 214 1422 94" stroke="#BDEBFF" stroke-width="46" stroke-linecap="round"/>
+    <path d="M860 190C1040 338 1226 650 1576 712" stroke="#8A7DFF" stroke-width="54" stroke-linecap="round"/>
+    <path d="M1030 748C1218 548 1310 336 1640 206" stroke="#DCF7FF" stroke-width="26" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(392 420)">
+    <circle r="275" fill="#9FE9FF" opacity=".08" filter="url(#softBlur)"/>
+    <circle r="239" fill="url(#orbGlass)"/>
+    <circle r="239" stroke="#DDF9FF" stroke-opacity=".58" stroke-width="2"/>
+    <circle r="203" stroke="#BCEEFF" stroke-opacity=".16"/>
+    <ellipse rx="232" ry="72" transform="rotate(-18)" stroke="url(#arcA)" stroke-width="10" filter="url(#fineGlow)"/>
+    <ellipse rx="218" ry="54" transform="rotate(-23)" stroke="url(#arcB)" stroke-width="5" filter="url(#fineGlow)"/>
+    <ellipse rx="190" ry="42" transform="rotate(-9)" stroke="#DDF9FF" stroke-opacity=".2" stroke-width="2"/>
+    <path d="M-160 34C-77-17 37-59 156-55" stroke="#D5F7FF" stroke-opacity=".26" stroke-width="1.5"/>
+    <path d="M-118 76C-12 18 95 8 174 34" stroke="#B799FF" stroke-opacity=".32" stroke-width="1.4"/>
+    <g stroke="#BDEBFF" stroke-opacity=".44" stroke-width="1.5">
+      <path d="M-60-84h34l18-20h58"/>
+      <path d="M42 86h46l22 24h48"/>
+      <path d="M-142 12h54l18 18h42"/>
+      <circle cx="-58" cy="-84" r="4"/>
+      <circle cx="162" cy="110" r="4"/>
+      <circle cx="-142" cy="12" r="4"/>
+    </g>
+    <circle r="235" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="20" filter="url(#softBlur)"/>
+  </g>
+</svg>

@@ -2,6 +2,17 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { usePortfolio } from '../hooks/usePortfolio';
 
+const DEMO_TRANSACTIONS = [
+  { ticker: 'NVDA', name: 'Kress Colette M', transactionCode: 'P', share: 12800, transactionPrice: 912.40, transactionDate: '2026-05-10' },
+  { ticker: 'MSFT', name: 'Nadella Satya', transactionCode: 'S', share: 18500, transactionPrice: 432.15, transactionDate: '2026-05-09' },
+  { ticker: 'AAPL', name: 'Cook Timothy D', transactionCode: 'S', share: 32000, transactionPrice: 193.22, transactionDate: '2026-05-08' },
+  { ticker: 'AMZN', name: 'Jassy Andrew R', transactionCode: 'P', share: 9400, transactionPrice: 188.60, transactionDate: '2026-05-07' },
+  { ticker: 'META', name: 'Clegg Nicholas', transactionCode: 'S', share: 7100, transactionPrice: 512.80, transactionDate: '2026-05-06' },
+  { ticker: 'JPM', name: 'Lake Jennifer', transactionCode: 'P', share: 5600, transactionPrice: 236.35, transactionDate: '2026-05-05' },
+  { ticker: 'GOOGL', name: 'Pichai Sundar', transactionCode: 'S', share: 15000, transactionPrice: 171.20, transactionDate: '2026-05-04' },
+  { ticker: 'TSLA', name: 'Taneja Vaibhav', transactionCode: 'S', share: 22100, transactionPrice: 219.15, transactionDate: '2026-05-03' },
+];
+
 export default function InsidersPage() {
   const { holdings } = usePortfolio();
   const [data, setData] = useState({});
@@ -27,9 +38,14 @@ export default function InsidersPage() {
 
   const tickers = holdings.map(h => h.ticker);
 
-  const all = tickers.flatMap(t =>
+  const liveAll = tickers.flatMap(t =>
     (data[t] ?? []).map(tx => ({ ...tx, ticker: t }))
   ).sort((a, b) => new Date(b.transactionDate ?? b.date ?? 0) - new Date(a.transactionDate ?? a.date ?? 0));
+  const demoAll = DEMO_TRANSACTIONS
+    .filter(tx => tickers.length === 0 || tickers.includes(tx.ticker))
+    .map(tx => ({ ...tx, demo: true }));
+  const all = liveAll.length ? liveAll : demoAll;
+  const usingDemo = liveAll.length === 0 && demoAll.length > 0;
 
   const filtered = filter === 'ALL' ? all : all.filter(t => t.ticker === filter);
 
@@ -40,7 +56,10 @@ export default function InsidersPage() {
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 className="page-title">Insiders</h1>
-          <p className="page-subtitle">Recent insider buy and sell transactions</p>
+          <p className="page-subtitle">
+            Recent insider buy and sell transactions
+            {usingDemo ? ' · demo feed shown while provider data is unavailable' : ' · live feed updated'}
+          </p>
         </div>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
           {['ALL', ...tickers].map(t => (
@@ -53,6 +72,12 @@ export default function InsidersPage() {
           ))}
         </div>
       </div>
+
+      {usingDemo && (
+        <div className="card p-4 text-sm text-[var(--text-2)] mb-4">
+          Market provider returned no current insider rows, so Aura is showing demo transactions for your annotated account.
+        </div>
+      )}
 
       {filtered.length === 0 ? (
         <p className="text-muted text-sm">No insider transactions found.</p>

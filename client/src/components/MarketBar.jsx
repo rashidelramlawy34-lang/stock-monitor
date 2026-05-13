@@ -1,272 +1,160 @@
-import { useMarket } from '../hooks/useMarket';
 import { useEffect, useRef, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import {
+  Bell, BookOpenCheck, CalendarDays, ChevronDown, CircleUserRound, Eye,
+  FileText, Lightbulb, LineChart, LogOut, Rocket, Settings, ShieldCheck,
+  Sparkles, TerminalSquare,
+} from 'lucide-react';
 
 const TABS = [
-  { id: 'hub',           label: 'Hub' },
-  { id: 'portfolio',     label: 'Portfolio' },
-  { id: 'watchlist',     label: 'Watchlist' },
-  { id: 'news',          label: 'News' },
-  { id: 'advisor',       label: 'AI Advisor' },
-  { id: 'coach',         label: 'AI Coach' },
-  { id: 'alerts',        label: 'Alerts' },
-  { id: 'discover',      label: 'Discover' },
-  { id: 'insiders',      label: 'Insiders' },
-  { id: 'institutional', label: 'Institutional' },
-  { id: 'calendar',      label: 'Calendar' },
-  { id: 'trades',        label: 'Trade Log' },
-  { id: 'settings',      label: 'Settings' },
+  { id: 'hub', label: 'Hub', Icon: Sparkles },
+  { id: 'portfolio', label: 'Portfolio', Icon: CircleUserRound },
+  { id: 'watchlist', label: 'Watchlist' },
+  { id: 'news', label: 'Intel Feed' },
+  { id: 'advisor', label: 'AI Advisor', Icon: Sparkles },
+  { id: 'coach', label: 'AI Coach', Icon: BookOpenCheck },
+  { id: 'alerts', label: 'Alerts' },
+  { id: 'discover', label: 'Discover', Icon: Rocket },
+  { id: 'insiders', label: 'Insiders', Icon: Eye },
+  { id: 'institutional', label: 'Institutional', Icon: ShieldCheck },
+  { id: 'calendar', label: 'Calendar', Icon: CalendarDays },
+  { id: 'trades', label: 'Trade Log', Icon: FileText },
+  { id: 'settings', label: 'Settings', Icon: Settings },
 ];
 
-const INDICES = [
-  { key: 'SPY', label: 'S&P' },
-  { key: 'QQQ', label: 'NQ' },
-  { key: 'DIA', label: 'DOW' },
-];
+const DEVELOPER_TAB = { id: 'developer', label: 'Developer', Icon: TerminalSquare };
 
-function isMarketOpen() {
-  const now = new Date();
-  const et  = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const day  = et.getDay();
-  const mins = et.getHours() * 60 + et.getMinutes();
-  return day >= 1 && day <= 5 && mins >= 570 && mins < 960;
+function AuraMark() {
+  return (
+    <svg width="31" height="31" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="aura-nav-mark" x1="5" y1="5" x2="34" y2="35" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#EAFDFF" />
+          <stop offset=".42" stopColor="#8EDFFF" />
+          <stop offset=".72" stopColor="#8B7CFF" />
+          <stop offset="1" stopColor="#E7D5FF" />
+        </linearGradient>
+      </defs>
+      <path d="M20.5 5.6 33.8 34h-7.3l-2.7-6.2H13.7L11 34H4.2L17.4 5.6h3.1Zm.8 16.5-2.5-6.2-2.6 6.2h5.1Z" fill="url(#aura-nav-mark)" />
+      <path d="M11.2 27.3c5.2-7.9 11-10.8 18.3-8.7" stroke="#EAFDFF" strokeOpacity=".55" strokeWidth="2.2" strokeLinecap="round" />
+    </svg>
+  );
 }
 
-function pad(n) { return String(n).padStart(2, '0'); }
-
 export default function MarketBar({ page, setPage, user, onLogout }) {
-  const { indices } = useMarket();
-  const [time, setTime] = useState(new Date());
-  const [tick, setTick] = useState(true);
   const [avatarOpen, setAvatarOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const avatarRef = useRef(null);
+  const moreRef = useRef(null);
 
   useEffect(() => {
-    const id = setInterval(() => { setTime(new Date()); setTick(t => !t); }, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  // Close avatar dropdown on outside click
-  useEffect(() => {
-    if (!avatarOpen) return;
     const handler = (e) => {
       if (!avatarRef.current?.contains(e.target)) setAvatarOpen(false);
+      if (!moreRef.current?.contains(e.target)) setMoreOpen(false);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [avatarOpen]);
+  }, []);
 
-  const open = isMarketOpen();
-  const et   = new Date(time.toLocaleString('en-US', { timeZone: 'America/New_York' }));
-  const hh   = pad(et.getHours());
-  const mm   = pad(et.getMinutes());
-  const ss   = pad(et.getSeconds());
-  const avatarLetter = user?.id?.[0]?.toUpperCase() ?? '?';
+  const visibleTabs = user?.id === 'rashidelramlawy' ? [...TABS, DEVELOPER_TAB] : TABS;
+  const avatarLetter = user?.id?.[0]?.toUpperCase() ?? 'A';
 
   return (
-    <div style={{
-      height: 52, flexShrink: 0,
-      display: 'flex', alignItems: 'center',
-      background: 'rgba(15, 22, 50, 0.7)',
-      backdropFilter: 'blur(20px)',
-      WebkitBackdropFilter: 'blur(20px)',
-      borderBottom: '1px solid var(--border)',
-      position: 'sticky', top: 0, zIndex: 100,
-      gap: 0,
-    }}>
+    <header className="aura-nav-shell">
+      <nav className="aura-nav" aria-label="Aura main navigation">
+        <button className="aura-nav__brand" onClick={() => setPage?.('hub')} aria-label="Go to Dashboard">
+          <AuraMark />
+          <span>Aura</span>
+        </button>
 
-      {/* Left: gradient wordmark → Hub */}
-      <button
-        onClick={() => setPage?.('hub')}
-        style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          background: 'none', border: 'none', cursor: 'pointer',
-          padding: '0 20px', height: '100%', flexShrink: 0,
-          borderRight: '1px solid var(--border)',
-        }}
-      >
-        {/* Mini orb icon */}
-        <div style={{
-          width: 20, height: 20, borderRadius: '50%',
-          background: 'var(--accent-grad)',
-          boxShadow: '0 0 8px var(--glow)',
-          flexShrink: 0,
-        }} />
-        <span style={{
-          fontSize: 14, fontWeight: 600,
-          background: 'var(--accent-grad)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          fontFamily: 'var(--font-sans)',
-          letterSpacing: '-0.01em',
-        }}>
-          Stock Monitor
-        </span>
-      </button>
+        <div className="aura-nav__tabs">
+          {visibleTabs.map(({ id, label, Icon = LineChart }) => {
+            const active = page === id;
+            return (
+              <button
+                key={id}
+                onClick={() => setPage?.(id)}
+                className={`aura-nav__tab${active ? ' aura-nav__tab--active' : ''}`}
+              >
+                <Icon size={15} />
+                <span>{label}</span>
+              </button>
+            );
+          })}
 
-      {/* Center: tab pills with sliding indicator */}
-      <div style={{
-        flex: 1, display: 'flex', alignItems: 'center',
-        overflowX: 'auto', overflowY: 'hidden',
-        scrollbarWidth: 'none',
-        padding: '0 8px',
-        gap: 2,
-      }}>
-        {TABS.map(({ id, label }) => {
-          const isActive = page === id;
-          return (
+          <div ref={moreRef} className="aura-nav__more aura-nav__more--compact">
             <button
-              key={id}
-              onClick={() => setPage?.(id)}
-              style={{
-                position: 'relative',
-                background: 'none', border: 'none', cursor: 'pointer',
-                padding: '6px 12px',
-                fontSize: 13, fontWeight: isActive ? 500 : 400,
-                color: isActive ? 'var(--text)' : 'var(--text-2)',
-                fontFamily: 'var(--font-sans)',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                transition: 'color 0.15s',
-              }}
+              onClick={() => setMoreOpen(v => !v)}
+              className="aura-nav__tab"
+              aria-expanded={moreOpen}
+              aria-label="Open quick navigation"
             >
-              {label}
-              {/* Sliding gradient underline */}
-              {isActive && (
-                <motion.div
-                  layoutId="nav-tab-indicator"
-                  style={{
-                    position: 'absolute', bottom: 0, left: 8, right: 8,
-                    height: 2,
-                    background: 'var(--accent-grad)',
-                    borderRadius: 1,
-                  }}
-                  transition={{ type: 'spring', stiffness: 380, damping: 32 }}
-                />
-              )}
+              <Lightbulb size={15} />
+              <span>More</span>
+              <ChevronDown size={14} />
             </button>
-          );
-        })}
-      </div>
-
-      {/* Right: market tickers + user avatar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 16,
-        padding: '0 16px', flexShrink: 0,
-        borderLeft: '1px solid var(--border)',
-      }}>
-        {/* Market tickers */}
-        {INDICES.map(({ key, label }) => {
-          const d   = indices[key];
-          const pos = d ? d.change_pct >= 0 : null;
-          return (
-            <div key={key} style={{ display: 'flex', alignItems: 'baseline', gap: 4, whiteSpace: 'nowrap' }}>
-              <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-sans)' }}>
-                {label}
-              </span>
-              {d ? (
-                <span style={{
-                  fontSize: 11, fontFamily: 'var(--font-mono)',
-                  color: pos ? 'var(--gain)' : 'var(--loss)',
-                }}>
-                  {pos ? '+' : ''}{d.change_pct?.toFixed(2)}%
-                </span>
-              ) : (
-                <span style={{ fontSize: 11, color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>—</span>
+            <AnimatePresence>
+              {moreOpen && (
+                <motion.div
+                  className="aura-nav__menu"
+                  initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.14 }}
+                >
+                  {visibleTabs.map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => {
+                        setMoreOpen(false);
+                        setPage?.(tab.id);
+                      }}
+                      className={page === tab.id ? 'is-active' : ''}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </motion.div>
               )}
-            </div>
-          );
-        })}
-
-        {/* Market status dot */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-          <span style={{
-            width: 5, height: 5, borderRadius: '50%',
-            background: open ? 'var(--gain)' : 'var(--text-muted)',
-            boxShadow: open ? '0 0 6px var(--gain)' : 'none',
-          }} />
-          <span style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: 'var(--font-sans)' }}>
-            {open ? 'Open' : 'Closed'}
-          </span>
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Clock */}
-        <span style={{
-          fontFamily: 'var(--font-mono)', fontSize: 11,
-          color: 'var(--text-2)', letterSpacing: '0.02em',
-        }}>
-          {hh}
-          <span style={{ opacity: tick ? 1 : 0.25 }}>:</span>
-          {mm}
-          <span style={{ color: 'var(--text-muted)', marginLeft: 3, fontSize: 9 }}>ET</span>
-        </span>
-
-        {/* User avatar + dropdown */}
-        <div ref={avatarRef} style={{ position: 'relative' }}>
-          <button
-            onClick={() => setAvatarOpen(v => !v)}
-            style={{
-              width: 28, height: 28, borderRadius: '50%',
-              background: 'var(--accent-grad)',
-              border: 'none', cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 11, fontWeight: 700, color: '#fff',
-              boxShadow: avatarOpen ? '0 0 12px var(--glow)' : 'none',
-              transition: 'box-shadow 0.2s',
-            }}
-          >
-            {avatarLetter}
+        <div className="aura-nav__actions">
+          <button className="aura-nav__icon-btn" aria-label="Notifications" onClick={() => setPage?.('alerts')}>
+            <Bell size={18} />
+            <span className="aura-nav__dot" />
           </button>
 
-          <AnimatePresence>
-            {avatarOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -6, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.97 }}
-                transition={{ duration: 0.15 }}
-                style={{
-                  position: 'absolute', top: 36, right: 0,
-                  minWidth: 140,
-                  background: 'rgba(15, 22, 50, 0.92)',
-                  backdropFilter: 'blur(20px)',
-                  WebkitBackdropFilter: 'blur(20px)',
-                  border: '1px solid var(--border-2)',
-                  borderRadius: 10,
-                  padding: '4px 0',
-                  zIndex: 200,
-                  boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-                }}
-              >
-                <div style={{
-                  padding: '8px 14px 6px',
-                  fontSize: 11, color: 'var(--text-muted)',
-                  borderBottom: '1px solid var(--border)',
-                  marginBottom: 4,
-                }}>
-                  {user?.id ?? 'Unknown user'}
-                </div>
-                <button
-                  onClick={() => { setAvatarOpen(false); onLogout?.(); }}
-                  style={{
-                    display: 'block', width: '100%',
-                    padding: '7px 14px', textAlign: 'left',
-                    background: 'none', border: 'none',
-                    fontSize: 13, color: 'var(--text-2)',
-                    cursor: 'pointer', fontFamily: 'var(--font-sans)',
-                    transition: 'color 0.12s, background 0.12s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'var(--surface-2)'; e.currentTarget.style.color = 'var(--loss)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text-2)'; }}
+          <div ref={avatarRef} className="aura-nav__avatar-wrap">
+            <button className="aura-nav__avatar" onClick={() => setAvatarOpen(v => !v)} aria-expanded={avatarOpen}>
+              <span>{avatarLetter}</span>
+              <ChevronDown size={14} />
+            </button>
+            <AnimatePresence>
+              {avatarOpen && (
+                <motion.div
+                  className="aura-nav__profile"
+                  initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -4, scale: 0.98 }}
+                  transition={{ duration: 0.14 }}
                 >
-                  Sign out
-                </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  <div className="aura-nav__profile-name">{user?.id ?? 'Investor'}</div>
+                  <button onClick={() => { setAvatarOpen(false); setPage?.('settings'); }}>
+                    <Settings size={14} />
+                    Settings
+                  </button>
+                  <button onClick={() => { setAvatarOpen(false); onLogout?.(); }}>
+                    <LogOut size={14} />
+                    Sign out
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
-    </div>
+      </nav>
+    </header>
   );
 }

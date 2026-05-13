@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { scryptSync, randomBytes, timingSafeEqual } from 'crypto';
 import { getDb } from '../db/schema.js';
+import { ensureDemoAccount } from '../db/demoData.js';
 
 const router = Router();
 
@@ -73,6 +74,17 @@ router.post('/login', (req, res) => {
   req.session.save((err) => {
     if (err) return res.status(500).json({ error: 'Session error' });
     res.json({ user: safeUser });
+  });
+});
+
+// POST /auth/demo — create/refresh a rich demo account and sign in.
+router.post('/demo', (_req, res) => {
+  const result = ensureDemoAccount();
+  const safeUser = result.user;
+  _req.session.user = safeUser;
+  _req.session.save((err) => {
+    if (err) return res.status(500).json({ error: 'Session error' });
+    res.json({ user: safeUser, seeded: result.created });
   });
 });
 

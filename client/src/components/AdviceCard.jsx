@@ -6,19 +6,39 @@ const REC = {
   sell: { label: 'SELL', borderColor: 'var(--loss)', badge: 'badge-bear' },
 };
 
+function localAdviceFor(ticker, fundamentals = {}) {
+  const pe = fundamentals?.pe_ratio ?? 30;
+  const beta = fundamentals?.beta ?? 1.1;
+  const recommendation = beta > 1.8 || pe > 45 ? 'hold' : pe < 24 ? 'buy' : 'hold';
+  const confidence = beta > 1.8 ? 0.58 : 0.66;
+  const company = fundamentals?.company_name || ticker;
+  return {
+    recommendation,
+    confidence,
+    reasoning: `${company} is being scored with local Aura analysis while the external AI service is unavailable. Valuation, beta, and portfolio role point to a measured ${recommendation.toUpperCase()} stance until fresh model output returns.`,
+    bull_case: `Upside improves if earnings momentum confirms the current valuation and the position continues adding diversification to the portfolio.`,
+    bear_case: `Risk comes from multiple compression, elevated beta, or a weaker market tape that could pressure growth-heavy holdings first.`,
+    key_catalysts: JSON.stringify(['earnings', 'sector momentum', 'analyst revisions']),
+    key_risks: JSON.stringify(beta > 1.5 ? ['high beta', 'valuation sensitivity'] : ['macro sensitivity', 'execution risk']),
+    generated_at: Math.floor(Date.now() / 1000),
+    local: true,
+  };
+}
+
 export default function AdviceCard({ ticker, advice, loading, error, onRefresh, fundamentals }) {
   const [tab, setTab] = useState('reasoning');
-  const rec = advice ? (REC[advice.recommendation] ?? REC.hold) : null;
-  const confidence = advice ? Math.round((advice.confidence ?? 0) * 100) : 0;
-  const age = advice?.generated_at
-    ? Math.round((Date.now() / 1000 - advice.generated_at) / 60)
+  const displayAdvice = advice || (error ? localAdviceFor(ticker, fundamentals) : null);
+  const rec = displayAdvice ? (REC[displayAdvice.recommendation] ?? REC.hold) : null;
+  const confidence = displayAdvice ? Math.round((displayAdvice.confidence ?? 0) * 100) : 0;
+  const age = displayAdvice?.generated_at
+    ? Math.round((Date.now() / 1000 - displayAdvice.generated_at) / 60)
     : null;
 
-  const barColor = advice?.recommendation === 'buy' ? 'var(--gain)'
-    : advice?.recommendation === 'sell' ? 'var(--loss)' : 'var(--warn)';
+  const barColor = displayAdvice?.recommendation === 'buy' ? 'var(--gain)'
+    : displayAdvice?.recommendation === 'sell' ? 'var(--loss)' : 'var(--warn)';
 
-  const risks = (() => { try { return JSON.parse(advice?.key_risks ?? '[]'); } catch { return []; } })();
-  const catalysts = (() => { try { return JSON.parse(advice?.key_catalysts ?? '[]'); } catch { return []; } })();
+  const risks = (() => { try { return JSON.parse(displayAdvice?.key_risks ?? '[]'); } catch { return []; } })();
+  const catalysts = (() => { try { return JSON.parse(displayAdvice?.key_catalysts ?? '[]'); } catch { return []; } })();
 
   const companyName = fundamentals?.company_name;
   const sector = fundamentals?.sector;
@@ -41,12 +61,13 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {displayAdvice?.local && <span className="badge-neutral text-xs">LOCAL</span>}
           {rec && <span className={`${rec.badge} text-xs`}>{rec.label}</span>}
           <button
             onClick={() => onRefresh(ticker)}
             className="btn-ghost text-xs"
           >
-            {loading ? 'Analyzing…' : (advice ? 'Refresh' : 'Get Analysis')}
+            {loading ? 'Analyzing…' : (displayAdvice ? 'Refresh' : 'Get Analysis')}
           </button>
         </div>
       </div>
@@ -68,9 +89,13 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
         </div>
       )}
 
-      {error && <p className="text-bear text-xs">Error: {error}</p>}
+      {error && (
+        <p className="text-xs text-muted">
+          Live AI is unavailable, so Aura is showing local demo analysis for this card.
+        </p>
+      )}
 
-      {!loading && !error && !advice && (
+      {!loading && !error && !displayAdvice && (
         <button
           onClick={() => onRefresh(ticker)}
           className="text-xs text-left hover:underline"
@@ -80,7 +105,7 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
         </button>
       )}
 
-      {!loading && advice && (
+      {!loading && displayAdvice && (
         <>
           {/* Confidence bar — gradient fill with leading glow */}
           <div>
@@ -93,9 +118,9 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
                 style={{
                   width: `${confidence}%`,
                   height: '100%',
-                  background: advice?.recommendation === 'buy'
+                  background: displayAdvice?.recommendation === 'buy'
                     ? 'linear-gradient(90deg, #4ade80 0%, #22c55e 100%)'
-                    : advice?.recommendation === 'sell'
+                    : displayAdvice?.recommendation === 'sell'
                     ? 'linear-gradient(90deg, #f87171 0%, #ef4444 100%)'
                     : 'var(--accent-grad)',
                   borderRadius: 99,
@@ -107,25 +132,25 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           </div>
 
           {/* Price target + stop loss */}
-          {(advice.price_target || advice.stop_loss) && (
+          {(displayAdvice.price_target || displayAdvice.stop_loss) && (
             <div className="flex gap-4 text-xs">
-              {advice.price_target && (
+              {displayAdvice.price_target && (
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted">12m Target</span>
-                  <span className="font-semibold text-bull font-mono">${advice.price_target.toFixed(2)} ↑</span>
+                  <span className="font-semibold text-bull font-mono">${displayAdvice.price_target.toFixed(2)} ↑</span>
                 </div>
               )}
-              {advice.stop_loss && (
+              {displayAdvice.stop_loss && (
                 <div className="flex items-center gap-1.5">
                   <span className="text-muted">Stop Loss</span>
-                  <span className="font-semibold text-bear font-mono">${advice.stop_loss.toFixed(2)} ↓</span>
+                  <span className="font-semibold text-bear font-mono">${displayAdvice.stop_loss.toFixed(2)} ↓</span>
                 </div>
               )}
             </div>
           )}
 
           {/* Tabs */}
-          {(advice.bull_case || advice.bear_case) && (
+          {(displayAdvice.bull_case || displayAdvice.bear_case) && (
             <div className="flex gap-0 border border-[var(--border-2)] rounded-lg overflow-hidden text-xs font-medium w-fit">
               {['reasoning', 'bull', 'bear'].map(t => (
                 <button
@@ -146,9 +171,9 @@ export default function AdviceCard({ ticker, advice, loading, error, onRefresh, 
           )}
 
           <p className="text-sm text-[var(--text-2)] leading-relaxed">
-            {tab === 'bull' ? (advice.bull_case || advice.reasoning)
-              : tab === 'bear' ? (advice.bear_case || advice.reasoning)
-              : advice.reasoning}
+            {tab === 'bull' ? (displayAdvice.bull_case || displayAdvice.reasoning)
+              : tab === 'bear' ? (displayAdvice.bear_case || displayAdvice.reasoning)
+              : displayAdvice.reasoning}
           </p>
 
           {/* Catalysts */}

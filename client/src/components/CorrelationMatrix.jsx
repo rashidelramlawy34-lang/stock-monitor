@@ -32,8 +32,17 @@ function heatColor(r) {
   return `rgba(255,51,85,${(Math.abs(r) * 0.6).toFixed(2)})`;
 }
 
+function strengthLabel(r) {
+  if (r == null) return 'No data';
+  const x = Math.abs(r);
+  if (x >= 0.7) return r > 0 ? 'very high' : 'inverse';
+  if (x >= 0.45) return r > 0 ? 'high' : 'negative';
+  if (x >= 0.2) return 'moderate';
+  return 'low';
+}
+
 export default function CorrelationMatrix({ holdings, candles }) {
-  const tickers = holdings.map(h => h.ticker).filter(t => candles?.[t]?.closes?.length > 1);
+  const tickers = holdings.map(h => h.ticker).filter(t => candles?.[t]?.closes?.length > 1).slice(0, 10);
 
   const matrix = useMemo(() => {
     const returns = {};
@@ -41,44 +50,68 @@ export default function CorrelationMatrix({ holdings, candles }) {
     return tickers.map(a => tickers.map(b => a === b ? 1 : pearson(returns[a], returns[b])));
   }, [tickers, candles]);
 
+  const summary = useMemo(() => {
+    const pairs = [];
+    for (let i = 0; i < tickers.length; i++) {
+      for (let j = i + 1; j < tickers.length; j++) {
+        const r = matrix[i]?.[j];
+        if (r != null) pairs.push({ a: tickers[i], b: tickers[j], r });
+      }
+    }
+    if (!pairs.length) return null;
+    const avg = pairs.reduce((s, p) => s + Math.abs(p.r), 0) / pairs.length;
+    const tightest = pairs.slice().sort((a, b) => Math.abs(b.r) - Math.abs(a.r))[0];
+    const diversifier = pairs.slice().sort((a, b) => Math.abs(a.r) - Math.abs(b.r))[0];
+    return { avg, tightest, diversifier };
+  }, [matrix, tickers]);
+
   if (tickers.length < 2) return null;
 
   return (
     <div className="card p-4 mb-6">
-      <h2 style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 12 }}>Correlation matrix (14-day)</h2>
-      <div className="overflow-x-auto">
-        <table className="text-xs font-mono">
-          <thead>
-            <tr>
-              <th className="w-12" />
-              {tickers.map(t => (
-                <th key={t} className="text-center px-2 py-1 font-mono font-normal" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{t}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tickers.map((rowT, ri) => (
-              <tr key={rowT}>
-                <td className="pr-2 py-1 font-mono" style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>{rowT}</td>
-                {tickers.map((colT, ci) => {
-                  const r = matrix[ri][ci];
-                  return (
-                    <td
-                      key={colT}
-                      title={r != null ? `${rowT} vs ${colT}: ${r.toFixed(3)}` : 'N/A'}
-                      className="text-center px-2 py-1.5 rounded"
-                      style={{ background: heatColor(r), color: 'rgba(255,255,255,0.85)' }}
-                    >
-                      {r != null ? r.toFixed(2) : '—'}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+        <div>
+          <h2 style={{ fontSize: 'var(--text-sm)', color: 'var(--text)', fontWeight: 700 }}>Correlation matrix</h2>
+          <p className="text-xs text-muted">14-day return relationship across your top holdings</p>
+        </div>
+        {summary && (
+          <div className="flex gap-2 flex-wrap text-xs">
+            <span className="px-2 py-1 rounded-full border border-[var(--border)] text-muted">Avg link {summary.avg.toFixed(2)}</span>
+            <span className="px-2 py-1 rounded-full border border-[var(--border)] text-muted">Tightest {summary.tightest.a}/{summary.tightest.b}</span>
+            <span className="px-2 py-1 rounded-full border border-[var(--border)] text-muted">Diversifier {summary.diversifier.a}/{summary.diversifier.b}</span>
+          </div>
+        )}
       </div>
-      <p className="text-[9px] text-muted mt-2 tracking-wide">+1 = perfect positive correlation, −1 = inverse, 0 = no correlation</p>
+      <div className="correlation-scroll">
+        <div className="correlation-grid" style={{ gridTemplateColumns: `92px repeat(${tickers.length}, minmax(58px, 1fr))` }}>
+          <div className="correlation-axis" />
+          {tickers.map(t => <div key={t} className="correlation-axis correlation-axis--top">{t}</div>)}
+          {tickers.map((rowT, ri) => (
+            <div key={rowT} className="contents">
+              <div className="correlation-axis correlation-axis--side">{rowT}</div>
+              {tickers.map((colT, ci) => {
+                const r = matrix[ri][ci];
+                return (
+                  <div
+                    key={colT}
+                    title={r != null ? `${rowT} vs ${colT}: ${r.toFixed(3)} (${strengthLabel(r)})` : 'N/A'}
+                    className="correlation-cell"
+                    style={{ background: heatColor(r) }}
+                  >
+                    <span>{r != null ? r.toFixed(2) : '—'}</span>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="flex gap-3 mt-3 text-[10px] text-muted flex-wrap">
+        <span>+1 moves together</span>
+        <span>0 diversifies</span>
+        <span>-1 moves opposite</span>
+        <span>Showing first {tickers.length} holdings with price history</span>
+      </div>
     </div>
   );
 }

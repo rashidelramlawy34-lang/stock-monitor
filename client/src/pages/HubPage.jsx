@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { usePrices } from '../hooks/usePrices.js';
 import { useFundamentals } from '../hooks/useFundamentals.js';
-import { Globe } from '../components/ui/globe.jsx';
+import CosmicOrb from '../components/CosmicOrb.jsx';
 import { Particles } from '../components/ui/particles.jsx';
 import {
   PortfolioIcon, NewsIcon, AdvisorIcon, AlertsIcon, DiscoverIcon,
@@ -79,32 +79,6 @@ const PLANETS = [
   { id: 'settings',      label: 'Settings',      Icon: SettingsIcon },
 ];
 
-// Globe config — bright Aura palette, visible on dark bg
-const AURA_GLOBE_CONFIG = {
-  devicePixelRatio: 2,
-  phi: 0,
-  theta: 0.25,
-  dark: 0,
-  diffuse: 0.8,
-  mapSamples: 20000,
-  mapBrightness: 2.2,
-  baseColor: [0.38, 0.52, 1.0],
-  markerColor: [0.65, 0.48, 1.0],
-  glowColor: [0.35, 0.55, 1.0],
-  markers: [
-    { location: [40.7128, -74.006],   size: 0.05 },
-    { location: [51.5074, -0.1278],   size: 0.05 },
-    { location: [35.6762, 139.6503],  size: 0.04 },
-    { location: [1.3521, 103.8198],   size: 0.03 },
-    { location: [48.8566, 2.3522],    size: 0.03 },
-    { location: [22.3193, 114.1694],  size: 0.04 },
-    { location: [37.7749, -122.4194], size: 0.04 },
-    { location: [-33.8688, 151.2093], size: 0.03 },
-    { location: [19.076, 72.8777],    size: 0.03 },
-    { location: [55.7558, 37.6173],   size: 0.03 },
-  ],
-  onRender: () => {},
-};
 
 function loadSaved() {
   try {
@@ -421,34 +395,15 @@ export default function HubPage({ setPage, user }) {
         );
       })}
 
-      {/* Globe — replaces CSS gradient orb */}
-      {/* Outer glow halo — rendered behind the clipped globe */}
-      <div style={{
-        position: 'absolute',
-        left: cx - ORB_SIZE / 2 - 60, top: cy - ORB_SIZE / 2 - 60,
-        width: ORB_SIZE + 120, height: ORB_SIZE + 120,
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(124,92,255,0.35) 0%, rgba(56,178,255,0.2) 35%, rgba(124,92,255,0.08) 65%, transparent 80%)',
-        filter: 'blur(18px)',
-        pointerEvents: 'none', zIndex: 4,
-        animation: 'orbPulse 3.2s ease-in-out infinite',
-      }} />
+      {/* CosmicOrb — R3F plasma energy sphere */}
       <div style={{
         position: 'absolute',
         left: cx - ORB_SIZE / 2,
         top:  cy - ORB_SIZE / 2,
-        width: ORB_SIZE, height: ORB_SIZE,
         zIndex: 5,
-        borderRadius: '50%',
-        overflow: 'hidden',
-        boxShadow: [
-          '0 0 0 1px rgba(124,92,255,0.35)',
-          '0 0 40px rgba(124,92,255,0.5)',
-          '0 0 80px rgba(56,178,255,0.25)',
-          '0 0 160px rgba(124,92,255,0.12)',
-        ].join(', '),
+        pointerEvents: 'none',
       }}>
-        <Globe config={AURA_GLOBE_CONFIG} className="w-full h-full" />
+        <CosmicOrb size={ORB_SIZE} />
       </div>
 
       {/* Planet nodes */}

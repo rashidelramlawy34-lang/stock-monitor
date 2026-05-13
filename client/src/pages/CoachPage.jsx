@@ -79,9 +79,28 @@ function ScoreHistoryChart({ history }) {
 
 const healthColor = { Aggressive: 'text-warn', Balanced: 'text-[var(--accent)]', Defensive: 'text-bull', Speculative: 'text-bear' };
 
+const LOCAL_COACH_ANALYSIS = {
+  score: 72,
+  overall_health: 'Balanced',
+  diversification_score: 68,
+  generated_at: Math.floor(Date.now() / 1000),
+  summary: 'Aura local analysis sees a growth-tilted portfolio with strong upside participation and manageable concentration risk. The account is suitable for an active investor, but position sizing should stay disciplined around high-beta names.',
+  top_opportunity: 'AI infrastructure and mega-cap software remain the cleanest momentum lane. NVDA and MSFT can continue driving returns if earnings revisions stay positive.',
+  top_risk: 'The portfolio is sensitive to broad technology multiple compression. A sudden rate move or weak guidance cycle could pressure several holdings at the same time.',
+  macro_outlook: 'Markets are rewarding quality growth, cash flow durability, and AI-linked revenue visibility. Keep some balance through financials or broad ETFs while the portfolio leans into momentum.',
+  concentration_risk: 'Single-theme exposure is the main issue. Keep the largest positions below target caps and add non-correlated exposure before increasing speculative names.',
+  suggested_rebalance: [
+    { ticker: 'NVDA', action: 'hold', reason: 'Keep core exposure, but avoid adding after sharp upside days.' },
+    { ticker: 'VTI', action: 'add', reason: 'Broadens market exposure and reduces single-theme drawdown risk.' },
+    { ticker: 'TSLA', action: 'reduce', reason: 'High beta makes this position the first trim candidate if volatility rises.' },
+  ],
+  local: true,
+};
+
 export default function CoachPage() {
   const { analysis, loading, error, fetchCached, refresh } = useCoach();
   const [history, setHistory] = useState([]);
+  const displayAnalysis = analysis || (error ? LOCAL_COACH_ANALYSIS : null);
 
   useEffect(() => { fetchCached(); }, [fetchCached]);
 
@@ -100,15 +119,15 @@ export default function CoachPage() {
           <p className="page-subtitle">Holistic portfolio analysis and rebalancing suggestions</p>
         </div>
         <div className="flex items-center gap-3">
-          {analysis?.generated_at && (
-            <span className="text-xs text-muted">Last analyzed: {timeAgo(analysis.generated_at)}</span>
+          {displayAnalysis?.generated_at && (
+            <span className="text-xs text-muted">Last analyzed: {timeAgo(displayAnalysis.generated_at)}</span>
           )}
           <button
             onClick={refresh}
             disabled={loading}
             className="btn-primary text-xs"
           >
-            {loading ? 'Analyzing…' : analysis ? '↻ Re-analyze' : 'Analyze Portfolio'}
+            {loading ? 'Analyzing…' : displayAnalysis ? '↻ Re-analyze' : 'Analyze Portfolio'}
           </button>
         </div>
       </div>
@@ -125,30 +144,35 @@ export default function CoachPage() {
         </div>
       )}
 
-      {error && <div className="card p-4 text-bear text-sm">Error: {error}</div>}
+      {error && (
+        <div className="card p-4 text-sm text-[var(--text-2)] mb-4">
+          Live AI is unavailable, so Aura is showing local demo coaching instead of the raw provider error.
+        </div>
+      )}
 
-      {!loading && !analysis && !error && (
+      {!loading && !displayAnalysis && !error && (
         <div className="card p-8 text-center">
           <p className="text-muted text-sm">No analysis yet.</p>
           <p className="text-muted text-xs mt-1">Click "Analyze Portfolio" to get a holistic assessment.</p>
         </div>
       )}
 
-      {!loading && analysis && (
+      {!loading && displayAnalysis && (
         <div className="flex flex-col gap-4">
           {/* Score + health */}
           <div className="card p-5 flex items-center gap-6">
-            <ScoreRing score={analysis.score ?? 50} />
+            <ScoreRing score={displayAnalysis.score ?? 50} />
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-2">
-                <span className={`text-lg font-bold ${healthColor[analysis.overall_health] ?? 'text-[var(--accent)]'}`}>
-                  {analysis.overall_health}
+                {displayAnalysis.local && <span className="badge-neutral text-xs">LOCAL DEMO</span>}
+                <span className={`text-lg font-bold ${healthColor[displayAnalysis.overall_health] ?? 'text-[var(--accent)]'}`}>
+                  {displayAnalysis.overall_health}
                 </span>
                 <span className="text-xs text-muted font-mono border border-[var(--border-2)] px-2 py-0.5 rounded-full">
-                  Diversification: {analysis.diversification_score ?? '—'}/100
+                  Diversification: {displayAnalysis.diversification_score ?? '—'}/100
                 </span>
               </div>
-              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.summary)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(displayAnalysis.summary)}</p>
             </div>
           </div>
 
@@ -156,11 +180,11 @@ export default function CoachPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4 border-l-2 border-l-bull">
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--gain)', fontWeight: 600, marginBottom: 8 }}>Top opportunity</p>
-              <p className="text-sm text-white leading-relaxed">{clean(analysis.top_opportunity)}</p>
+              <p className="text-sm text-white leading-relaxed">{clean(displayAnalysis.top_opportunity)}</p>
             </div>
             <div className="card p-4 border-l-2 border-l-bear">
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--loss)', fontWeight: 600, marginBottom: 8 }}>Top risk</p>
-              <p className="text-sm text-white leading-relaxed">{clean(analysis.top_risk)}</p>
+              <p className="text-sm text-white leading-relaxed">{clean(displayAnalysis.top_risk)}</p>
             </div>
           </div>
 
@@ -168,22 +192,22 @@ export default function CoachPage() {
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="card p-4">
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8 }}>Macro outlook</p>
-              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.macro_outlook)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(displayAnalysis.macro_outlook)}</p>
             </div>
             <div className="card p-4">
               <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 8 }}>Concentration risk</p>
-              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(analysis.concentration_risk)}</p>
+              <p className="text-sm text-[var(--text-2)] leading-relaxed">{clean(displayAnalysis.concentration_risk)}</p>
             </div>
           </div>
 
           {/* Rebalance suggestions */}
-          {analysis.suggested_rebalance?.length > 0 && (
+          {displayAnalysis.suggested_rebalance?.length > 0 && (
             <div className="card overflow-hidden">
               <div className="p-4 border-b border-[var(--border)]">
                 <h2 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--text)' }}>Rebalance suggestions</h2>
               </div>
               <div className="divide-y divide-[var(--border)]">
-                {analysis.suggested_rebalance.map((s, i) => (
+                {displayAnalysis.suggested_rebalance.map((s, i) => (
                   <div key={i} className="flex items-start gap-4 p-4">
                     <span className="font-mono font-bold w-14 shrink-0" style={{ color: 'var(--text)' }}>{s.ticker}</span>
                     <span className={`text-xs font-bold px-2 py-0.5 rounded-full border shrink-0 ${

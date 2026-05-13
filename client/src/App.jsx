@@ -11,7 +11,6 @@ import DiscoverPage from './pages/DiscoverPage.jsx';
 import SettingsPage from './pages/SettingsPage.jsx';
 import DeveloperPage from './pages/DeveloperPage.jsx';
 import AlertBanner from './components/AlertBanner.jsx';
-import AuraPanel from './components/AuraPanel.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import WatchlistPage from './pages/WatchlistPage.jsx';
 import CoachPage from './pages/CoachPage.jsx';
@@ -19,7 +18,7 @@ import TradeLogPage from './pages/TradeLogPage.jsx';
 import InsidersPage from './pages/InsidersPage.jsx';
 import InstitutionalPage from './pages/InstitutionalPage.jsx';
 import CalendarPage from './pages/CalendarPage.jsx';
-import HubPage from './pages/HubPage.jsx';
+import DashboardPage from './pages/DashboardPage.jsx';
 
 const ALL_PAGES = ['hub','portfolio','watchlist','news','advisor','coach','alerts','discover','insiders','institutional','calendar','trades','settings','developer'];
 
@@ -93,33 +92,13 @@ export default function App() {
 
   if (!user) return <LoginPage onLogin={setUser} />;
 
-  if (page === 'hub') return (
-    <MotionConfig reducedMotion="user">
-      <ToastProvider>
-        <div style={{ background: 'var(--bg)', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-          <MarketBar page={page} setPage={setPage} pageLabel="Hub" user={user} onLogout={handleLogout} />
-          <HubPage setPage={setPage} user={user} />
-        </div>
-        {logoutOverlay.visible && (
-          <div style={{
-            position: 'fixed', inset: 0, zIndex: 9999,
-            background: '#020714',
-            opacity: logoutOverlay.opacity,
-            transition: 'opacity 0.42s ease',
-            pointerEvents: logoutOverlay.opacity > 0.5 ? 'all' : 'none',
-          }} />
-        )}
-      </ToastProvider>
-    </MotionConfig>
-  );
-
   return (
     <MotionConfig reducedMotion="user">
       <ToastProvider>
-        <div className="app-orbital-rings" style={{ background: 'transparent', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="aura-app-shell">
           <MarketBar page={page} setPage={setPage} pageLabel={PAGE_LABELS[page]} user={user} onLogout={handleLogout} />
           <AlertBanner />
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          <div className={page === 'hub' ? '' : 'aura-feature-shell'}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={page}
@@ -129,6 +108,7 @@ export default function App() {
                 transition={{ type: 'spring', stiffness: 100, damping: 18, mass: 0.8 }}
                 style={{ flex: 1 }}
               >
+                {page === 'hub'           && <DashboardPage setPage={setPage} user={user} />}
                 {page === 'portfolio'     && <Dashboard />}
                 {page === 'watchlist'     && <WatchlistPage />}
                 {page === 'news'          && <NewsPage />}
@@ -145,7 +125,6 @@ export default function App() {
               </motion.div>
             </AnimatePresence>
           </div>
-          <AuraPanel />
         </div>
         {logoutOverlay.visible && (
           <div style={{

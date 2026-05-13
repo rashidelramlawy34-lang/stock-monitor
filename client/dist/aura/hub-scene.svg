@@ -1,0 +1,82 @@
+<svg width="1800" height="1000" viewBox="0 0 1800 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1800" height="1000" fill="#020512"/>
+  <defs>
+    <radialGradient id="core" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 500) scale(660)">
+      <stop stop-color="#EAFDFF" stop-opacity=".74"/>
+      <stop offset=".12" stop-color="#BEEBFF" stop-opacity=".35"/>
+      <stop offset=".32" stop-color="#8371FF" stop-opacity=".18"/>
+      <stop offset=".58" stop-color="#1D2C5D" stop-opacity=".2"/>
+      <stop offset="1" stop-color="#020512" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="sphere" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(900 492) rotate(34) scale(620)">
+      <stop stop-color="#EAFDFF" stop-opacity=".58"/>
+      <stop offset=".23" stop-color="#8FE6FF" stop-opacity=".13"/>
+      <stop offset=".58" stop-color="#8F77FF" stop-opacity=".12"/>
+      <stop offset=".86" stop-color="#CFF6FF" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#EAFDFF" stop-opacity=".36"/>
+    </radialGradient>
+    <linearGradient id="ringA" x1="210" y1="836" x2="1510" y2="194" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DDCFF" stop-opacity="0"/>
+      <stop offset=".32" stop-color="#9EF3FF" stop-opacity=".95"/>
+      <stop offset=".58" stop-color="#FFE1F7"/>
+      <stop offset=".82" stop-color="#8877FF" stop-opacity=".86"/>
+      <stop offset="1" stop-color="#7DDCFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ringB" x1="316" y1="174" x2="1540" y2="768" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8A7DFF" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#A38CFF" stop-opacity=".88"/>
+      <stop offset=".58" stop-color="#BDEBFF" stop-opacity=".74"/>
+      <stop offset="1" stop-color="#8A7DFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur24" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <pattern id="stars" width="220" height="220" patternUnits="userSpaceOnUse">
+      <circle cx="28" cy="44" r="1" fill="#fff" opacity=".42"/>
+      <circle cx="132" cy="70" r=".8" fill="#BEEBFF" opacity=".38"/>
+      <circle cx="184" cy="164" r="1.2" fill="#D8E2FF" opacity=".3"/>
+      <circle cx="66" cy="185" r=".7" fill="#fff" opacity=".25"/>
+    </pattern>
+  </defs>
+  <rect width="1800" height="1000" fill="url(#stars)" opacity=".78"/>
+  <circle cx="900" cy="500" r="664" fill="url(#sphere)"/>
+  <circle cx="900" cy="500" r="660" stroke="#DDF9FF" stroke-opacity=".18" stroke-width="2"/>
+  <circle cx="900" cy="500" r="620" stroke="#A6EFFF" stroke-opacity=".12"/>
+  <circle cx="900" cy="500" r="520" stroke="#B99CFF" stroke-opacity=".10"/>
+  <circle cx="900" cy="500" r="385" fill="url(#core)"/>
+  <g filter="url(#blur24)" opacity=".35">
+    <ellipse cx="900" cy="500" rx="680" ry="188" transform="rotate(-16 900 500)" stroke="#9EF3FF" stroke-width="36"/>
+    <ellipse cx="900" cy="500" rx="710" ry="214" transform="rotate(18 900 500)" stroke="#8A7DFF" stroke-width="38"/>
+  </g>
+  <g filter="url(#glow)">
+    <ellipse cx="900" cy="500" rx="680" ry="188" transform="rotate(-16 900 500)" stroke="url(#ringA)" stroke-width="7"/>
+    <ellipse cx="900" cy="500" rx="710" ry="214" transform="rotate(18 900 500)" stroke="url(#ringB)" stroke-width="5"/>
+    <ellipse cx="900" cy="500" rx="560" ry="128" transform="rotate(-10 900 500)" stroke="#DDF9FF" stroke-opacity=".28" stroke-width="2"/>
+  </g>
+  <g stroke="#BDEBFF" stroke-opacity=".5" stroke-width="2">
+    <path d="M1240 290h72l28 28h92"/>
+    <path d="M1264 358h124l34 34h62"/>
+    <path d="M420 706h168l34-34h92"/>
+    <path d="M1186 680h130l30-30h78"/>
+    <path d="M356 418h130l32 28h108"/>
+    <circle cx="1240" cy="290" r="10"/>
+    <circle cx="1432" cy="318" r="8"/>
+    <circle cx="356" cy="418" r="8"/>
+    <circle cx="1424" cy="650" r="8"/>
+  </g>
+  <g transform="translate(900 500)">
+    <circle r="150" fill="#EAFDFF" opacity=".12" filter="url(#blur24)"/>
+    <circle r="124" fill="#EAFDFF" opacity=".12"/>
+    <circle r="106" stroke="#C7F4FF" stroke-opacity=".42"/>
+    <path d="M-70-10C-10-62 72-56 102 10C58 92-50 92-102 8C-94 0-84-6-70-10Z" fill="#8A7DFF" opacity=".28"/>
+    <circle r="32" fill="#EAFDFF" opacity=".68" filter="url(#glow)"/>
+  </g>
+  <rect width="1800" height="1000" fill="url(#core)" opacity=".52"/>
+</svg>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { BarChart, Bar, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, Tooltip, ResponsiveContainer, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { usePortfolio } from '../hooks/usePortfolio.js';
 import { useNews } from '../hooks/useNews.js';
 import NewsCard, { getPinnedUrls } from '../components/NewsCard.jsx';
@@ -23,13 +23,32 @@ function SentimentTrend({ articles }) {
     return Object.values(buckets).sort((a, b) => a.ts - b.ts).slice(-14);
   }, [articles]);
 
-  if (data.length < 3) return null;
+  if (data.length < 2) return null;
+
+  const totals = data.reduce((acc, d) => ({
+    bullish: acc.bullish + d.bullish,
+    neutral: acc.neutral + d.neutral,
+    bearish: acc.bearish + d.bearish,
+  }), { bullish: 0, neutral: 0, bearish: 0 });
 
   return (
     <div className="card p-4 mb-5">
-      <p style={{ fontSize: 9, color: 'var(--text-muted)', marginBottom: 8 }}>Sentiment trend (14 days)</p>
-      <ResponsiveContainer width="100%" height={60}>
-        <BarChart data={data} barSize={8} barGap={2}>
+      <div className="flex items-start justify-between gap-4 mb-3 flex-wrap">
+        <div>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text)', fontWeight: 700 }}>Sentiment trend</p>
+          <p className="text-xs text-muted">Article tone by publish date over the last 14 visible days</p>
+        </div>
+        <div className="flex gap-2 text-xs">
+          <span className="text-bull">{totals.bullish} bullish</span>
+          <span className="text-muted">{totals.neutral} neutral</span>
+          <span className="text-bear">{totals.bearish} bearish</span>
+        </div>
+      </div>
+      <ResponsiveContainer width="100%" height={170}>
+        <BarChart data={data} barSize={18} barGap={4} margin={{ top: 8, right: 12, bottom: 0, left: -18 }}>
+          <CartesianGrid stroke="rgba(255,255,255,0.08)" vertical={false} />
+          <XAxis dataKey="key" tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
+          <YAxis allowDecimals={false} tick={{ fill: 'var(--text-muted)', fontSize: 10 }} axisLine={false} tickLine={false} />
           <Tooltip
             contentStyle={{ background: 'var(--surface-1)', border: '1px solid var(--border-2)', borderRadius: 4 }}
             labelStyle={{ color: 'var(--text-muted)', fontSize: 10 }}

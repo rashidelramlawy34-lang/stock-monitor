@@ -1,0 +1,39 @@
+<svg width="1600" height="1200" viewBox="0 0 1600 1200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1200" fill="#020512"/>
+  <defs>
+    <radialGradient id="a" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1180 120) rotate(118) scale(840 520)">
+      <stop stop-color="#BDEBFF" stop-opacity=".22"/>
+      <stop offset=".32" stop-color="#7F6BFF" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#020512" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="b" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(260 860) rotate(42) scale(780 520)">
+      <stop stop-color="#7DDCFF" stop-opacity=".14"/>
+      <stop offset=".46" stop-color="#40308D" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#020512" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="arc" x1="-44" y1="924" x2="1644" y2="214" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7DDCFF" stop-opacity="0"/>
+      <stop offset=".42" stop-color="#BDEBFF" stop-opacity=".34"/>
+      <stop offset=".68" stop-color="#A38CFF" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#7DDCFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="blur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24"/>
+    </filter>
+    <pattern id="stars" width="210" height="210" patternUnits="userSpaceOnUse">
+      <circle cx="24" cy="34" r="1" fill="#fff" opacity=".36"/>
+      <circle cx="124" cy="72" r=".8" fill="#BEEBFF" opacity=".3"/>
+      <circle cx="184" cy="164" r="1.1" fill="#D8E2FF" opacity=".24"/>
+      <circle cx="70" cy="188" r=".7" fill="#fff" opacity=".22"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#stars)" opacity=".7"/>
+  <rect width="1600" height="1200" fill="url(#a)"/>
+  <rect width="1600" height="1200" fill="url(#b)"/>
+  <g filter="url(#blur)" opacity=".5">
+    <path d="M-120 910C360 590 840 420 1740 220" stroke="#BDEBFF" stroke-width="24"/>
+    <path d="M-80 660C484 710 990 604 1700 420" stroke="#8A7DFF" stroke-width="20"/>
+  </g>
+  <path d="M-120 910C360 590 840 420 1740 220" stroke="url(#arc)" stroke-width="3"/>
+  <path d="M-80 660C484 710 990 604 1700 420" stroke="url(#arc)" stroke-width="2"/>
+</svg>

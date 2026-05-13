@@ -8,6 +8,21 @@ const RISK_COLORS = {
   'Very High': { text: 'var(--loss)', bg: 'rgba(220,38,38,0.1)',   border: 'rgba(220,38,38,0.3)'   },
 };
 
+function analysisCopy(candidate) {
+  if (candidate.bull_case) return candidate.bull_case;
+  const conviction = Math.round((candidate.conviction ?? 0.5) * 100);
+  const beta = candidate.beta ?? 1;
+  const analystBuys = (candidate.strong_buy ?? 0) + (candidate.buy_count ?? 0);
+  const upside = candidate.upside_pct;
+  const pieces = [
+    `${candidate.ticker} screens as a ${candidate.risk_label?.toLowerCase() || 'medium'} risk idea with ${conviction}% Aura conviction.`,
+    analystBuys > 0 ? `${analystBuys} analysts are on the buy side` : 'Analyst support is still developing',
+    beta > 1.4 ? `and beta of ${beta.toFixed(2)} makes position sizing important.` : `with beta near ${beta.toFixed(2)} keeping volatility more controlled.`,
+  ];
+  if (upside != null) pieces.push(`Consensus target implies ${upside >= 0 ? '+' : ''}${upside.toFixed(1)}% upside.`);
+  return pieces.join(' ');
+}
+
 export default function HRHRCard({ candidate }) {
   const {
     ticker, company_name, sector,
@@ -43,6 +58,7 @@ export default function HRHRCard({ candidate }) {
   const totalAnalysts = strong_buy + buy_count + hold_count + sell_count + strong_sell;
   const convictionPct = conviction != null ? Math.round(conviction * 100) : null;
   const initials = ticker.slice(0, 2).toUpperCase();
+  const analysis = analysisCopy(candidate);
 
   return (
     <div className="card p-5 flex flex-col gap-3.5">
@@ -88,13 +104,10 @@ export default function HRHRCard({ candidate }) {
 
       <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '2px 0' }} />
 
-      {/* Bull case */}
-      {bull_case && (
-        <div>
-          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>Bull case</p>
-          <p className="text-sm text-[var(--text-2)] leading-relaxed">{bull_case}</p>
-        </div>
-      )}
+      <div>
+        <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>Aura analysis</p>
+        <p className="text-sm text-[var(--text-2)] leading-relaxed">{analysis}</p>
+      </div>
 
       {/* Entry + catalyst */}
       <div className="flex flex-wrap gap-2">
