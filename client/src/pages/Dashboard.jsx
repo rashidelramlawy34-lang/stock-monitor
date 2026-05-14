@@ -158,6 +158,7 @@ function StatCard({ label, value, sub, pnl, sparkData, sparkType, countUp, forma
 const SORT_COLS = {
   ticker: (h) => h.ticker,
   price: (h, p) => p?.price ?? -Infinity,
+  value: (h, p) => p?.price != null ? p.price * h.shares : -Infinity,
   today: (h, p) => p?.change_pct ?? -Infinity,
   pl: (h, p) => p?.price ? (p.price - h.cost_basis) * h.shares : -Infinity,
   upside: (h, p, f) => (f?.target_mean && p?.price) ? (f.target_mean - p.price) / p.price : -Infinity,
@@ -364,6 +365,7 @@ export default function Dashboard() {
                   <tr style={{ borderBottom: '1px solid var(--border)' }}>
                     <SortTh col="ticker" label="Ticker" />
                     <SortTh col="price" label="Price" right />
+                    <SortTh col="value" label="Value" right />
                     <SortTh col="today" label="Today" right />
                     <th style={{ ...thStyle(false), cursor: 'default' }}>7D</th>
                     <th style={thStyle(true)}>Shares</th>

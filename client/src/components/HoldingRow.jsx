@@ -10,6 +10,17 @@ function pnl(holding, price) {
   return { value: current - basis, pct: ((current - basis) / basis) * 100 };
 }
 
+const money = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
+const number = new Intl.NumberFormat('en-US', {
+  maximumFractionDigits: 4,
+});
+
 export default function HoldingRow({
   holding, price, candles, fundamentals, shortInterest, latestUpgrade,
   hasAlert, hasTriggeredAlert, expanded, onToggleExpand, onRemove,
@@ -27,6 +38,7 @@ export default function HoldingRow({
   const logoUrl = fundamentals?.logo_url;
   const initials = holding.ticker.slice(0, 2).toUpperCase();
   const shortPct = shortInterest?.shortPercent ?? shortInterest?.shortRatio ?? null;
+  const marketValue = price?.price != null ? price.price * holding.shares : null;
 
   return (
     <>
@@ -65,7 +77,14 @@ export default function HoldingRow({
         {/* Price */}
         <td className="py-[14px] px-5 text-right">
           {price?.price != null
-            ? <span className="font-mono font-medium text-[var(--text-2)]">${price.price.toFixed(2)}</span>
+            ? <span className="font-mono font-medium text-[var(--text-2)]">{money.format(price.price)}</span>
+            : <span className="text-muted">—</span>}
+        </td>
+
+        {/* Market value */}
+        <td className="py-[14px] px-5 text-right">
+          {marketValue != null
+            ? <span className="font-mono font-semibold text-[var(--text)]">{money.format(marketValue)}</span>
             : <span className="text-muted">—</span>}
         </td>
 
@@ -84,18 +103,18 @@ export default function HoldingRow({
         </td>
 
         {/* Shares */}
-        <td className="py-[14px] px-5 text-right text-[var(--text-2)] font-mono">{holding.shares}</td>
+        <td className="py-[14px] px-5 text-right text-[var(--text-2)] font-mono">{number.format(holding.shares)}</td>
 
         {/* Avg cost */}
         <td className="py-[14px] px-5 text-right text-[var(--text-2)] font-mono">
-          ${Number(holding.cost_basis).toFixed(2)}
+          {money.format(Number(holding.cost_basis))}
         </td>
 
         {/* P&L */}
         <td className="py-[14px] px-5 text-right">
           {gain != null
             ? <span className={gain.value >= 0 ? 'text-bull font-bold' : 'text-bear font-bold'}>
-                {gain.value >= 0 ? '+' : ''}${gain.value.toFixed(2)}
+                {gain.value >= 0 ? '+' : ''}{money.format(gain.value)}
                 <span className="text-xs ml-1 opacity-70">({gain.pct.toFixed(1)}%)</span>
               </span>
             : <span className="text-muted">—</span>}
